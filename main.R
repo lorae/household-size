@@ -11,6 +11,12 @@
 # TODO: two matrices not necessary? Each cell has two dimensions of values,
 # nobs and hhsize?
 
+# Step 0: Initialize libraries and modules
+library("ipumsr")
+
+# Step 1: Load data
+
+
 # Pseudocode
 # Create list of attributes and dimensions of each:
 attributes <- list(
