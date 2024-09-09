@@ -66,6 +66,43 @@ TODO: set up an R project so the renv and working directory load up automaticall
 
 3. Run the main script
 
+# FAQ
+
+1. How granular is this analysis, geographically?
+
+    There are XXX Census PUMAs in the United States. However, their size varies widely. In the state of Ohio, the smallest PUMA encompasses [what city?] and the largest PUMA encompasses [the rest of the state?]
+
+    [map of Ohio PUMAs]
+
+    Here's a map of the PUMAs in the United States.
+
+    [map of all PUMAs]
+
+2. How granular is this analysis, demographically?
+
+    The variables we use to bin individuals into groups are the following. See our codebook [link to codebook] for more information.
+
+    **Age**: 5-year bins:
+        - 0-4 years
+        - 5-9 years
+        - 10-14 years
+        - 15-19 years
+        - 20-24 years
+        - 25-29 years
+        - 30-24 years
+        - ...
+        - 75-79 years
+        - 80-84 years
+        - 85+
+
+    [perhaps a table of how many individuals fall in each age group?]
+
+    **Race**: Add info here
+
+    **Household income**: Add information here on how it's defined, whether it's pre-tax/transfer, whether it's only earned or earned and unearned, how it's deflated to compare over time, etc.
+
+
+# References
 
 # References
 
