@@ -4,15 +4,66 @@ The project uses of American Community Survey (ACS) IPUMS microdata, which are f
 
 # Project Setup
 
+TODO: set up an R project so the renv and working directory load up automatically upon opening the project.
+
+## If you're running the code for the first time...
+
 1. Sign up for an IPUMS account and API key
 
 2. Clone the repository
 
-3. Initialize the `renv` (R virtual environment)
+3. Set your working directory into the repository:
 
-4. Run the main script
+    Shell:
+    
+    ```sh
+    cd your/path/to/household-size
+    ```
+    
+    R:
+    
+    ```r
+    setwd("your/path/to/household-size")
+    ```
 
-5. View results
+4. Add a step to check if `renv` package is already installed and install if necessary?
+
+5. Download and install all the needed packages using `renv` ([R virtual environment](https://rstudio.github.io/renv/articles/renv.html))
+
+    TODO: Do you need to run `renv::activate()` first? I'm not sure.
+
+    ```r
+    renv::restore()
+    ```
+
+5. Run the main script
+
+6. View results
+
+## If you're running the code any subsequent time...
+
+1. Set your working directory into the repository:
+
+    Shell:
+    
+    ```sh
+    cd your/path/to/household-size
+    ```
+    
+    R:
+    
+    ```r
+    setwd("your/path/to/household-size")
+    ```
+
+2. Restore the [`renv`](https://rstudio.github.io/renv/articles/renv.html)
+
+    ```r
+    renv::restore()
+    ```
+
+3. Run the main script
+
 
 # References
 
