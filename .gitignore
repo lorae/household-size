@@ -1,3 +1,7 @@
+# README.html (since .md version is already committed and auto-rendered on GitHub)
+# Case-insensitive format
+[Rr][Ee][Aa][Dd][Mm][Ee].html
+
 # IPUMS data and ddi files
 *.xml
 *.dat
