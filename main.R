@@ -15,9 +15,35 @@
 library("ipumsr")
 
 # Step 1: Load data
+# Current code assumes data is saved to computer. 
+# TODO: build in an API call instead to make the code more easily replicable.
+# Helpful information on IPUMS and ipumsr from: 
+# https://www.youtube.com/watch?v=OT6upQ1dBgU
 
+ddi <- read_ipums_ddi("usa_00002.xml")
+# Note: This file takes about 3 minutes to read
+data <- read_ipums_micro(ddi)
 
-# Pseudocode
+# Step 2: Explore the data
+
+# Learn higher level info about variables
+View(ddi$var_info)
+
+# Learn what the variables are!
+names(data) # not very informative
+
+# Variable labels provide additional insight into what a cryptically-labelled
+# column represents
+ipums_var_label(ddi, PERNUM)
+
+# Value labels decode numeric codes into their descriptions
+ipums_val_labels(ddi, SEX)
+
+# A nice static HTML page labelling the data. This can be useful for understanding
+# a dataset after importing it.
+ipums_view(ddi)
+
+# Step X: Extra pseudocode
 # Create list of attributes and dimensions of each:
 attributes <- list(
   sex = 
