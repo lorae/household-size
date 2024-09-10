@@ -49,6 +49,13 @@ generate_household_data <- function(num_households = 40,
                    NUMPREC = integer(),
                    HHWT = integer())
   
+  # Input validation
+  if (length(pphh_range) != 2 || pphh_range[1] > pphh_range[2]) stop("Invalid pphh_range.")
+  if (length(age_range) != 2 || age_range[1] > age_range[2]) stop("Invalid age_range.")
+  if (length(hhwt_range) != 2 || hhwt_range[1] > hhwt_range[2]) stop("Invalid hhwt_range.")
+  if (length(sex_probs) != 3 || sum(sex_probs) != 1) stop("Invalid sex_probs.")
+  if (num_households <= 0 || num_households %% 1 != 0) stop("num_households must be a positive integer.")
+  
   # Generate data for each household
   for (serial in 1:num_households) {
     
