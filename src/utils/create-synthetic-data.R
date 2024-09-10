@@ -3,7 +3,7 @@
 # This module contains helper functions that create synthetic IPUMS data
 
 generate_household_data <- function(num_households = 40, 
-                                    pphh_range = c(1, 5), # Persons per household range
+                                    pphh_range = c(1, 8), # Persons per household range
                                     age_range = c(1, 100), 
                                     hhwt_range = c(50, 200), 
                                     sex_probs = c(0.45, 0.45, 0.1)) {
@@ -12,6 +12,7 @@ generate_household_data <- function(num_households = 40,
                    AGE = integer(),
                    SEX = numeric(),
                    PERNUM = integer(),
+                   NUMPREC = integer(),
                    HHWT = integer())
   
   # Generate data for each household
@@ -34,6 +35,7 @@ generate_household_data <- function(num_households = 40,
                           AGE = ages,
                           SEX = sexes,
                           PERNUM = pernums,
+                          NUMPREC = rep(num_persons, num_persons),
                           HHWT = rep(hhwt, num_persons))
     
     # Bind to the main data frame
