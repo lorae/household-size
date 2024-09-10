@@ -2,27 +2,50 @@
 #
 # This module contains helper functions that create synthetic IPUMS data
 
-#' Generate Synthetic Household Data
+#' Generate synthetic household data
 #'
-#' The `generate_household_data` function creates a synthetic dataset that mimics IPUMS-like household data, with realistic attributes for a specified number of households and persons per household.
+#' The `generate_household_data` function creates a synthetic dataset that mimics 
+#' IPUMS-like household data, with realistic attributes for a specified number 
+#' of households and persons per household.
 #'
-#' @param num_households Integer. The number of households to generate. Default is 40.
-#' @param pphh_range Integer vector of length 2. Inclusive range for the number of persons per household (PERNUM). Default is c(1, 8), which means each household will have between 1 to 8 persons, inclusive.
-#' @param age_range Integer vector of length 2. Inclusive range for the age of persons in the households. Default is c(0, 100), which allows ages from 1 to 100 years, inclusive.
-#' @param hhwt_range Integer vector of length 2. Inclusive range for the household weight (HHWT). HHWT is a weight that applies to all individuals within a household. Default is c(50, 200).
-#' @param sex_probs Numeric vector of length 3. Probabilities for assigning sex to individuals. The vector should have three elements, where the first element is the probability of assigning 1 (Male), the second is the probability of assigning 2 (Female), and the third is the probability of assigning NA (missing). Default is c(0.45, 0.45, 0.1).
-#' @param hhinc_mean Numeric. The mean household income (HHINCOME) to be generated. Default is 80,000.
-#' @param hhinc_sd Numeric. The standard deviation of household income (HHINCOME). Default is 40,000.
+#' @param num_households Integer. The number of households to generate. Default 
+#'   is 40.
+#' @param pphh_range Integer vector of length 2. Inclusive range for the number 
+#'   of persons per household (PERNUM). Default is c(1, 8), which means each 
+#'   household will have between 1 to 8 persons, inclusive.
+#' @param age_range Integer vector of length 2. Inclusive range for the age of 
+#'   persons in the households. Default is c(0, 100), which allows ages from 
+#'   0 to 100 years, inclusive.
+#' @param hhwt_range Integer vector of length 2. Inclusive range for the 
+#'   household weight (HHWT). HHWT is a weight that applies to all individuals 
+#'   within a household. Default is c(50, 200).
+#' @param sex_probs Numeric vector of length 3. Probabilities for assigning sex 
+#'   to individuals. The vector should have three elements, where the first element 
+#'   is the probability of assigning 1 (Male), the second is the probability of 
+#'   assigning 2 (Female), and the third is the probability of assigning NA (missing). 
+#'   Default is c(0.45, 0.45, 0.1).
+#' @param hhinc_mean Numeric. The mean household income (HHINCOME) to be generated. 
+#'   Default is 80,000.
+#' @param hhinc_sd Numeric. The standard deviation of household income (HHINCOME). 
+#'   Default is 40,000.
 #'
-#' @return A data frame with synthetic household data containing the following columns:
+#' @return A data frame with synthetic household data containing the following 
+#'   columns:
 #' \describe{
 #'   \item{SERIAL}{Integer. Unique identifier for each household.}
-#'   \item{AGE}{Integer. Age of the individual. Generated randomly within the specified age range.}
-#'   \item{SEX}{Integer or NA. Sex of the individual. 1 represents Male, 2 represents Female, and NA represents missing data.}
-#'   \item{PERNUM}{Integer. Person number within a household. For example, if a household has three people, the values would be 1, 2, 3.}
-#'   \item{NUMPREC}{Integer. Number of persons in each household. This value is repeated for all persons within a household.}
-#'   \item{HHWT}{Integer. Household weight, which is a random integer assigned to all persons within a household to represent the weight of the household in a survey context.}
-#'   \item{HHINCOME}{Numeric. Household income, generated using a normal distribution with a floor at 0. This value is the same for all members of a household.}
+#'   \item{AGE}{Integer. Age of the individual. Generated randomly within the 
+#'     specified age range.}
+#'   \item{SEX}{Integer or NA. Sex of the individual. 1 represents Male, 2 represents 
+#'     Female, and NA represents missing data.}
+#'   \item{PERNUM}{Integer. Person number within a household. For example, if a 
+#'     household has three people, the values would be 1, 2, 3.}
+#'   \item{NUMPREC}{Integer. Number of persons in each household. This value is 
+#'     repeated for all persons within a household.}
+#'   \item{HHWT}{Integer. Household weight, which is a random integer assigned to 
+#'     all persons within a household to represent the weight of the household in 
+#'     a survey context.}
+#'   \item{HHINCOME}{Numeric. Household income, generated using a normal distribution 
+#'     with a floor at 0. This value is the same for all members of a household.}
 #' }
 #'
 #' @examples
@@ -42,7 +65,7 @@
 #'
 #' @export
 generate_household_data <- function(num_households = 40, 
-                                    pphh_range = c(1, 8),
+                                    pphh_range = c(1, 8), 
                                     age_range = c(0, 100), 
                                     hhwt_range = c(50, 200), 
                                     sex_probs = c(0.45, 0.45, 0.1),
@@ -82,3 +105,4 @@ generate_household_data <- function(num_households = 40,
   
   return(df)
 }
+

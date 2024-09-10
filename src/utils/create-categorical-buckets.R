@@ -2,30 +2,32 @@
 #
 # This module contains helper functions meant to create custom buckets of variables
 
-#' Generate a Bucket Column Based on Specified Ranges for Continuous Values
+#' Generate a bucket column based on specified ranges for continuous values
 #'
-#' The `generate_bucket_column` function creates a new column in a data frame by categorizing
-#' a specified numeric column based on the ranges provided in a lookup table. It handles continuous values
-#' by using inclusive `lower_bound` and exclusive `upper_bound`, where the `lower_bound` is inclusive,
-#' and the `upper_bound` is exclusive.
+#' The `generate_bucket_column` function creates a new column in a data frame by 
+#' categorizing a specified numeric column based on the ranges provided in a 
+#' lookup table. It handles continuous values by using inclusive `lower_bound` 
+#' and exclusive `upper_bound`, where the `lower_bound` is inclusive, and the 
+#' `upper_bound` is exclusive.
 #'
 #' @param data A data frame containing the data to be categorized.
 #' @param lookup_table A data frame with at least three columns: `bucket_name`, 
-#'        `lower_bound` (inclusive), and `upper_bound` (exclusive). Each row defines
-#'        a bucket with a name and the range of values for that bucket. For example,
-#'        an income bucket with a lower bound of $0 and upper bound of $10,000 would
-#'        include the observations $0.00; $1.00; $9,999.00; and $9,999.99; but would 
-#'        NOT include an observation of $10,000.00. For a range of buckets to have 
-#'        full coverage of the data, without gaps, it is necessary for the upper 
-#'        bound of a previous range to equal the lower bound of the following range. 
-#'        If the ranges overlap, an error will be thrown. If the ranges do not overlap 
-#'        but this condition does not hold, then the function will produce a warning,
-#'        and unbucketed observations will be assigned NA.
-#'        
+#'   `lower_bound` (inclusive), and `upper_bound` (exclusive). Each row defines 
+#'   a bucket with a name and the range of values for that bucket. For example, 
+#'   an income bucket with a lower bound of $0 and upper bound of $10,000 would 
+#'   include the observations $0.00; $1.00; $9,999.00; and $9,999.99; but would 
+#'   NOT include an observation of $10,000.00. For a range of buckets to have 
+#'   full coverage of the data, without gaps, it is necessary for the upper 
+#'   bound of a previous range to equal the lower bound of the following range. 
+#'   If the ranges overlap, an error will be thrown. If the ranges do not overlap 
+#'   but this condition does not hold, then the function will produce a warning, 
+#'   and unbucketed observations will be assigned NA.
 #' @param column_name The name of the numeric column in `data` to categorize.
-#' @param new_column_name The name of the new column to be created. If not provided, it defaults to `bucketed_{column_name}`.
+#' @param new_column_name The name of the new column to be created. If not provided, 
+#'   it defaults to `bucketed_{column_name}`.
 #'
-#' @return A modified data frame with a new column containing the categorized buckets.
+#' @return A modified data frame with a new column containing the categorized 
+#'   buckets.
 #' @examples
 #' # Define a lookup table
 #' lookup_table <- data.frame(
