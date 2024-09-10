@@ -28,21 +28,6 @@
 #'
 #' @return A modified data frame with a new column containing the categorized 
 #'   buckets.
-#' @examples
-#' # Define a lookup table
-#' lookup_table <- data.frame(
-#'   bucket_name = c("LowIncome", "HighIncome"),
-#'   lower_bound = c(0, 100000),  
-#'   upper_bound = c(100000, Inf) # Use Inf to represent the maximum possible value
-#' )
-#'
-#' # Example usage with the given data frame 'household_data'
-#' household_data <- generate_bucket_column(
-#'   data = household_data, 
-#'   lookup_table = lookup_table, 
-#'   column_name = "HHINCOME", 
-#'   new_column_name = "hhincome_bucket"
-#' )
 #'
 #' @export
 generate_bucket_column <- function(

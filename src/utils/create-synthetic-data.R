@@ -48,21 +48,6 @@
 #'     with a floor at 0. This value is the same for all members of a household.}
 #' }
 #'
-#' @examples
-#' # Generate synthetic data with default settings
-#' household_data <- generate_household_data()
-#'
-#' # Generate synthetic data with custom settings
-#' household_data <- generate_household_data(
-#'   num_households = 50,
-#'   pphh_range = c(1, 6),
-#'   age_range = c(0, 90),
-#'   hhwt_range = c(30, 300),
-#'   sex_probs = c(0.48, 0.48, 0.04),
-#'   hhinc_mean = 120000,
-#'   hhinc_sd = 50000
-#' )
-#'
 #' @export
 generate_household_data <- function(num_households = 40, 
                                     pphh_range = c(1, 8), 
