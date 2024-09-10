@@ -15,7 +15,7 @@ The project is set up as an R project with `renv` to manage dependencies. When y
 2. Clone the repository:
 
     ```sh
-    git clone https://github.com/yourusername/household-size.git
+    git clone https://github.com/lorae/household-size.git
     ```
 
 3. Open the R project file (`household-size.Rproj`) in RStudio. 
@@ -46,15 +46,23 @@ The project is set up as an R project with `renv` to manage dependencies. When y
 
 1. How granular is this analysis, geographically?
 
-    There are XXX Census PUMAs in the United States. However, their size varies widely. In the state of Ohio, the smallest PUMA encompasses [what city?] and the largest PUMA encompasses [the rest of the state?]
+    There are roughly 2,000 Census PUMAs in the United States. However, their size varies widely. In the state of Ohio, the smallest PUMA encompasses [what city?] and the largest PUMA encompasses [the rest of the state?]. 
 
-    [map of Ohio PUMAs]
+    [map of Ohio PUMAs in 2020]
 
     Here's a map of the PUMAs in the United States.
 
     [map of all PUMAs]
+    
+    Unfortunately, PUMAs do not perfectly correspond with each other between the 2000 and 2020 Census.
+    
+    [map with altered PUMA boundaries]
+    
+2. How do you get around the issue of mismatched PUMAs?
 
-2. How granular is this analysis, demographically?
+  [TODO: Explain several robusteness tests here]
+
+3. How granular is this analysis, demographically?
 
     The variables we use to bin individuals into groups are the following. See our codebook [link to codebook] for more information.
 
