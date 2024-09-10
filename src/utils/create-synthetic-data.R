@@ -41,13 +41,6 @@ generate_household_data <- function(num_households = 40,
                                     age_range = c(1, 100), 
                                     hhwt_range = c(50, 200), 
                                     sex_probs = c(0.45, 0.45, 0.1)) {
-  # Create an empty data frame
-  df <- data.frame(SERIAL = integer(),
-                   AGE = integer(),
-                   SEX = numeric(),
-                   PERNUM = integer(),
-                   NUMPREC = integer(),
-                   HHWT = integer())
   
   # Input validation
   if (length(pphh_range) != 2 || pphh_range[1] > pphh_range[2]) stop("Invalid pphh_range.")
@@ -57,33 +50,25 @@ generate_household_data <- function(num_households = 40,
   if (num_households <= 0 || num_households %% 1 != 0) stop("num_households must be a positive integer.")
   
   # Generate data for each household
-  for (serial in 1:num_households) {
-    
-    ## Generate household-level attributes
-    # Number of persons in each household (random integer in pphh_range)
+  households <- lapply(1:num_households, function(serial) {
     num_persons <- sample(pphh_range[1]:pphh_range[2], 1)
-    # Generate HHWT for the household within the specified range
     hhwt <- sample(hhwt_range[1]:hhwt_range[2], 1)
-    
-    ## Generate individual-level attributes within the household.
     pernums <- 1:num_persons
     ages <- sample(age_range[1]:age_range[2], num_persons, replace = TRUE)
-    # Generate SEXes as 1, 2, or NA with specified probabilities for each person
     sexes <- sample(c(1, 2, NA), num_persons, replace = TRUE, prob = sex_probs)
     
-    ## Create a temporary data frame for this household
-    temp_df <- data.frame(SERIAL = rep(serial, num_persons),
-                          AGE = ages,
-                          SEX = sexes,
-                          PERNUM = pernums,
-                          NUMPREC = rep(num_persons, num_persons),
-                          HHWT = rep(hhwt, num_persons))
-    
-    # Bind to the main data frame
-    df <- rbind(df, temp_df)
-  }
+    # Return household-level data as a data frame
+    data.frame(SERIAL = rep(serial, num_persons),
+               AGE = ages,
+               SEX = sexes,
+               PERNUM = pernums,
+               NUMPREC = rep(num_persons, num_persons),
+               HHWT = rep(hhwt, num_persons))
+  })
   
-  # Return the final data frame
+  # Combine all households into a single data frame
+  df <- do.call(rbind, households)
+  
   return(df)
 }
 
