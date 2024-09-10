@@ -7,10 +7,12 @@
 #' The `generate_household_data` function creates a synthetic dataset that mimics IPUMS-like household data, with realistic attributes for a specified number of households and persons per household.
 #'
 #' @param num_households Integer. The number of households to generate. Default is 40.
-#' @param pphh_range Integer vector of length 2. Range for the number of persons per household (PERNUM). Default is c(1, 8), which means each household will have between 1 to 8 persons.
-#' @param age_range Integer vector of length 2. Range for the age of persons in the households. Default is c(1, 100), which allows ages from 1 to 100 years.
-#' @param hhwt_range Integer vector of length 2. Range for the household weight (HHWT). HHWT is a weight that applies to all individuals within a household. Default is c(50, 200).
+#' @param pphh_range Integer vector of length 2. Inclusive range for the number of persons per household (PERNUM). Default is c(1, 8), which means each household will have between 1 to 8 persons, inclusive.
+#' @param age_range Integer vector of length 2. Inclusive range for the age of persons in the households. Default is c(0, 100), which allows ages from 1 to 100 years, inclusive.
+#' @param hhwt_range Integer vector of length 2. Inclusive range for the household weight (HHWT). HHWT is a weight that applies to all individuals within a household. Default is c(50, 200).
 #' @param sex_probs Numeric vector of length 3. Probabilities for assigning sex to individuals. The vector should have three elements, where the first element is the probability of assigning 1 (Male), the second is the probability of assigning 2 (Female), and the third is the probability of assigning NA (missing). Default is c(0.45, 0.45, 0.1).
+#' @param hhinc_mean Numeric. The mean household income (HHINCOME) to be generated. Default is 80,000.
+#' @param hhinc_sd Numeric. The standard deviation of household income (HHINCOME). Default is 40,000.
 #'
 #' @return A data frame with synthetic household data containing the following columns:
 #' \describe{
@@ -20,6 +22,7 @@
 #'   \item{PERNUM}{Integer. Person number within a household. For example, if a household has three people, the values would be 1, 2, 3.}
 #'   \item{NUMPREC}{Integer. Number of persons in each household. This value is repeated for all persons within a household.}
 #'   \item{HHWT}{Integer. Household weight, which is a random integer assigned to all persons within a household to represent the weight of the household in a survey context.}
+#'   \item{HHINCOME}{Numeric. Household income, generated using a normal distribution with a floor at 0. This value is the same for all members of a household.}
 #' }
 #'
 #' @examples
@@ -32,15 +35,19 @@
 #'   pphh_range = c(1, 6),
 #'   age_range = c(0, 90),
 #'   hhwt_range = c(30, 300),
-#'   sex_probs = c(0.48, 0.48, 0.04)
+#'   sex_probs = c(0.48, 0.48, 0.04),
+#'   hhinc_mean = 120000,
+#'   hhinc_sd = 50000
 #' )
 #'
 #' @export
 generate_household_data <- function(num_households = 40, 
-                                    pphh_range = c(1, 8), # Persons per household range
-                                    age_range = c(1, 100), 
+                                    pphh_range = c(1, 8),
+                                    age_range = c(0, 100), 
                                     hhwt_range = c(50, 200), 
-                                    sex_probs = c(0.45, 0.45, 0.1)) {
+                                    sex_probs = c(0.45, 0.45, 0.1),
+                                    hhinc_mean = 80000,
+                                    hhinc_sd = 40000) {
   
   # Input validation
   if (length(pphh_range) != 2 || pphh_range[1] > pphh_range[2]) stop("Invalid pphh_range.")
@@ -48,6 +55,7 @@ generate_household_data <- function(num_households = 40,
   if (length(hhwt_range) != 2 || hhwt_range[1] > hhwt_range[2]) stop("Invalid hhwt_range.")
   if (length(sex_probs) != 3 || sum(sex_probs) != 1) stop("Invalid sex_probs.")
   if (num_households <= 0 || num_households %% 1 != 0) stop("num_households must be a positive integer.")
+  if (hhinc_mean < 0) stop ("hhinc_mean must be greater than or equal to 0.")
   
   # Generate data for each household
   households <- lapply(1:num_households, function(serial) {
@@ -56,6 +64,8 @@ generate_household_data <- function(num_households = 40,
     pernums <- 1:num_persons
     ages <- sample(age_range[1]:age_range[2], num_persons, replace = TRUE)
     sexes <- sample(c(1, 2, NA), num_persons, replace = TRUE, prob = sex_probs)
+    # Generate HHINCOME (household income) with a normal distribution and a floor at 0
+    hhincome <- max(0, rnorm(1, mean = hhinc_mean, sd = hhinc_sd))
     
     # Return household-level data as a data frame
     data.frame(SERIAL = rep(serial, num_persons),
@@ -63,7 +73,8 @@ generate_household_data <- function(num_households = 40,
                SEX = sexes,
                PERNUM = pernums,
                NUMPREC = rep(num_persons, num_persons),
-               HHWT = rep(hhwt, num_persons))
+               HHWT = rep(hhwt, num_persons),
+               HHINCOME = rep(hhincome, num_persons))
   })
   
   # Combine all households into a single data frame
@@ -71,4 +82,3 @@ generate_household_data <- function(num_households = 40,
   
   return(df)
 }
-
