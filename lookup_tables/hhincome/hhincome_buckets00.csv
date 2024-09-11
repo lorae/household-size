@@ -1,0 +1,3 @@
+"bucket_name","lower_bound","upper_bound"
+"LowIncome",0,1e+05
+"HighIncome",1e+05,Inf
