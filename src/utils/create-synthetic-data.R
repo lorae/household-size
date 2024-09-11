@@ -10,17 +10,18 @@
 #'
 #' @param num_households Integer. The number of households to generate. Default 
 #'   is 40.
-#' @param pphh_range Integer vector of length 2. Inclusive range for the number 
-#'   of persons per household (PERNUM). Default is c(1, 8), which means each 
-#'   household will have between 1 to 8 persons, inclusive.
-#' @param age_range Integer vector of length 2. Inclusive range for the age of 
-#'   persons in the households. Default is c(0, 100), which allows ages from 
-#'   0 to 100 years, inclusive.
-#' @param hhwt_range Integer vector of length 2. Inclusive range for the 
-#'   household weight (HHWT). HHWT is a weight that applies to all individuals 
-#'   within a household. Default is c(50, 200).
-#' @param sex_probs Numeric vector of length 3. Probabilities for assigning sex 
-#'   to individuals. The vector should have three elements, where the first element 
+#' @param pphh_range Integer vector of length 2, with named elements `min` and `max`. 
+#'   Inclusive range for the number of persons per household (PERNUM). Default is 
+#'   c(min = 1, max = 8), which means each household will have between 1 to 8 
+#'   persons, inclusive.
+#' @param age_range Integer vector of length 2, with named elements `min` and `max`. 
+#'   Inclusive range for the age of persons in the households. Default is c(min = 0, 
+#'   max = 100), which allows ages from 0 to 100 years, inclusive.
+#' @param hhwt_range Integer vector of length 2, with named elements `min` and `max`. 
+#'   Inclusive range for the household weight (HHWT). HHWT is a weight that applies 
+#'   to all individuals within a household. Default is c(min = 50, max = 200).
+#' @param sex_probs Numeric vector of length 3. Probabilities for assigning sex to 
+#'   individuals. The vector should have three elements, where the first element 
 #'   is the probability of assigning 1 (Male), the second is the probability of 
 #'   assigning 2 (Female), and the third is the probability of assigning NA (missing). 
 #'   Default is c(0.45, 0.45, 0.1).
@@ -50,27 +51,30 @@
 #'
 #' @export
 generate_household_data <- function(num_households = 40, 
-                                    pphh_range = c(1, 8), 
-                                    age_range = c(0, 100), 
-                                    hhwt_range = c(50, 200), 
-                                    sex_probs = c(0.45, 0.45, 0.1),
+                                    pphh_range = c(min = 1, max = 8), 
+                                    age_range = c(min = 0, max = 100), 
+                                    hhwt_range = c(min = 50, max = 200), 
+                                    sex_probs = c(male = 0.45, female = 0.45, na = 0.1),
                                     hhinc_mean = 80000,
                                     hhinc_sd = 40000) {
   
   # Input validation
-  if (length(pphh_range) != 2 || pphh_range[1] > pphh_range[2]) stop("Invalid pphh_range.")
-  if (length(age_range) != 2 || age_range[1] > age_range[2]) stop("Invalid age_range.")
-  if (length(hhwt_range) != 2 || hhwt_range[1] > hhwt_range[2]) stop("Invalid hhwt_range.")
+  if (!all(c("min", "max") %in% names(pphh_range))) stop("pphh_range must have named elements 'min' and 'max'.")
+  if (!all(c("min", "max") %in% names(age_range))) stop("age_range must have named elements 'min' and 'max'.")
+  if (!all(c("min", "max") %in% names(hhwt_range))) stop("hhwt_range must have named elements 'min' and 'max'.")
+  if (pphh_range["min"] > pphh_range["max"]) stop("Invalid pphh_range.")
+  if (age_range["min"] > age_range["max"]) stop("Invalid age_range.")
+  if (hhwt_range["min"] > hhwt_range["max"]) stop("Invalid hhwt_range.")
   if (length(sex_probs) != 3 || sum(sex_probs) != 1) stop("Invalid sex_probs.")
   if (num_households <= 0 || num_households %% 1 != 0) stop("num_households must be a positive integer.")
-  if (hhinc_mean < 0) stop ("hhinc_mean must be greater than or equal to 0.")
+  if (hhinc_mean < 0) stop("hhinc_mean must be greater than or equal to 0.")
   
   # Generate data for each household
   households <- lapply(1:num_households, function(serial) {
-    num_persons <- sample(pphh_range[1]:pphh_range[2], 1)
-    hhwt <- sample(hhwt_range[1]:hhwt_range[2], 1)
+    num_persons <- sample(pphh_range["min"]:pphh_range["max"], 1)
+    hhwt <- sample(hhwt_range["min"]:hhwt_range["max"], 1)
     pernums <- 1:num_persons
-    ages <- sample(age_range[1]:age_range[2], num_persons, replace = TRUE)
+    ages <- sample(age_range["min"]:age_range["max"], num_persons, replace = TRUE)
     sexes <- sample(c(1, 2, NA), num_persons, replace = TRUE, prob = sex_probs)
     # Generate HHINCOME (household income) with a normal distribution and a floor at 0
     hhincome <- max(0, rnorm(1, mean = hhinc_mean, sd = hhinc_sd))
@@ -90,4 +94,5 @@ generate_household_data <- function(num_households = 40,
   
   return(df)
 }
+
 
