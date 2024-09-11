@@ -20,7 +20,11 @@ The project is set up as an R project with `renv` to manage dependencies. When y
 
 3. Open the R project file (`household-size.Rproj`) in RStudio. 
 
-4. When you open the project, `renv` will automatically load the required packages. 
+4. Install RTools, if not already installed. It is required for compiling some of the packages needed in the renv.
+
+    [TODO: instructions]
+
+5. When you open the project, `renv` will automatically load the required packages. 
 
     To verify that the `renv` is activated, run:
   
@@ -28,13 +32,13 @@ The project is set up as an R project with `renv` to manage dependencies. When y
     renv::status()
     ```
   
-5. Run the main script to perform the analysis. If you encounter any issues with missing packages, run the following command to install them:
+6. Run the main script to perform the analysis. If you encounter any issues with missing packages, run the following command to install them:
   
     ```r
     renv::restore()
     ```
 
-6. View the results as needed.
+7. View the results as needed.
 
 ## If you're running the code any subsequent time...
 
