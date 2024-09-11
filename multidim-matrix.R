@@ -19,34 +19,24 @@ household_data <- generate_household_data()
 View(household_data)
 
 # ----- Step 2: Bucket the data
+# Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
+# directory. There are several bucketing schemes saved. Here we explicitly choose
+# each .csv file.
+age_lookup_table <- read.csv("lookup_tables/age/age_buckets00.csv", stringsAsFactors = FALSE)
+hhincome_lookup_table <- read.csv("lookup_tables/hhincome/hhincome_buckets00.csv", stringsAsFactors = FALSE)
 
-# Step 2A: Define lookup tables for bucketing specific columns
-# Define a lookup table for ages
-age_lookup_table <- data.frame(
-  bucket_name = c("r00_49", "r50plus"),
-  lower_bound = c(0, 50),
-  upper_bound = c(50, 200)
-)
-
-# Define a lookup table for household income
-hhinc_lookup_table <- data.frame(
-  bucket_name = c("LowIncome", "HighIncome"),
-  lower_bound = c(0, 100000),  
-  upper_bound = c(100000, Inf)
-)
-
-# Step 2B: Bucket the data using lookup tables
+# Use the lookup tables to add bucket columns to the data frame.
 household_data_bucketed <- household_data %>%
-  # Bucket the age categories
+  # Age buckets
   generate_bucket_column(
     data = ., 
-    lookup_table = age_lookup_table, 
+    lookup_table = age_lookup_table,
     column_name = "AGE"
   ) %>%
-  # Bucket the income categories
+  # Household income buckets
   generate_bucket_column(
     data = ., 
-    lookup_table = hhinc_lookup_table, 
+    lookup_table = hhincome_lookup_table,
     column_name = "HHINCOME"
   ) 
 
