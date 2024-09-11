@@ -20,37 +20,79 @@ The project is set up as an R project with `renv` to manage dependencies. When y
 
 3. Open the R project file (`household-size.Rproj`) in RStudio. 
 
-4. Install RTools, if not already installed. It is required for compiling some of the packages needed in the renv.
+4. Verify that [RTools](https://cran.r-project.org/bin/windows/Rtools/) is already installed on your computer. RTools is required for compiling some of the packages in this project's library.
 
-    [TODO: instructions]
+    a. Load the `pkgbuild` package, installing if necessary:
 
-5. When you open the project, `renv` will automatically load the required packages. 
+        ```r
+        if (!requireNamespace("pkgbuild", quietly = TRUE)) {
+          install.packages("pkgbuild")
+        }
+        library("pkgbuild")
+        ```
 
-    To verify that the `renv` is activated, run:
-  
+    b. Use the `find_rtools()` function from the `pkgbuild` package to verify that RTools is installed and configured.
+
+        ```r
+        pkgbuild::find_rtools()
+        ```
+
+        If the output is `[1] TRUE`, RTools is installed and ready to use. Proceed to step 5.
+        
+        If the output is `[2] FALSE`:
+        
+          i. Verify your current version of R by running 
+          
+              ```r 
+              R.version.string
+              ```
+          ii. Navigate to https://cran.r-project.org/bin/windows/Rtools/. Download the version of RTools consistent with your version of R: For example, install RTools44 for version 4.4.0 and above, and RTools43 for version 4.3.0 and above.
+          
+          iii. Close any instances of R and RStudio and open the executable to follow installation instructions. Once downloaded, reopen RStudio rerun the above steps to verify proper RTools installation. 
+
+5. Install the `renv` package by running the following command in R:
+
     ```r
-    renv::status()
+    install.packages("renv")
     ```
-  
-6. Run the main script to perform the analysis. If you encounter any issues with missing packages, run the following command to install them:
-  
+
+6. Run `renv::restore()` to install all the required packages as specified in the `renv.lock` file:
+
     ```r
     renv::restore()
     ```
 
-7. View the results as needed.
+    This will ensure that your environment is set up with the same package versions used in the project.
+  
+7. Run the main script to perform the analysis. 
+
+   [TODO: instructions here]
+
+8. View the results as needed.
 
 ## If you're running the code any subsequent time...
 
 1. Open the R project file (`household-size.Rproj`) in RStudio.
 
-2. Run the main script to perform the analysis.
+2. Run `renv::restore()` to install all the required packages as specified in the `renv.lock` file:
+
+    ```r
+    renv::restore()
+    ```
+
+    This will ensure that your environment is set up with the same package versions used in the project.
+  
+3. Run the main script to perform the analysis. 
+
+   [TODO: instructions here]
+
+4. View the results as needed.
 
 # FAQ
 
 1. How granular is this analysis, geographically?
 
-    There are roughly 2,000 Census PUMAs in the United States. However, their size varies widely. In the state of Ohio, the smallest PUMA encompasses [what city?] and the largest PUMA encompasses [the rest of the state?]. 
+    There are roughly 2,000 Census PUMAs in the United States. However, their size varies widely. In Minnesota, the smallest PUMA encompasses [what city?] and the largest PUMA encompasses [the rest of the state?]. 
 
     [map of Ohio PUMAs in 2020]
 
