@@ -54,7 +54,7 @@ generate_household_data <- function(num_households = 40,
                                     pphh_range = c(min = 1, max = 8), 
                                     age_range = c(min = 0, max = 100), 
                                     hhwt_range = c(min = 50, max = 200), 
-                                    sex_probs = c(male = 0.45, female = 0.45, na = 0.1),
+                                    sex_probs = c(male = 0.45, female = 0.45, missing = 0.1),
                                     hhinc_mean = 80000,
                                     hhinc_sd = 40000) {
   
@@ -75,7 +75,7 @@ generate_household_data <- function(num_households = 40,
     hhwt <- sample(hhwt_range["min"]:hhwt_range["max"], 1)
     pernums <- 1:num_persons
     ages <- sample(age_range["min"]:age_range["max"], num_persons, replace = TRUE)
-    sexes <- sample(c(1, 2, NA), num_persons, replace = TRUE, prob = sex_probs)
+    sexes <- sample(c(1, 2, 9), num_persons, replace = TRUE, prob = sex_probs)
     # Generate HHINCOME (household income) with a normal distribution and a floor at 0
     hhincome <- max(0, rnorm(1, mean = hhinc_mean, sd = hhinc_sd))
     
