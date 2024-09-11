@@ -4,30 +4,44 @@
 # arrays, as suggested by Galster (2024). 
 # For full citation, please see the project README.
 
-# Define dimension names
-row_names <- c("Row1", "Row2", "Row3")
-column_names <- c("Col1", "Col2", "Col3", "Col4")
-layer_names <- c("Layer1", "Layer2")
-
-# Create a 3D array with named elements for dimnames
-named_array <- array(
-  data = 1:24, 
-  dim = c(3, 4, 2), 
-  dimnames = list(
-    rows = row_names, 
-    columns = column_names, 
-    layers = layer_names
+# Function to create an empty array with named dimensions from individual vectors
+create_named_array <- function(...) {
+  # Capture all vectors passed as arguments
+  dim_vectors <- list(...)
+  
+  # Get the length of each vector to determine the dimensions
+  dim_lengths <- sapply(dim_vectors, length)
+  
+  # Get the names of the vectors to use as dimension names
+  dim_names <- names(dim_vectors)
+  
+  # Create an empty array with named dimensions
+  named_array <- array(
+    data = NA,  # Initialize with NA (empty array)
+    dim = dim_lengths,  # Set dimensions based on lengths of input vectors
+    dimnames = dim_vectors  # Set dimension names based on input vectors
   )
-)
+  
+  return(named_array)
+}
 
-# Access row names using "rows" name
-row_names <- dimnames(named_array)[["rows"]]
-print(row_names)
+# Use the function to initialize an empty array
+test_array <- create_named_array(
+  age = age_lookup_table[["bucket_name"]], 
+  hhinc = hhinc_lookup_table[["bucket_name"]],
+  sex = c(1,2,9)
+  )
 
-# Access column names using "columns" name
-column_names <- dimnames(named_array)[["columns"]]
-print(column_names)
+dimnames(test_array)
 
-# Access layer names using "layers" name
-layer_names <- dimnames(named_array)[["layers"]]
-print(layer_names)
+# Access age buckets using "age" dimension name
+age_buckets <- dimnames(test_array)$age
+print(age_buckets)
+
+# Access hhinc buckets using "hhinc" dimension name
+hhinc_buckets <- dimnames(test_array)$hhinc
+print(hhinc_buckets)
+
+# Access sex buckets "sex" dimension name
+sex_buckets <- dimnames(test_array)$sex
+print(sex_buckets)
