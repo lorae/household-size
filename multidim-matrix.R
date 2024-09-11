@@ -3,7 +3,9 @@
 # This script produces a multidimensional aggregate matrix on synthetic data
 # as a proof-of-concept for aggregation methods in the IPUMS data.
 
-# ----- Step 0: Source helper functions
+# ----- Step 0: Source helper functions and packages
+library("data.table")
+library("magrittr")
 source("src/utils/create-synthetic-data.R")
 source("src/utils/create-categorical-buckets.R")
 
@@ -50,6 +52,19 @@ household_data_bucketed <- household_data %>%
 
 View(household_data_bucketed)
 
-# ----- Step 3: Summarize the data in a multidimensional matrix
+# ----- Step 3: Produce aggregate household sizes in data table
+
+# Convert your large data frame to data.table for faster processing
+household_dt <- as.data.table(household_data_bucketed)
+
+# Compute weighted mean directly using data.table's grouping and add counts
+# TODO: replace HHWT with the correct person-level weight.
+aggregate_dt <- household_dt[, .(
+  weighted_mean = weighted.mean(PERNUM, w = HHWT, na.rm = FALSE),  # Weighted mean calculation
+  count = .N  # Count of observations in each group
+), by = .(AGE_bucket, HHINCOME_bucket, SEX)]
+
+# Print the resulting data table
+print(aggregate_dt)
 
 
