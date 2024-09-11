@@ -73,8 +73,11 @@ generate_bucket_column <- function(
     lower_bound <- lookup_table$lower_bound[i]
     upper_bound <- lookup_table$upper_bound[i]
     
-    # Assign bucket name to entries that fall within the range (lower bound inclusive, upper bound exclusive)
-    data[[new_column_name]][data[[column_name]] >= lower_bound & data[[column_name]] < upper_bound] <- bucket_name
+    # Create a logical vector to identify rows that fall within the range of bucket `i`
+    in_range <- data[[column_name]] >= lower_bound & data[[column_name]] < upper_bound
+    
+    # Assign the bucket name to the new column for all rows where the condition is TRUE
+    data[[new_column_name]][in_range] <- bucket_name
   }
   
   # Return the modified data frame with the new column
