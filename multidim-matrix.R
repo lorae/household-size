@@ -7,16 +7,18 @@
 source("src/utils/create-synthetic-data.R")
 source("src/utils/create-categorical-buckets.R")
 
+# ----- Step 1: Generate synthetic data
+
 # Set pseudorandom seed for replicability
 set.seed(42)
 
 # Generate synthetic household data
 household_data <- generate_household_data()
-print(household_data)
+View(household_data)
 
+# ----- Step 2: Bucket the data
 
-# Add age buckets
-
+# Step 2A: Define lookup tables for bucketing specific columns
 # Define a lookup table for ages
 age_lookup_table <- data.frame(
   bucket_name = c("r00_49", "r50plus"),
@@ -31,7 +33,7 @@ hhinc_lookup_table <- data.frame(
   upper_bound = c(100000, Inf)
 )
 
-# Example usage with the given data frame 'household_data'
+# Step 2B: Bucket the data using lookup tables
 household_data_bucketed <- household_data %>%
   # Bucket the age categories
   generate_bucket_column(
@@ -46,5 +48,8 @@ household_data_bucketed <- household_data %>%
     column_name = "HHINCOME"
   ) 
 
-# Print the first few rows of the updated data frame to see the new column
 View(household_data_bucketed)
+
+# ----- Step 3: Summarize the data in a multidimensional matrix
+
+
