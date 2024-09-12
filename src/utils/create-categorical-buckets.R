@@ -1,3 +1,8 @@
+# create-categorical-buckets.R
+#
+# This module contains helper functions meant to create custom buckets of variables
+
+
 #' Generate a bucket column for continuous values based on specified ranges and specific values
 #'
 #' The `generate_bucket_continuous` function creates a new column in a data frame by 
@@ -12,7 +17,7 @@
 #'   cases that match specific values.
 #' @param column_name The name of the numeric column in `data` to categorize.
 #' @param new_column_name The name of the new column to be created. If not provided, 
-#'   it defaults to `bucketed_{column_name}`.
+#'   it defaults to `{column_name}_bucket`.
 #'
 #' @return A modified data frame with a new column containing the categorized 
 #'   buckets.
