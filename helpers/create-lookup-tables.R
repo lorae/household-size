@@ -26,7 +26,7 @@ hhincome_buckets00 <- rbind(
   c("NegIncome", -Inf, 0, NA),
   c("LowIncome", 0, 100000, NA),
   c("HighIncome", 100000, 9999999, NA),
-  c(NA, NA, NA, 9999999)
+  c("N/A", NA, NA, 9999999)
 ) %>%
   as.data.frame() %>%
   setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
@@ -36,18 +36,18 @@ write.csv(hhincome_buckets00, "lookup_tables/hhincome/hhincome_buckets00.csv", r
 
 # hhincome_buckets01.csv
 hhincome_buckets01 <- rbind(
-  c("r000_020k", 0, 20000),
-  c("r020k_040k", 20000, 40000),
-  c("r040k_060k", 40000, 60000),
-  c("r060k_080k", 60000, 80000),
-  c("r080k_100k", 80000, 100000),
-  c("r100k_150k", 100000, 150000),
-  c("r150k_200k", 150000, 200000),
-  c("r200k_300k", 200000, 300000),
-  c("r300kplus", 300000, Inf)
+  c("r000_020k", 0, 20000, NA),
+  c("r020k_040k", 20000, 40000, NA),
+  c("r040k_060k", 40000, 60000, NA),
+  c("r060k_080k", 60000, 80000, NA),
+  c("r080k_100k", 80000, 100000, NA),
+  c("r100k_150k", 100000, 150000, NA),
+  c("r150k_200k", 150000, 200000, NA),
+  c("r200k_300k", 200000, 300000, NA),
+  c("r300kplus", 300000, Inf, NA)
 ) %>%
   as.data.frame() %>%
-  setNames(c("bucket_name", "lower_bound", "upper_bound")) %>% # Add column names
+  setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
 write.csv(hhincome_buckets01, "lookup_tables/hhincome/hhincome_buckets01.csv", row.names = FALSE)

@@ -2,4 +2,4 @@
 "NegIncome",-Inf,0,NA
 "LowIncome",0,1e+05,NA
 "HighIncome",1e+05,9999999,NA
-NA,NA,NA,9999999
+"N/A",NA,NA,9999999
