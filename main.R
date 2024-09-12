@@ -65,6 +65,11 @@ data_bucketed <- data %>%
     data = .,
     lookup_table = race_lookup_table,
     column_name = "RACE"
+  ) %>%
+  # Combine race and ethnicity into one variable using specific rules of 
+  # precedence (defined in ``)
+  create_race_eth_bucket(
+    data = .
   )
 
 #View(data_bucketed)
@@ -83,8 +88,7 @@ aggregate_dt <- dt[, .(
   AGE_bucket, 
   HHINCOME_bucket, 
   SEX, 
-  HISPAN_bucket,
-  RACE_bucket
+  RACE_ETH_bucket
   )
 ]
 
