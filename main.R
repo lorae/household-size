@@ -38,18 +38,19 @@ data <- read_ipums_micro(ddi)
 age_lookup_table <- read.csv("lookup_tables/age/age_buckets00.csv", stringsAsFactors = FALSE)
 hhincome_lookup_table <- read.csv("lookup_tables/hhincome/hhincome_buckets00.csv", stringsAsFactors = FALSE)
 hispan_lookup_table <- read.csv("lookup_tables/hispan/hispan_buckets00.csv", stringsAsFactors = FALSE)
+race_lookup_table <- read.csv("lookup_tables/race/race_buckets00.csv", stringsAsFactors = FALSE)
 
 # Use the lookup tables to add bucket columns to the data frame.
 data_bucketed <- data %>%
   # Age buckets
   generate_bucket_continuous(
-    data = ., 
+    data = .,
     lookup_table = age_lookup_table,
     column_name = "AGE"
   ) %>%
   # Household income buckets
   generate_bucket_continuous(
-    data = ., 
+    data = .,
     lookup_table = hhincome_lookup_table,
     column_name = "HHINCOME"
   ) %>%
@@ -58,9 +59,15 @@ data_bucketed <- data %>%
     data = .,
     lookup_table = hispan_lookup_table,
     column_name = "HISPAN"
+  ) %>%
+  # Race buckets
+  generate_bucket_categorical(
+    data = .,
+    lookup_table = race_lookup_table,
+    column_name = "RACE"
   )
 
-View(data_bucketed)
+#View(data_bucketed)
 
 # ----- Step 3: Produce aggregate household sizes in data table
 
@@ -76,7 +83,8 @@ aggregate_dt <- dt[, .(
   AGE_bucket, 
   HHINCOME_bucket, 
   SEX, 
-  HISPAN_bucket
+  HISPAN_bucket,
+  RACE_bucket
   )
 ]
 

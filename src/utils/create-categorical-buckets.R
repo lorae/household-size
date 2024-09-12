@@ -1,6 +1,8 @@
 # create-categorical-buckets.R
 #
-# This module contains helper functions meant to create custom buckets of variables
+# This module contains various helper functions meant to create custom buckets 
+# of continuous (such as income, age) and categorical (such as race, ethnicity)
+# variables.
 
 
 #' Generate a bucket column for continuous values based on specified ranges and specific values
