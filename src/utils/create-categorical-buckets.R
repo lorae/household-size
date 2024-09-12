@@ -1,6 +1,6 @@
-#' Generate a bucket column based on specified ranges and specific values
+#' Generate a bucket column for continuous values based on specified ranges and specific values
 #'
-#' The `generate_bucket_column` function creates a new column in a data frame by 
+#' The `generate_bucket_continuous` function creates a new column in a data frame by 
 #' categorizing a specified numeric column based on the ranges provided in a 
 #' lookup table or specific values. It handles continuous values by using inclusive 
 #' `lower_bound` and exclusive `upper_bound`, and allows for specific values to be 
@@ -18,7 +18,7 @@
 #'   buckets.
 #'
 #' @export
-generate_bucket_column <- function(
+generate_bucket_continuous <- function(
     data, 
     lookup_table, 
     column_name, 

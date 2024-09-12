@@ -41,13 +41,13 @@ hhincome_lookup_table <- read.csv("lookup_tables/hhincome/hhincome_buckets00.csv
 # Use the lookup tables to add bucket columns to the data frame.
 data_bucketed <- data %>%
   # Age buckets
-  generate_bucket_column(
+  generate_bucket_continuous(
     data = ., 
     lookup_table = age_lookup_table,
     column_name = "AGE"
   ) %>%
   # Household income buckets
-  generate_bucket_column(
+  generate_bucket_continuous(
     data = ., 
     lookup_table = hhincome_lookup_table,
     column_name = "HHINCOME"
