@@ -84,3 +84,62 @@ generate_bucket_continuous <- function(
   # Return the modified data frame with the new column
   return(data)
 }
+
+
+#' Generate a bucket column for categorical values based on a lookup table
+#'
+#' The `generate_bucket_categorical` function creates a new column in a data frame by 
+#' categorizing a specified categorical column based on a lookup table. It maps old 
+#' values to new values as defined in the lookup table.
+#'
+#' @param data A data frame containing the data to be categorized.
+#' @param lookup_table A data frame with columns: `old_val` and `new_val`. The `old_val` 
+#'   column represents the current values in the data, and the `new_val` column represents 
+#'   the new values to which `old_val` should be mapped.
+#' @param column_name The name of the column in `data` to categorize.
+#' @param new_column_name The name of the new column to be created. If not provided, 
+#'   it defaults to `{column_name}_bucket`.
+#'
+#' @return A modified data frame with a new column containing the categorized values.
+#'
+#' @export
+generate_bucket_categorical <- function(
+    data, 
+    lookup_table, 
+    column_name, 
+    new_column_name = NULL) {
+  
+  # Check if the specified column exists in the data frame
+  if (!column_name %in% names(data)) {
+    stop(paste("Column", column_name, "not found in the data frame."))
+  }
+  
+  # Generate a default name for the new column if not provided
+  if (is.null(new_column_name)) {
+    new_column_name <- paste0(column_name, "_bucket")
+  }
+  
+  # Check if the new column name already exists in the data frame
+  if (new_column_name %in% names(data)) {
+    stop(paste("Column", new_column_name, "already exists in the data frame. Please choose a different name."))
+  }
+  
+  # Initialize the new column for the categorized values with NA
+  data[[new_column_name]] <- NA
+  
+  # Loop through each row of the lookup table to categorize based on the provided values
+  for (i in 1:nrow(lookup_table)) {
+    old_val <- lookup_table$old_val[i]
+    new_val <- lookup_table$new_val[i]
+    
+    # Create a logical vector to identify rows that match the old value
+    matches_old_val <- data[[column_name]] == old_val
+    
+    # Assign the new value to the new column for all rows where the condition is TRUE
+    data[[new_column_name]][matches_old_val] <- new_val
+  }
+  
+  # Return the modified data frame with the new column
+  return(data)
+}
+
