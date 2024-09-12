@@ -37,6 +37,7 @@ data <- read_ipums_micro(ddi)
 # each .csv file.
 age_lookup_table <- read.csv("lookup_tables/age/age_buckets00.csv", stringsAsFactors = FALSE)
 hhincome_lookup_table <- read.csv("lookup_tables/hhincome/hhincome_buckets00.csv", stringsAsFactors = FALSE)
+hispan_lookup_table <- read.csv("lookup_tables/hispan/hispan_buckets00.csv", stringsAsFactors = FALSE)
 
 # Use the lookup tables to add bucket columns to the data frame.
 data_bucketed <- data %>%
@@ -51,7 +52,13 @@ data_bucketed <- data %>%
     data = ., 
     lookup_table = hhincome_lookup_table,
     column_name = "HHINCOME"
-  ) 
+  ) %>%
+  # Ethnicity (hispanic/not hispanic) buckets
+  generate_bucket_categorical(
+    data = .,
+    lookup_table = hispan_lookup_table,
+    column_name = "HISPAN"
+  )
 
 View(data_bucketed)
 
@@ -65,7 +72,13 @@ dt <- as.data.table(data_bucketed)
 aggregate_dt <- dt[, .(
   weighted_mean = weighted.mean(PERNUM, w = HHWT, na.rm = FALSE),  # Weighted mean calculation
   count = .N  # Count of observations in each group
-), by = .(AGE_bucket, HHINCOME_bucket, SEX)]
+), by = .(
+  AGE_bucket, 
+  HHINCOME_bucket, 
+  SEX, 
+  HISPAN_bucket
+  )
+]
 
 # Print the resulting data table
 print(aggregate_dt)
