@@ -54,7 +54,7 @@ write.csv(hhincome_buckets01, "lookup_tables/hhincome/hhincome_buckets01.csv", r
 
 # ----- Ethnicity (hispanic) lookup tables -----
 
-# hhincome_buckets00.csv
+# hispan_buckets00.csv
 hispan_buckets00 <- rbind(
   c(0, "not_hispanic"),
   c(1, "hispanic"),
@@ -68,3 +68,23 @@ hispan_buckets00 <- rbind(
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
 write.csv(hispan_buckets00, "lookup_tables/hispan/hispan_buckets00.csv", row.names = FALSE)
+
+# ----- Race lookup tables -----
+
+# race_buckets00.csv
+race_buckets00 <- rbind(
+  c(1, "white"),
+  c(2, "black"),
+  c(3, "aian"),
+  c(4, "aapi"),
+  c(5, "aapi"),
+  c(6, "aapi"),
+  c(8, "multi"),
+  c(9, "multi"),
+  c(7, "other")
+) %>%
+  as.data.frame() %>%
+  setNames(c("old_val", "new_val")) %>% # Add column names
+  type.convert(as.is = TRUE) # Convert column encoding to character or numeric
+
+write.csv(race_buckets00, "lookup_tables/race/race_buckets00.csv", row.names = FALSE)
