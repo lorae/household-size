@@ -23,9 +23,9 @@ write.csv(age_buckets00, "lookup_tables/age/age_buckets00.csv", row.names = FALS
 
 # hhincome_buckets00.csv
 hhincome_buckets00 <- rbind(
-  c("NegIncome", -Inf, 0, NA),
-  c("LowIncome", 0, 100000, NA),
-  c("HighIncome", 100000, 9999999, NA),
+  c("negative", -Inf, 0, NA),
+  c("r000_100k", 0, 100000, NA),
+  c("r100kplus", 100000, 9999999, NA),
   c("N/A", NA, NA, 9999999)
 ) %>%
   as.data.frame() %>%
