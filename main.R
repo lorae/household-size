@@ -95,7 +95,26 @@ aggregate_dt <- dt[, .(
 # Print the resulting data table
 print(aggregate_dt)
 
+# Example lookup tables with desired order
+age_levels <- c("r00_49", "r50plus")
+income_levels <- c("negative", "r000_100k", "r100kplus", "N/A") 
+race_eth_levels <- c("hispanic", "black", "aapi", "aian", "multi", "white", "other")
+sex_levels <- c(1, 2)
 
+# Convert to factor with specified levels
+aggregate_dt[, AGE_bucket := factor(AGE_bucket, levels = age_levels)]
+aggregate_dt[, HHINCOME_bucket := factor(HHINCOME_bucket, levels = income_levels)]
+aggregate_dt[, RACE_ETH_bucket := factor(RACE_ETH_bucket, levels = race_eth_levels)]
+aggregate_dt[, SEX := factor(SEX, levels = sex_levels)]
+
+# Sort by age, income, race/ethnicity, and sex
+setorder(aggregate_dt, AGE_bucket, HHINCOME_bucket, RACE_ETH_bucket, SEX)
+
+# View the sorted data
+print(aggregate_dt)
+
+# Export the data.table to a CSV file
+fwrite(aggregate_dt, "output/aggregate_dt_sorted.csv")
 
 
 # ----- Step EXTRA: Explore the data
