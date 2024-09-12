@@ -51,3 +51,20 @@ hhincome_buckets01 <- rbind(
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
 write.csv(hhincome_buckets01, "lookup_tables/hhincome/hhincome_buckets01.csv", row.names = FALSE)
+
+# ----- Ethnicity (hispanic) lookup tables -----
+
+# hhincome_buckets00.csv
+hispan_buckets00 <- rbind(
+  c(0, "not_hispanic"),
+  c(1, "hispanic"),
+  c(2, "hispanic"),
+  c(3, "hispanic"),
+  c(4, "hispanic"),
+  c(9, "N/A")
+) %>%
+  as.data.frame() %>%
+  setNames(c("old_val", "new_val")) %>% # Add column names
+  type.convert(as.is = TRUE) # Convert column encoding to character or numeric
+
+write.csv(hispan_buckets00, "lookup_tables/hispan/hispan_buckets00.csv", row.names = FALSE)
