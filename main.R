@@ -15,6 +15,8 @@
 library("ipumsr")
 library("magrittr")
 library("dplyr")
+library("data.table")
+source("src/utils/create-categorical-buckets.R")
 
 # ----- Step 1: Load data
 # Current code assumes data is saved to computer. 
@@ -22,11 +24,56 @@ library("dplyr")
 # Helpful information on IPUMS and ipumsr from: 
 # https://www.youtube.com/watch?v=OT6upQ1dBgU
 
-ddi <- read_ipums_ddi("usa_00002.xml")
+# On my computer, the usa_00003 data pull represents just data from 2000. It is 
+# currently .gitignored. Later, I will make this code more replicable by using
+# an API call.
+ddi <- read_ipums_ddi("usa_00003.xml")
 # Note: This file takes about 3 minutes to read
 data <- read_ipums_micro(ddi)
 
-# ----- Step 2: Explore the data
+# ----- Step 2: Bucket the data
+# Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
+# directory. There are several bucketing schemes saved. Here we explicitly choose
+# each .csv file.
+age_lookup_table <- read.csv("lookup_tables/age/age_buckets00.csv", stringsAsFactors = FALSE)
+hhincome_lookup_table <- read.csv("lookup_tables/hhincome/hhincome_buckets00.csv", stringsAsFactors = FALSE)
+
+# Use the lookup tables to add bucket columns to the data frame.
+data_bucketed <- data %>%
+  # Age buckets
+  generate_bucket_column(
+    data = ., 
+    lookup_table = age_lookup_table,
+    column_name = "AGE"
+  ) %>%
+  # Household income buckets
+  generate_bucket_column(
+    data = ., 
+    lookup_table = hhincome_lookup_table,
+    column_name = "HHINCOME"
+  ) 
+
+View(data_bucketed)
+
+# ----- Step 3: Produce aggregate household sizes in data table
+
+# Convert your large data frame to data.table for faster processing
+dt <- as.data.table(data_bucketed)
+
+# Compute weighted mean directly using data.table's grouping and add counts
+# TODO: replace HHWT with the correct person-level weight.
+aggregate_dt <- dt[, .(
+  weighted_mean = weighted.mean(PERNUM, w = HHWT, na.rm = FALSE),  # Weighted mean calculation
+  count = .N  # Count of observations in each group
+), by = .(AGE_bucket, HHINCOME_bucket, SEX)]
+
+# Print the resulting data table
+print(aggregate_dt)
+
+
+
+
+# ----- Step EXTRA: Explore the data
 
 # Learn higher level info about variables
 View(ddi$var_info)
@@ -45,7 +92,7 @@ ipums_val_labels(ddi, SEX)
 # a dataset after importing it.
 ipums_view(ddi)
 
-# ----- Step 3: Actually start analysis
+# Check for missing year
 if (any(is.na(data$YEAR))) {
   warning("There are missing values in the YEAR column.")
 }
@@ -85,18 +132,3 @@ data2020 %>%
   filter(PERNUM == 1) %>%
   weighted.mean(x = .$NUMPREC, w = .$HHWT)
 
-# ----- Step X: Extra pseudocode
-# Create list of attributes and dimensions of each:
-attributes <- list(
-  sex = 
-    c(
-      "M", 
-      "F"
-      ),
-  # I'll do 2 buckets for now for simplicity
-  age = 
-    c(
-      "r00-49",
-      "r5plus"
-    )
-)
