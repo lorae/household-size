@@ -10,11 +10,11 @@
 
 # Define and populate the age lookup table row-wise
 age_buckets00 <- rbind(
-  c("r00_49", 0, 50),
-  c("r50plus", 50, 200)
+  c("r00_49", 0, 50, NA),
+  c("r50plus", 50, 200, NA)
 ) %>%
   as.data.frame() %>%
-  setNames(c("bucket_name", "lower_bound", "upper_bound")) %>% # Add column names
+  setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_values")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
 write.csv(age_buckets00, "lookup_tables/age/age_buckets00.csv", row.names = FALSE)
@@ -23,11 +23,13 @@ write.csv(age_buckets00, "lookup_tables/age/age_buckets00.csv", row.names = FALS
 
 # hhincome_buckets00.csv
 hhincome_buckets00 <- rbind(
-  c("LowIncome", 0, 100000),
-  c("HighIncome", 100000, Inf)
+  c("NegIncome", -Inf, 0, NA),
+  c("LowIncome", 0, 100000, NA),
+  c("HighIncome", 100000, 9999999, NA),
+  c(NA, NA, NA, 9999999)
 ) %>%
   as.data.frame() %>%
-  setNames(c("bucket_name", "lower_bound", "upper_bound")) %>% # Add column names
+  setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
 write.csv(hhincome_buckets00, "lookup_tables/hhincome/hhincome_buckets00.csv", row.names = FALSE)

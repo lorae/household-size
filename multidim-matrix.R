@@ -16,7 +16,6 @@ set.seed(42)
 
 # Generate synthetic household data
 household_data <- generate_household_data()
-View(household_data)
 
 # ----- Step 2: Bucket the data
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/

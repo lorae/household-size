@@ -1,3 +1,5 @@
-"bucket_name","lower_bound","upper_bound"
-"LowIncome",0,1e+05
-"HighIncome",1e+05,Inf
+"bucket_name","lower_bound","upper_bound","specific_value"
+"NegIncome",-Inf,0,NA
+"LowIncome",0,1e+05,NA
+"HighIncome",1e+05,9999999,NA
+NA,NA,NA,9999999

@@ -1,27 +1,15 @@
-# create-categorical-buckets.R
-#
-# This module contains helper functions meant to create custom buckets of variables
-
-#' Generate a bucket column based on specified ranges for continuous values
+#' Generate a bucket column based on specified ranges and specific values
 #'
 #' The `generate_bucket_column` function creates a new column in a data frame by 
 #' categorizing a specified numeric column based on the ranges provided in a 
-#' lookup table. It handles continuous values by using inclusive `lower_bound` 
-#' and exclusive `upper_bound`, where the `lower_bound` is inclusive, and the 
-#' `upper_bound` is exclusive.
+#' lookup table or specific values. It handles continuous values by using inclusive 
+#' `lower_bound` and exclusive `upper_bound`, and allows for specific values to be 
+#' matched directly.
 #'
 #' @param data A data frame containing the data to be categorized.
-#' @param lookup_table A data frame with at least three columns: `bucket_name`, 
-#'   `lower_bound` (inclusive), and `upper_bound` (exclusive). Each row defines 
-#'   a bucket with a name and the range of values for that bucket. For example, 
-#'   an income bucket with a lower bound of $0 and upper bound of $10,000 would 
-#'   include the observations $0.00; $1.00; $9,999.00; and $9,999.99; but would 
-#'   NOT include an observation of $10,000.00. For a range of buckets to have 
-#'   full coverage of the data, without gaps, it is necessary for the upper 
-#'   bound of a previous range to equal the lower bound of the following range. 
-#'   If the ranges overlap, an error will be thrown. If the ranges do not overlap 
-#'   but this condition does not hold, then the function will produce a warning, 
-#'   and unbucketed observations will be assigned NA.
+#' @param lookup_table A data frame with columns: `bucket_name`, `lower_bound`, 
+#'   `upper_bound`, and `specific_value`. The `specific_value` column handles 
+#'   cases that match specific values.
 #' @param column_name The name of the numeric column in `data` to categorize.
 #' @param new_column_name The name of the new column to be created. If not provided, 
 #'   it defaults to `bucketed_{column_name}`.
@@ -55,16 +43,21 @@ generate_bucket_column <- function(
   data[[new_column_name]] <- NA
   
   # Sort the lookup table by `lower_bound`
-  lookup_table <- lookup_table[order(lookup_table$lower_bound), ]
+  lookup_table <- lookup_table[order(lookup_table$lower_bound, na.last = TRUE), ]
   
-  # Check for overlapping ranges in the lookup table
-  if (any(lookup_table$upper_bound[-nrow(lookup_table)] > lookup_table$lower_bound[-1])) {
-    stop("Error: Overlapping ranges detected in the lookup table.")
-  }
-  
-  # Check for gaps in the ranges and produce a warning if found
-  if (any(lookup_table$upper_bound[-nrow(lookup_table)] != lookup_table$lower_bound[-1])) {
-    warning("Warning: Gaps detected between ranges in the lookup table. Observations outside these ranges will be assigned NA.")
+  # Handle specific values first
+  for (i in 1:nrow(lookup_table)) {
+    bucket_name <- lookup_table$bucket_name[i]
+    specific_value <- lookup_table$specific_value[i]
+    
+    # If there's a specific value to match
+    if (!is.na(specific_value)) {
+      # Create a logical vector to identify rows that match the specific value
+      matches_specific_value <- data[[column_name]] == specific_value
+      
+      # Assign the bucket name to the new column for all rows where the condition is TRUE
+      data[[new_column_name]][matches_specific_value] <- bucket_name
+    }
   }
   
   # Loop through each row of the lookup table to categorize based on the provided ranges
@@ -72,6 +65,9 @@ generate_bucket_column <- function(
     bucket_name <- lookup_table$bucket_name[i]
     lower_bound <- lookup_table$lower_bound[i]
     upper_bound <- lookup_table$upper_bound[i]
+    
+    # Skip if it's a specific value rule
+    if (!is.na(lookup_table$specific_value[i])) next
     
     # Create a logical vector to identify rows that fall within the range of bucket `i`
     in_range <- data[[column_name]] >= lower_bound & data[[column_name]] < upper_bound
