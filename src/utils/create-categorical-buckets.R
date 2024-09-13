@@ -31,6 +31,9 @@ generate_bucket_continuous <- function(
     column_name, 
     new_column_name = NULL) {
   
+  # Start timing
+  start_time <- Sys.time()
+  
   # Check if the specified column exists in the data frame
   if (!column_name %in% names(data)) {
     stop(paste("Column", column_name, "not found in the data frame."))
@@ -86,6 +89,12 @@ generate_bucket_continuous <- function(
   # Convert the new column to a factor with levels in the order they appear in the lookup table
   data[[new_column_name]] <- factor(data[[new_column_name]], levels = lookup_table$bucket_name)
   
+  # End timing
+  end_time <- Sys.time()
+  
+  # Calculate and print the duration
+  print(paste("Time taken for generate_bucket_continuous:", round(difftime(end_time, start_time, units = "secs"), 3), "seconds"))
+  
   # Return the modified data frame
   return(data)
 }
@@ -114,6 +123,9 @@ generate_bucket_categorical <- function(
     lookup_table, 
     column_name, 
     new_column_name = NULL) {
+  
+  # Start timing
+  start_time <- Sys.time()
   
   # Check if the specified column exists in the data frame
   if (!column_name %in% names(data)) {
@@ -147,6 +159,12 @@ generate_bucket_categorical <- function(
   
   # Convert the new column to a factor with levels in the order they appear in the lookup table
   data[[new_column_name]] <- factor(data[[new_column_name]], levels = unique(lookup_table$new_val))
+  
+  # End timing
+  end_time <- Sys.time()
+  
+  # Calculate and print the duration
+  print(paste("Time taken for generate_bucket_categorical:", round(difftime(end_time, start_time, units = "secs"), 3), "seconds"))
   
   # Return the modified data frame
   return(data)
