@@ -22,7 +22,7 @@
 #'   it defaults to `{column_name}_bucket`.
 #'
 #' @return A modified data frame with a new column containing the categorized 
-#'   buckets.
+#'   buckets as a factor.
 #'
 #' @export
 generate_bucket_continuous <- function(
@@ -83,9 +83,13 @@ generate_bucket_continuous <- function(
     data[[new_column_name]][in_range] <- bucket_name
   }
   
-  # Return the modified data frame with the new column
+  # Convert the new column to a factor with levels in the order they appear in the lookup table
+  data[[new_column_name]] <- factor(data[[new_column_name]], levels = lookup_table$bucket_name)
+  
+  # Return the modified data frame
   return(data)
 }
+
 
 
 #' Generate a bucket column for categorical values based on a lookup table
@@ -102,7 +106,7 @@ generate_bucket_continuous <- function(
 #' @param new_column_name The name of the new column to be created. If not provided, 
 #'   it defaults to `{column_name}_bucket`.
 #'
-#' @return A modified data frame with a new column containing the categorized values.
+#' @return A modified data frame with a new column containing the categorized values as a factor.
 #'
 #' @export
 generate_bucket_categorical <- function(
@@ -141,9 +145,13 @@ generate_bucket_categorical <- function(
     data[[new_column_name]][matches_old_val] <- new_val
   }
   
-  # Return the modified data frame with the new column
+  # Convert the new column to a factor with levels in the order they appear in the lookup table
+  data[[new_column_name]] <- factor(data[[new_column_name]], levels = unique(lookup_table$new_val))
+  
+  # Return the modified data frame
   return(data)
 }
+
 
 
 # The purpose of this function is to take inputs from the RACE_bucket and
@@ -188,6 +196,11 @@ create_race_eth_bucket <- function(data) {
   # Assign "other" to remaining observations where RACE_bucket is "other"
   data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "other"] <- "other"
   
+  # Convert the RACE_ETH_bucket to a factor with levels in the desired order
+  race_eth_levels <- c("hispanic", "black", "aapi", "aian", "multi", "white", "other")
+  data[["RACE_ETH_bucket"]] <- factor(data[["RACE_ETH_bucket"]], levels = race_eth_levels)
+  
   # Return the modified data frame
   return(data)
 }
+

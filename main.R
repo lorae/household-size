@@ -72,7 +72,7 @@ data_bucketed <- data %>%
     data = .
   )
 
-#View(data_bucketed)
+View(data_bucketed)
 
 # ----- Step 3: Produce aggregate household sizes in data table
 
@@ -96,15 +96,12 @@ aggregate_dt <- dt[, .(
 print(aggregate_dt)
 
 # Example lookup tables with desired order
-age_levels <- c("r00_49", "r50plus")
-income_levels <- c("negative", "r000_100k", "r100kplus", "N/A") 
-race_eth_levels <- c("hispanic", "black", "aapi", "aian", "multi", "white", "other")
 sex_levels <- c(1, 2)
 
 # Convert to factor with specified levels
-aggregate_dt[, AGE_bucket := factor(AGE_bucket, levels = age_levels)]
-aggregate_dt[, HHINCOME_bucket := factor(HHINCOME_bucket, levels = income_levels)]
-aggregate_dt[, RACE_ETH_bucket := factor(RACE_ETH_bucket, levels = race_eth_levels)]
+aggregate_dt[, AGE_bucket]
+aggregate_dt[, HHINCOME_bucket]
+aggregate_dt[, RACE_ETH_bucket]
 aggregate_dt[, SEX := factor(SEX, levels = sex_levels)]
 
 # Sort by age, income, race/ethnicity, and sex
