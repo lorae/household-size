@@ -64,19 +64,25 @@ write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
 print(tbl(con, "age_lookup") %>% collect())
 print(tbl(con, "micro") %>% head(n = 10) %>% collect())
 
+write_sql_query <- function(column_name) {
+  sql_condition <- glue::glue(
+    "(
+      (LHS.{column_name} = RHS.specific_value AND RHS.specific_value IS NOT NULL)
+      OR
+      (RHS.specific_value IS NULL AND LHS.{column_name} >= RHS.lower_bound AND LHS.{column_name} < RHS.upper_bound)
+    )"
+  )
+  
+  return(sql_condition)  
+}
+
 # Add age bucketing to micro database
 micro_with_age_bucket <- tbl(con, "micro") %>%
   left_join(
     tbl(con, "age_lookup"), 
     by = character(), 
-    sql_on = "LHS.AGE BETWEEN RHS.lower_bound AND RHS.upper_bound"
-    sql_on = "(
-                (LHS.AGE = RHS.specific_value AND RHS.specific_value IS NOT NULL)
-                OR
-                (RHS.specific_value IS NULL AND LHS.AGE >= RHS.lower_bound AND LHS.AGE < RHS.upper_bound)
-              )"
+    sql_on = write_sql_query(column_name = "AGE")
   ) %>%
-  select(-lower_bound, -upper_bound, -specific_values) %>%
   select(-lower_bound, -upper_bound, -specific_value) %>%
   rename(AGE_bucket = bucket_name) %>%
   head(n = 50) %>%
@@ -89,11 +95,7 @@ micro_with_hhincome_bucket <- tbl(con, "micro") %>%
   left_join(
     tbl(con, "hhincome_lookup"), 
     by = character(), 
-    sql_on = "(
-                (LHS.HHINCOME = RHS.specific_value AND RHS.specific_value IS NOT NULL)
-                OR
-                (RHS.specific_value IS NULL AND LHS.HHINCOME >= RHS.lower_bound AND LHS.HHINCOME < RHS.upper_bound)
-              )"
+    sql_on = write_sql_query(column_name = "HHINCOME")
   ) %>%
   select(-lower_bound, -upper_bound, -specific_value) %>%
   rename(HHINCOME_bucket = bucket_name) %>%
