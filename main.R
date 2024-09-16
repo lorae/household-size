@@ -19,6 +19,7 @@ library("data.table")
 library("duckdb")
 library("duckplyr")
 library("dbplyr")
+library("glue")
 source("src/utils/create-categorical-buckets.R")
 
 # ----- Step 1: Load data
@@ -40,6 +41,7 @@ micro <- read_ipums_micro(
 )
 end_time <- Sys.time() # For elapsed time
 print(paste("Time taken to read in IPUMS microdata:", round(difftime(end_time, start_time, units = "secs"), 3), "seconds"))
+
 # Connect to DuckDB
 con <- dbConnect(duckdb::duckdb(), ":memory:")
 
@@ -64,41 +66,6 @@ write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
 print(tbl(con, "age_lookup") %>% collect())
 print(tbl(con, "micro") %>% head(n = 10) %>% collect())
 
-# Create a query that assigns the buckets within the database
-write_sql_query <- function(
-    data, # STRING: Name of the database containing data in the connection
-    lookup, # STRING: Name of the database containing the lookup table in the connection
-    column_name # STRING: Name of the column being transformed
-) {
-  # Create a dynamic name for the bucket column
-  bucket_column_name <- paste0(column_name, "_bucket")
-  
-  # Build the SQL query using glue
-  sql_query <- glue::glue(
-  "
-    SELECT
-        {data}.*,
-        COALESCE(specific.bucket_name, range.bucket_name) AS {bucket_column_name}
-    FROM
-        {data}
-    LEFT JOIN (
-        SELECT *
-        FROM {lookup}
-        WHERE specific_value IS NOT NULL
-    ) AS specific
-        ON {data}.{column_name} = specific.specific_value
-    LEFT JOIN (
-        SELECT *
-        FROM {lookup}
-        WHERE specific_value IS NULL
-    ) AS range
-        ON {data}.{column_name} >= range.lower_bound
-        AND {data}.{column_name} < range.upper_bound
-  "
-  )
-  
-  return(sql_query)  
-}
 
 # Apply the query to the database
 micro_with_age_bucket <- tbl(

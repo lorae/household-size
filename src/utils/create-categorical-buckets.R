@@ -222,3 +222,43 @@ create_race_eth_bucket <- function(data) {
   return(data)
 }
 
+
+# https://duckdb.org/2024/04/02/duckplyr.html
+
+
+# Create a query that assigns the buckets within the database
+write_sql_query <- function(
+    data, # STRING: Name of the database containing data in the connection
+    lookup, # STRING: Name of the database containing the lookup table in the connection
+    column_name # STRING: Name of the column being transformed
+) {
+  # Create a dynamic name for the bucket column
+  bucket_column_name <- paste0(column_name, "_bucket")
+  
+  # Build the SQL query using glue
+  sql_query <- glue::glue(
+    "
+    SELECT
+        {data}.*,
+        COALESCE(specific.bucket_name, range.bucket_name) AS {bucket_column_name}
+    FROM
+        {data}
+    LEFT JOIN (
+        SELECT *
+        FROM {lookup}
+        WHERE specific_value IS NOT NULL
+    ) AS specific
+        ON {data}.{column_name} = specific.specific_value
+    LEFT JOIN (
+        SELECT *
+        FROM {lookup}
+        WHERE specific_value IS NULL
+    ) AS range
+        ON {data}.{column_name} >= range.lower_bound
+        AND {data}.{column_name} < range.upper_bound
+  "
+  )
+  
+  return(sql_query)  
+}
+
