@@ -14,7 +14,7 @@ age_buckets00 <- rbind(
   c("r50plus", 50, 200, NA)
 ) %>%
   as.data.frame() %>%
-  setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_values")) %>% # Add column names
+  setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
 write.csv(age_buckets00, "lookup_tables/age/age_buckets00.csv", row.names = FALSE)
