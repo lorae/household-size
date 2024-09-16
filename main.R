@@ -64,6 +64,18 @@ write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
 print(tbl(con, "age_lookup") %>% collect())
 print(tbl(con, "micro") %>% head(n = 10) %>% collect())
 
+micro_with_age_bucket <- tbl(con, "micro") %>%
+  left_join(
+    tbl(con, "age_lookup"), 
+    by = character(), 
+    sql_on = "LHS.AGE BETWEEN RHS.lower_bound AND RHS.upper_bound"
+  ) %>%
+  select(-lower_bound, -upper_bound, -specific_values) %>%
+  head(n = 50) %>%
+  collect()  # Bring the result back into R
+
+print(micro_with_age_bucket)
+
 
 # ----- Step 2: Bucket the data
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
