@@ -48,6 +48,10 @@ con <- dbConnect(duckdb::duckdb(), ":memory:")
 # Write the IPUMS microdata table to the connection
 dbWriteTable(con, "micro", micro)
 
+# ----- Step 2: Bucket the data
+# Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
+# directory. There are several bucketing schemes saved. Here we explicitly choose
+# each .csv file.
 # Write the lookup tables to the connection
 write_lookup_to_db <- function(con, table_name, file_path) {
   # Read the CSV lookup table
@@ -75,8 +79,8 @@ micro_with_age_bucket <- tbl(
       data = "micro", 
       lookup = "age_lookup", 
       column_name = "AGE"
-      )
     )
+  )
 ) %>%
   head(50) %>%
   collect()
@@ -93,53 +97,6 @@ micro_with_hhincome_bucket <- tbl(
 ) %>%
   head(50) %>%
   collect()
-# ----
-
-print(micro_with_hhincome_bucket)
-
-
-# ----- Step 2: Bucket the data
-# Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
-# directory. There are several bucketing schemes saved. Here we explicitly choose
-# each .csv file.
-age_lookup_table <- read.csv("lookup_tables/age/age_buckets00.csv", stringsAsFactors = FALSE)
-hhincome_lookup_table <- read.csv("lookup_tables/hhincome/hhincome_buckets00.csv", stringsAsFactors = FALSE)
-hispan_lookup_table <- read.csv("lookup_tables/hispan/hispan_buckets00.csv", stringsAsFactors = FALSE)
-race_lookup_table <- read.csv("lookup_tables/race/race_buckets00.csv", stringsAsFactors = FALSE)
-
-# Use the lookup tables to add bucket columns to the data frame.
-data_bucketed <- data %>%
-  # Age buckets
-  generate_bucket_continuous(
-    data = .,
-    lookup_table = age_lookup_table,
-    column_name = "AGE"
-  ) %>%
-  # Household income buckets
-  generate_bucket_continuous(
-    data = .,
-    lookup_table = hhincome_lookup_table,
-    column_name = "HHINCOME"
-  ) %>%
-  # Ethnicity (hispanic/not hispanic) buckets
-  generate_bucket_categorical(
-    data = .,
-    lookup_table = hispan_lookup_table,
-    column_name = "HISPAN"
-  ) %>%
-  # Race buckets
-  generate_bucket_categorical(
-    data = .,
-    lookup_table = race_lookup_table,
-    column_name = "RACE"
-  ) %>%
-  # Combine race and ethnicity into one variable using specific rules of 
-  # precedence (defined in ``)
-  create_race_eth_bucket(
-    data = .
-  )
-
-View(data_bucketed)
 
 # ----- Step 3: Produce aggregate household sizes in data table
 
