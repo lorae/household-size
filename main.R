@@ -64,17 +64,46 @@ write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
 print(tbl(con, "age_lookup") %>% collect())
 print(tbl(con, "micro") %>% head(n = 10) %>% collect())
 
+# Add age bucketing to micro database
 micro_with_age_bucket <- tbl(con, "micro") %>%
   left_join(
     tbl(con, "age_lookup"), 
     by = character(), 
     sql_on = "LHS.AGE BETWEEN RHS.lower_bound AND RHS.upper_bound"
+    sql_on = "(
+                (LHS.AGE = RHS.specific_value AND RHS.specific_value IS NOT NULL)
+                OR
+                (RHS.specific_value IS NULL AND LHS.AGE >= RHS.lower_bound AND LHS.AGE < RHS.upper_bound)
+              )"
   ) %>%
   select(-lower_bound, -upper_bound, -specific_values) %>%
+  select(-lower_bound, -upper_bound, -specific_value) %>%
+  rename(AGE_bucket = bucket_name) %>%
   head(n = 50) %>%
   collect()  # Bring the result back into R
 
 print(micro_with_age_bucket)
+
+# Add hhincome bucketing to micro database
+micro_with_hhincome_bucket <- tbl(con, "micro") %>%
+  left_join(
+    tbl(con, "hhincome_lookup"), 
+    by = character(), 
+    sql_on = "(
+                (LHS.HHINCOME = RHS.specific_value AND RHS.specific_value IS NOT NULL)
+                OR
+                (RHS.specific_value IS NULL AND LHS.HHINCOME >= RHS.lower_bound AND LHS.HHINCOME < RHS.upper_bound)
+              )"
+  ) %>%
+  select(-lower_bound, -upper_bound, -specific_value) %>%
+  rename(HHINCOME_bucket = bucket_name) %>%
+  # filter(HHINCOME == 9999999) %>%
+  # # Use window function to assign row numbers
+  # mutate(row_num = sql('ROW_NUMBER() OVER (ORDER BY "YEAR", "SAMPLE", "SERIAL", "PERNUM")')) %>%
+  # filter(row_num >= 14000000 & row_num <= 14000050) %>%
+  collect()  # Bring the result back into R
+
+print(micro_with_hhincome_bucket)
 
 
 # ----- Step 2: Bucket the data
