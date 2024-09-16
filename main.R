@@ -16,6 +16,9 @@ library("ipumsr")
 library("magrittr")
 library("dplyr")
 library("data.table")
+library("duckdb")
+library("duckplyr")
+library("dbplyr")
 source("src/utils/create-categorical-buckets.R")
 
 # ----- Step 1: Load data
@@ -29,7 +32,20 @@ source("src/utils/create-categorical-buckets.R")
 # an API call.
 ddi <- read_ipums_ddi("usa_00003.xml")
 # Note: This file takes about 3 minutes to read
-data <- read_ipums_micro(ddi)
+print("Reading in IPUMS microdata")
+start_time <- Sys.time() # For elapsed time
+micro <- read_ipums_micro(
+  ddi,
+  var_attrs = c() # Scrub variable attributes so that the data can be read into duckplyr
+)
+end_time <- Sys.time() # For elapsed time
+print(paste("Time taken to read in IPUMS microdata:", round(difftime(end_time, start_time, units = "secs"), 3), "seconds"))
+# Connect to DuckDB
+con <- dbConnect(duckdb::duckdb(), ":memory:")
+
+# Write the IPUMS microdata table to the connection
+dbWriteTable(con, "micro", micro)
+
 
 # ----- Step 2: Bucket the data
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
