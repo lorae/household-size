@@ -8,6 +8,10 @@
 # ALSO NOTE: I've configured these lookup tables to match a range selection that
 # is inclusive of lower_bound and exclusive of upper_bound. In other words,
 # lower_bound <= x < upper_bound.
+#
+# TODO: rename from bucket_name to output_val, from lower_bound to input_range_lower,
+# from upper_bound to input_range_upper, and from specific_value to input_val. Rearrange
+# order as the 3 inputs in the first 3 cols and the output in the fourth column.
 
 # ----- Age lookup tables -----
 
