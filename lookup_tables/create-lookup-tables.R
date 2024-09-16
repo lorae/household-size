@@ -24,7 +24,7 @@ age_buckets00 <- rbind(
   setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
-write.csv(age_buckets00, "lookup_tables/age/age_buckets00.csv", row.names = FALSE)
+write.csv(age_buckets00, "age/age_buckets00.csv", row.names = FALSE)
 
 # ----- Household income lookup tables -----
 
@@ -39,7 +39,7 @@ hhincome_buckets00 <- rbind(
   setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
-write.csv(hhincome_buckets00, "lookup_tables/hhincome/hhincome_buckets00.csv", row.names = FALSE)
+write.csv(hhincome_buckets00, "hhincome/hhincome_buckets00.csv", row.names = FALSE)
 
 # hhincome_buckets01.csv
 hhincome_buckets01 <- rbind(
@@ -57,7 +57,7 @@ hhincome_buckets01 <- rbind(
   setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
-write.csv(hhincome_buckets01, "lookup_tables/hhincome/hhincome_buckets01.csv", row.names = FALSE)
+write.csv(hhincome_buckets01, "hhincome/hhincome_buckets01.csv", row.names = FALSE)
 
 # ----- Ethnicity (hispanic) lookup tables -----
 
@@ -74,7 +74,7 @@ hispan_buckets00 <- rbind(
   setNames(c("old_val", "new_val")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
-write.csv(hispan_buckets00, "lookup_tables/hispan/hispan_buckets00.csv", row.names = FALSE)
+write.csv(hispan_buckets00, "hispan/hispan_buckets00.csv", row.names = FALSE)
 
 # ----- Race lookup tables -----
 
@@ -94,4 +94,4 @@ race_buckets00 <- rbind(
   setNames(c("old_val", "new_val")) %>% # Add column names
   type.convert(as.is = TRUE) # Convert column encoding to character or numeric
 
-write.csv(race_buckets00, "lookup_tables/race/race_buckets00.csv", row.names = FALSE)
+write.csv(race_buckets00, "race/race_buckets00.csv", row.names = FALSE)
