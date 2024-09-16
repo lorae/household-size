@@ -64,46 +64,69 @@ write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
 print(tbl(con, "age_lookup") %>% collect())
 print(tbl(con, "micro") %>% head(n = 10) %>% collect())
 
-write_sql_query <- function(column_name) {
-  sql_condition <- glue::glue(
-    "(
-      (LHS.{column_name} = RHS.specific_value AND RHS.specific_value IS NOT NULL)
-      OR
-      (RHS.specific_value IS NULL AND LHS.{column_name} >= RHS.lower_bound AND LHS.{column_name} < RHS.upper_bound)
-    )"
+# Create a query that assigns the buckets within the database
+write_sql_query <- function(
+    data, # STRING: Name of the database containing data in the connection
+    lookup, # STRING: Name of the database containing the lookup table in the connection
+    column_name # STRING: Name of the column being transformed
+) {
+  # Create a dynamic name for the bucket column
+  bucket_column_name <- paste0(column_name, "_bucket")
+  
+  # Build the SQL query using glue
+  sql_query <- glue::glue(
+  "
+    SELECT
+        {data}.*,
+        COALESCE(specific.bucket_name, range.bucket_name) AS {bucket_column_name}
+    FROM
+        {data}
+    LEFT JOIN (
+        SELECT *
+        FROM {lookup}
+        WHERE specific_value IS NOT NULL
+    ) AS specific
+        ON {data}.{column_name} = specific.specific_value
+    LEFT JOIN (
+        SELECT *
+        FROM {lookup}
+        WHERE specific_value IS NULL
+    ) AS range
+        ON {data}.{column_name} >= range.lower_bound
+        AND {data}.{column_name} < range.upper_bound
+  "
   )
   
-  return(sql_condition)  
+  return(sql_query)  
 }
 
-# Add age bucketing to micro database
-micro_with_age_bucket <- tbl(con, "micro") %>%
-  left_join(
-    tbl(con, "age_lookup"), 
-    by = character(), 
-    sql_on = write_sql_query(column_name = "AGE")
-  ) %>%
-  select(-lower_bound, -upper_bound, -specific_value) %>%
-  rename(AGE_bucket = bucket_name) %>%
-  head(n = 50) %>%
-  collect()  # Bring the result back into R
+# Apply the query to the database
+micro_with_age_bucket <- tbl(
+  con, 
+  sql(
+    write_sql_query(
+      data = "micro", 
+      lookup = "age_lookup", 
+      column_name = "AGE"
+      )
+    )
+) %>%
+  head(50) %>%
+  collect()
 
-print(micro_with_age_bucket)
-
-# Add hhincome bucketing to micro database
-micro_with_hhincome_bucket <- tbl(con, "micro") %>%
-  left_join(
-    tbl(con, "hhincome_lookup"), 
-    by = character(), 
-    sql_on = write_sql_query(column_name = "HHINCOME")
-  ) %>%
-  select(-lower_bound, -upper_bound, -specific_value) %>%
-  rename(HHINCOME_bucket = bucket_name) %>%
-  # filter(HHINCOME == 9999999) %>%
-  # # Use window function to assign row numbers
-  # mutate(row_num = sql('ROW_NUMBER() OVER (ORDER BY "YEAR", "SAMPLE", "SERIAL", "PERNUM")')) %>%
-  # filter(row_num >= 14000000 & row_num <= 14000050) %>%
-  collect()  # Bring the result back into R
+micro_with_hhincome_bucket <- tbl(
+  con, 
+  sql(
+    write_sql_query(
+      data = "micro", 
+      lookup = "hhincome_lookup", 
+      column_name = "HHINCOME"
+    )
+  )
+) %>%
+  head(50) %>%
+  collect()
+# ----
 
 print(micro_with_hhincome_bucket)
 
