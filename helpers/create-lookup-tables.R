@@ -5,6 +5,9 @@
 # These lookup tables are saved as CSV files and can be reused or modified 
 # for different bucketing schemes or sensitivity testing.
 #
+# ALSO NOTE: I've configured these lookup tables to match a range selection that
+# is inclusive of lower_bound and exclusive of upper_bound. In other words,
+# lower_bound <= x < upper_bound.
 
 # ----- Age lookup tables -----
 
