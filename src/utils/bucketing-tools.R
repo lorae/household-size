@@ -1,4 +1,4 @@
-# create-categorical-buckets.R
+# bucketing-tools.R
 #
 # This module contains various helper functions meant to create custom buckets 
 # of continuous (such as income, age) and categorical (such as race, ethnicity)
@@ -107,3 +107,31 @@ write_lookup_to_db <- function(
   copy_to(con, lookup_table, data, overwrite = TRUE)
 }
 
+# bucket_with_lookup <- function(
+#     con, # name of connection
+#     data, # name of database in connection - string 
+#     lookup_table, # name of lookup table in connection - string
+#     column_name # name of column being bucketed
+# ) {
+#   # Write a SQL query that will be applied to `data` and `lookup_table`
+#   sql_query <- write_sql_query(column_name = column_name)
+#   cat(paste0("The SQL query being run is: \n", sql_query, " \n"))
+#   
+#   # Create a name for the new column being added to `data`
+#   new_column_name <- paste0(column_name, "_bucket")
+#   print(paste0("Column ", new_column_name, " is being created."))
+#   
+#   # Join the main data to the lookup table
+#   result <- tbl(con, data) %>%
+#     left_join(
+#       tbl(con, lookup_table), 
+#       by = character(), 
+#       sql_on = sql_query # Using custom sql query, defined above
+#     ) %>%
+#     select(-lower_bound, -upper_bound, -specific_value) %>%
+#     rename(!!new_column_name := bucket_name) %>% # Rename the new column to `new_column_name`
+#     head(n = 50) %>%
+#     collect()
+#   
+#   return(result)
+# }

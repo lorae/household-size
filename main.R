@@ -19,7 +19,7 @@ library("duckdb")
 library("duckplyr")
 library("dbplyr")
 library("glue")
-source("src/utils/create-categorical-buckets.R")
+source("src/utils/bucketing-tools.R")
 
 # ----- Step 1: Load data
 # Current code assumes data is saved to computer. 
