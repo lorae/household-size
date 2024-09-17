@@ -51,22 +51,22 @@ dbWriteTable(con, "micro", micro)
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
 # directory. There are several bucketing schemes saved. Here we explicitly choose
 # each .csv file.
-write_data_to_db(
+read_csv_into_db(
   con = con, 
   data_title = "age_lookup", 
   file_path = "lookup_tables/age/age_buckets00.csv"
   )
-write_data_to_db(
+read_csv_into_db(
   con = con, 
   data_title = "hhincome_lookup", 
   file_path = "lookup_tables/hhincome/hhincome_buckets00.csv"
   )
-write_data_to_db(
+read_csv_into_db(
   con = con, 
   data_title = "hispan_lookup", 
   file_path = "lookup_tables/hispan/hispan_buckets00.csv"
   )
-write_data_to_db(
+read_csv_into_db(
   con = con, 
   data_title = "race", 
   file_path = "lookup_tables/race/race_buckets00.csv"

@@ -94,8 +94,8 @@ write_sql_query <- function(
   return(sql_query)  
 }
 
-# Write the data tables to the connection
-write_data_to_db <- function(
+# Read CSV data tables and write their contents to the database connection
+read_csv_into_db <- function(
     con, # Name of the DuckDB connection
     data_title, # STRING: Name that will be assigned to the data table in the connection
     file_path # STRING: File path to the data (must be CSV)
