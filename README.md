@@ -4,6 +4,38 @@ The purpose of this project is to analyze the extent to which demographic change
 
 The project uses American Community Survey (ACS) IPUMS microdata, which are freely available to the public after registering for an API key.
 
+# File tree
+## Project Structure
+
+The following is an overview of the project's file structure:
+
+```
+household-size/
+├── README.md                  # The document you're currently reading
+├── household-size.Rproj       # RStudio project file
+├── renv/                      # R environment directory
+│   ├── activate.R             
+│   ├── settings.dcf           
+│   └── library/               
+├── src/                       # Source code directory
+│   ├── utils/                 # Utility scripts
+│   │   ├── bucketing-tools.R  # Functions for bucketing data
+│   │   ├── create-summary-array.R  # May be deprecated soon
+│   │   └── create-synthetic-data.R # For testing? Maybe move to tests/
+│   └── sample_code_for_sarah.R # Demonstrates SQL requests using lookup tables using DuckDB
+│   
+└── tests/                     # Testing directory
+    ├── testthat/              # Unit tests directory
+    │   └── test-bucketing.R   # Test script for bucketing functions
+    └── test-data/             # Mock data for testing
+        ├── mock_data.csv
+        ├── mock_age_lookup.csv
+        ├── mock_income_lookup.csv
+        ├── expected_age_output.csv
+        └── expected_income_output.csv
+
+```
+
 # Project Setup
 
 The project is set up as an R project with `renv` to manage dependencies. When you open the project in RStudio, `renv` will automatically load the required environment, and you will have access to the correct versions of all the necessary packages.

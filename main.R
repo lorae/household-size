@@ -51,41 +51,54 @@ dbWriteTable(con, "micro", micro)
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
 # directory. There are several bucketing schemes saved. Here we explicitly choose
 # each .csv file.
-write_lookup_to_db(con, "age_lookup", "lookup_tables/age/age_buckets00.csv")
-write_lookup_to_db(con, "hhincome_lookup", "lookup_tables/hhincome/hhincome_buckets00.csv")
-write_lookup_to_db(con, "hispan_lookup", "lookup_tables/hispan/hispan_buckets00.csv")
-write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
+read_csv_into_db(
+  con = con, 
+  data_title = "age_lookup", 
+  file_path = "lookup_tables/age/age_buckets00.csv"
+  )
+read_csv_into_db(
+  con = con, 
+  data_title = "hhincome_lookup", 
+  file_path = "lookup_tables/hhincome/hhincome_buckets00.csv"
+  )
+read_csv_into_db(
+  con = con, 
+  data_title = "hispan_lookup", 
+  file_path = "lookup_tables/hispan/hispan_buckets00.csv"
+  )
+read_csv_into_db(
+  con = con, 
+  data_title = "race", 
+  file_path = "lookup_tables/race/race_buckets00.csv"
+  )
 
 # Optional: print the tables to verify everything looks good
 print(tbl(con, "age_lookup") |> collect())
 print(tbl(con, "micro") |> head(n = 10) |> collect())
 
-# Apply the query to the database
-micro_with_age_bucket <- tbl(
-  con, 
-  sql(
-    write_sql_query( # Custom function for creating the SQL query using the lookup table
-      data = "micro", 
-      lookup = "age_lookup", 
-      column_name = "AGE"
-    )
-  )
+# Produce a bucketed column of ages by applying a custom SQL query
+micro_with_age_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
+  data = "micro", 
+  lookup = "age_lookup", 
+  column_name = "AGE"
 ) |>
-  head(50) |>
-  collect()
+  sql() |>                 # Convert the SQL string to a SQL object
+  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
+  head(50) |>              # Limit the number of rows
+  collect()                # Collect the results into a data frame
 
-micro_with_hhincome_bucket <- tbl(
-  con, 
-  sql(
-    write_sql_query( # Custom function for creating the SQL query using the lookup table
-      data = "micro", 
-      lookup = "hhincome_lookup", 
-      column_name = "HHINCOME"
-    )
-  )
+
+# Produce a bucketed column of incomes by applying a custom SQL query
+micro_with_hhincome_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
+  data = "micro", 
+  lookup = "hhincome_lookup", 
+  column_name = "HHINCOME"
 ) |>
-  head(50) |>
-  collect()
+  sql() |>                 # Convert the SQL string to a SQL object
+  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
+  head(50) |>              # Limit the number of rows
+  collect()                # Collect the results into a data frame
+
 
 # ----- Step 3: Produce aggregate household sizes in data table
 
