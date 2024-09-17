@@ -11,7 +11,7 @@ root <- rprojroot::find_rstudio_root_file()
 setwd(root)
 
 # Source the function to be tested
-source("src/utils/bucketing_tools.R")
+source("src/utils/bucketing-tools.R")
 
 # Test write_sql_query function with mock data and lookup table
 # This test is meant to verify whether the SQL query produced by the write_sql_query()
