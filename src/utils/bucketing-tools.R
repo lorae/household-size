@@ -94,17 +94,17 @@ write_sql_query <- function(
   return(sql_query)  
 }
 
-# Write the lookup tables to the connection
-write_lookup_to_db <- function(
+# Write the data tables to the connection
+write_data_to_db <- function(
     con, # Name of the DuckDB connection
-    data, # STRING: Name of the database containing data in the connection
-    file_path # STRING: File path to the lookup table (must be CSV)
+    data_title, # STRING: Name that will be assigned to the data table in the connection
+    file_path # STRING: File path to the data (must be CSV)
     ) {
-  # Read the CSV lookup table
-  lookup_table <- read.csv(file_path, stringsAsFactors = FALSE)
+  # Read the CSV data
+  data <- read.csv(file_path, stringsAsFactors = FALSE)
   
   # Write the lookup table to DuckDB
-  copy_to(con, lookup_table, data, overwrite = TRUE)
+  copy_to(con, data, data_title, overwrite = TRUE)
 }
 
 # bucket_with_lookup <- function(

@@ -51,10 +51,26 @@ dbWriteTable(con, "micro", micro)
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
 # directory. There are several bucketing schemes saved. Here we explicitly choose
 # each .csv file.
-write_lookup_to_db(con, "age_lookup", "lookup_tables/age/age_buckets00.csv")
-write_lookup_to_db(con, "hhincome_lookup", "lookup_tables/hhincome/hhincome_buckets00.csv")
-write_lookup_to_db(con, "hispan_lookup", "lookup_tables/hispan/hispan_buckets00.csv")
-write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
+write_data_to_db(
+  con = con, 
+  data_title = "age_lookup", 
+  file_path = "lookup_tables/age/age_buckets00.csv"
+  )
+write_data_to_db(
+  con = con, 
+  data_title = "hhincome_lookup", 
+  file_path = "lookup_tables/hhincome/hhincome_buckets00.csv"
+  )
+write_data_to_db(
+  con = con, 
+  data_title = "hispan_lookup", 
+  file_path = "lookup_tables/hispan/hispan_buckets00.csv"
+  )
+write_data_to_db(
+  con = con, 
+  data_title = "race", 
+  file_path = "lookup_tables/race/race_buckets00.csv"
+  )
 
 # Optional: print the tables to verify everything looks good
 print(tbl(con, "age_lookup") |> collect())
