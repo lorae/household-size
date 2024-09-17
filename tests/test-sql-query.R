@@ -57,7 +57,7 @@ test_that("write_sql_query outputs the correct database results with mock data",
     column_name = "AGE"
   ) |>
     sql() |>                 # Convert the SQL string to a SQL object
-    tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
+    tbl(test_con, from = _) |>    # Create a reference to the database table with the SQL query
     collect()                # Collect the results into a data frame
   
   income_output <- write_sql_query( 
@@ -66,7 +66,7 @@ test_that("write_sql_query outputs the correct database results with mock data",
     column_name = "INCOME"
   ) |>
     sql() |>                 # Convert the SQL string to a SQL object
-    tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
+    tbl(test_con, from = _) |>    # Create a reference to the database table with the SQL query
     collect()                # Collect the results into a data frame
   
   # # Step 5: Run the SQL query for income bucketing
