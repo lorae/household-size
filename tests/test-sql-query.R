@@ -4,6 +4,11 @@ library("DBI")
 library("duckdb")
 library("dplyr")
 library("glue")
+library("rprojroot")
+
+# Define the project root
+root <- rprojroot::find_rstudio_root_file()
+setwd(root)
 
 # Source the function to be tested
 source("src/utils/bucketing_tools.R")
