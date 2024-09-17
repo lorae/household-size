@@ -13,7 +13,6 @@
 
 # ----- Step 0: Initialize libraries and modules
 library("ipumsr")
-library("magrittr")
 library("dplyr")
 library("data.table")
 library("duckdb")
@@ -57,36 +56,35 @@ write_lookup_to_db(con, "hhincome_lookup", "lookup_tables/hhincome/hhincome_buck
 write_lookup_to_db(con, "hispan_lookup", "lookup_tables/hispan/hispan_buckets00.csv")
 write_lookup_to_db(con, "race", "lookup_tables/race/race_buckets00.csv")
 
-# Optional: print the table
-print(tbl(con, "age_lookup") %>% collect())
-print(tbl(con, "micro") %>% head(n = 10) %>% collect())
-
+# Optional: print the tables to verify everything looks good
+print(tbl(con, "age_lookup") |> collect())
+print(tbl(con, "micro") |> head(n = 10) |> collect())
 
 # Apply the query to the database
 micro_with_age_bucket <- tbl(
   con, 
   sql(
-    write_sql_query(
+    write_sql_query( # Custom function for creating the SQL query using the lookup table
       data = "micro", 
       lookup = "age_lookup", 
       column_name = "AGE"
     )
   )
-) %>%
-  head(50) %>%
+) |>
+  head(50) |>
   collect()
 
 micro_with_hhincome_bucket <- tbl(
   con, 
   sql(
-    write_sql_query(
+    write_sql_query( # Custom function for creating the SQL query using the lookup table
       data = "micro", 
       lookup = "hhincome_lookup", 
       column_name = "HHINCOME"
     )
   )
-) %>%
-  head(50) %>%
+) |>
+  head(50) |>
   collect()
 
 # ----- Step 3: Produce aggregate household sizes in data table
@@ -104,7 +102,7 @@ aggregate_dt <- dt[, .(
   HHINCOME_bucket, 
   SEX, 
   RACE_ETH_bucket
-  )
+)
 ]
 
 # Print the resulting data table
@@ -154,11 +152,11 @@ if (any(is.na(data$YEAR))) {
 }
 
 # Data from 2000
-data2000 <- data %>%
+data2000 <- data |>
   filter(YEAR == 2000)
 
 # Data from 2020
-data2020 <- data %>%
+data2020 <- data |>
   filter(YEAR == 2020)
 
 # Number of observations
@@ -169,8 +167,8 @@ nrow(data2020)
 
 # Method 1: Count the number of "person number 1" (within each n-person household, persons 
 # are numbered from 1 to n using the PERNUM variable).
-data2000 %>% 
-  filter(PERNUM == 1) %>%
+data2000 |> 
+  filter(PERNUM == 1) |>
   nrow()
 
 # Method 2: Count the number of unique serial numbers
@@ -179,12 +177,17 @@ length(unique(data2000$SERIAL))
 ## Average household size
 
 # In 2000
-data2000 %>%
-  filter(PERNUM == 1) %>%
+data2000 |>
+  filter(PERNUM == 1) |>
   weighted.mean(x = .$NUMPREC, w = .$HHWT)
 
 # In 2020
-data2020 %>%
-  filter(PERNUM == 1) %>%
+data2020 |>
+  filter(PERNUM == 1) |>
   weighted.mean(x = .$NUMPREC, w = .$HHWT)
+
+
+
+
+
 
