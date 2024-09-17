@@ -36,10 +36,10 @@ test_that("write_sql_query outputs the correct database results with mock data",
     "tests/test-data/mock_age_lookup.csv"
   )
   
-  mock_income_lookup <- read_csv_into_db(
+  mock_hhincome_lookup <- read_csv_into_db(
     test_con, 
-    "mock_income_lookup", 
-    "tests/test-data/mock_income_lookup.csv"
+    "mock_hhincome_lookup", 
+    "tests/test-data/mock_hhincome_lookup.csv"
   )
   
   # Step 4: Read in expected output
@@ -49,10 +49,10 @@ test_that("write_sql_query outputs the correct database results with mock data",
     "tests/test-data/expected_age_output.csv"
   )
   
-  expected_income_output <- read_csv_into_db(
+  expected_hhincome_output <- read_csv_into_db(
     test_con, 
-    "expected_income_output", 
-    "tests/test-data/expected_income_output.csv"
+    "expected_hhincome_output", 
+    "tests/test-data/expected_hhincome_output.csv"
   )
 
   # Step 4: Run the SQL queries 
@@ -65,41 +65,26 @@ test_that("write_sql_query outputs the correct database results with mock data",
     tbl(test_con, from = _) |>    # Create a reference to the database table with the SQL query
     collect()                # Collect the results into a data frame
   
-  income_output <- write_sql_query( 
+  hhincome_output <- write_sql_query( 
     data = "mock_data", 
-    lookup = "mock_income_lookup", 
-    column_name = "INCOME"
+    lookup = "mock_hhincome_lookup", 
+    column_name = "HHINCOME"
   ) |>
     sql() |>                 # Convert the SQL string to a SQL object
     tbl(test_con, from = _) |>    # Create a reference to the database table with the SQL query
     collect()                # Collect the results into a data frame
   
-  # # Step 5: Run the SQL query for income bucketing
-  # query_income <- write_sql_query("mock_data", "hhincome_lookup", "HHINCOME")
-  # result_income <- tbl(con, sql(query_income)) |> collect()
-  # 
-  # # Step 6: Define the expected output for age bucketing
-  # expected_age <- data.frame(
-  #   ID = 1:5,
-  #   AGE = c(10, 30, 60, 45, 70),
-  #   HHINCOME = c(50000, 150000, 20000, 100000, 250000),
-  #   AGE_bucket = c("r00_49", "r00_49", "r50plus", "r00_49", "r50plus")
-  # )
-  # 
-  # # Step 7: Define the expected output for income bucketing
-  # expected_income <- data.frame(
-  #   ID = 1:5,
-  #   AGE = c(10, 30, 60, 45, 70),
-  #   HHINCOME = c(50000, 150000, 20000, 100000, 250000),
-  #   HHINCOME_bucket = c("r000_100k", "r100kplus", "r000_100k", "r100kplus", "r100kplus")
-  # )
-  # 
-  # # Step 8: Test if the results match the expected output for age bucketing
-  # expect_equal(result_age |> select(ID, AGE, HHINCOME, AGE_bucket), expected_age)
-  # 
-  # # Step 9: Test if the results match the expected output for income bucketing
-  # expect_equal(result_income |> select(ID, AGE, HHINCOME, HHINCOME_bucket), expected_income)
-  # 
-  # # Step 10: Disconnect from DuckDB
-  # dbDisconnect(con, shutdown = TRUE)
+  # Step 5: Test if the output matches the expected output
+  expect_equal(
+    object = age_output, 
+    expected = expected_age_output
+    )
+  
+  expect_equal(
+    object = hhincome_output, 
+    expected = expected_hhincome_output
+  )
+  
+  # Step 6: Disconnect from DuckDB
+  dbDisconnect(test_con, shutdown = TRUE)
 })
