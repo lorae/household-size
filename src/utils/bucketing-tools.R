@@ -60,39 +60,49 @@ create_race_eth_bucket <- function(data) {
 
 # Create a query that assigns the buckets within the database
 write_sql_query <- function(
-    data, # STRING: Name of the database containing data in the connection
-    lookup, # STRING: Name of the database containing the lookup table in the connection
-    column_name # STRING: Name of the column being transformed
+    data,        # STRING: Name of the table or a subquery
+    lookup,      # STRING: Name of the lookup table in the connection
+    column_name  # STRING: Name of the column being transformed
 ) {
   # Create a dynamic name for the bucket column
   bucket_column_name <- paste0(column_name, "_bucket")
+  
+  # If data is a subquery (starts with SELECT), wrap it appropriately
+  if (grepl("^\\s*SELECT", data, ignore.case = TRUE)) {
+    data_source <- glue("({data}) AS data")
+    data_ref <- "data"
+  } else {
+    data_source <- data
+    data_ref <- data
+  }
   
   # Build the SQL query using glue
   sql_query <- glue::glue(
     "
     SELECT
-        {data}.*,
+        {data_ref}.*,
         COALESCE(specific.bucket_name, range.bucket_name) AS {bucket_column_name}
     FROM
-        {data}
+        {data_source}
     LEFT JOIN (
         SELECT *
         FROM {lookup}
         WHERE specific_value IS NOT NULL
     ) AS specific
-        ON {data}.{column_name} = specific.specific_value
+        ON {data_ref}.{column_name} = specific.specific_value
     LEFT JOIN (
         SELECT *
         FROM {lookup}
         WHERE specific_value IS NULL
     ) AS range
-        ON {data}.{column_name} >= range.lower_bound
-        AND {data}.{column_name} < range.upper_bound
-  "
+        ON {data_ref}.{column_name} >= range.lower_bound
+        AND {data_ref}.{column_name} < range.upper_bound
+    "
   )
   
-  return(sql_query)  
+  return(sql_query)
 }
+
 
 # Read CSV data tables and write their contents to the database connection
 read_csv_into_db <- function(

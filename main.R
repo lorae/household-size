@@ -76,28 +76,31 @@ read_csv_into_db(
 print(tbl(con, "age_lookup") |> collect())
 print(tbl(con, "micro") |> head(n = 10) |> collect())
 
-# Produce a bucketed column of ages by applying a custom SQL query
-micro_with_age_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
-  data = "micro", 
-  lookup = "age_lookup", 
+
+# Delete previous data cluttering up the space
+dbExecute(con, "DROP TABLE IF EXISTS micro_with_buckets")
+
+# Define your initial data source
+initial_data <- "micro"
+
+# Chain the SQL queries
+sql_query <- write_sql_query(
+  data = initial_data,
+  lookup = "age_lookup",
   column_name = "AGE"
-) |>
-  sql() |>                 # Convert the SQL string to a SQL object
-  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
-  head(50) |>              # Limit the number of rows
-  collect()                # Collect the results into a data frame
+  ) |>
+  write_sql_query(
+    data = _,
+    lookup = "hhincome_lookup",
+    column_name = "HHINCOME"
+  )
 
+# Execute the final SQL query and create a new table in DuckDB
+test <- tbl(con, sql(sql_query)) %>%
+  compute(name = "micro_with_buckets", temporary = FALSE) |>
+  head(50) |>
+  collect()
 
-# Produce a bucketed column of incomes by applying a custom SQL query
-micro_with_hhincome_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
-  data = "micro", 
-  lookup = "hhincome_lookup", 
-  column_name = "HHINCOME"
-) |>
-  sql() |>                 # Convert the SQL string to a SQL object
-  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
-  head(50) |>              # Limit the number of rows
-  collect()                # Collect the results into a data frame
 
 
 # ----- Step 3: Produce aggregate household sizes in data table
