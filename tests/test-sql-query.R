@@ -43,17 +43,13 @@ test_that("write_sql_query outputs the correct database results with mock data",
   )
   
   # Step 4: Read in expected output
-  expected_age_output <- read_csv_into_db(
-    test_con, 
-    "expected_age_output", 
-    "tests/test-data/expected_age_output.csv"
-  )
-  
-  expected_hhincome_output <- read_csv_into_db(
-    test_con, 
-    "expected_hhincome_output", 
-    "tests/test-data/expected_hhincome_output.csv"
-  )
+  expected_age_output <- read.csv("tests/test-data/expected_age_output.csv", stringsAsFactors = FALSE) |>
+    as_tibble() |>
+    arrange(ID) # Sort result by ID column for comparability
+
+  expected_hhincome_output <- read.csv("tests/test-data/expected_hhincome_output.csv", stringsAsFactors = FALSE)  |>
+    as_tibble() |>
+    arrange(ID) # Sort result by ID column for comparability
 
   # Step 4: Run the SQL queries 
   age_output <- write_sql_query( 
@@ -63,7 +59,8 @@ test_that("write_sql_query outputs the correct database results with mock data",
   ) |>
     sql() |>                 # Convert the SQL string to a SQL object
     tbl(test_con, from = _) |>    # Create a reference to the database table with the SQL query
-    collect()                # Collect the results into a data frame
+    collect() |>             # Collect the results into a data frame
+    arrange(ID) # Sort result by ID column for comparability
   
   hhincome_output <- write_sql_query( 
     data = "mock_data", 
@@ -72,7 +69,8 @@ test_that("write_sql_query outputs the correct database results with mock data",
   ) |>
     sql() |>                 # Convert the SQL string to a SQL object
     tbl(test_con, from = _) |>    # Create a reference to the database table with the SQL query
-    collect()                # Collect the results into a data frame
+    collect() |>             # Collect the results into a data frame
+    arrange(ID) # Sort result by ID column for comparability
   
   # Step 5: Test if the output matches the expected output
   expect_equal(
