@@ -76,32 +76,29 @@ write_data_to_db(
 print(tbl(con, "age_lookup") |> collect())
 print(tbl(con, "micro") |> head(n = 10) |> collect())
 
-# Apply the query to the database
-micro_with_age_bucket <- tbl(
-  con, 
-  sql(
-    write_sql_query( # Custom function for creating the SQL query using the lookup table
-      data = "micro", 
-      lookup = "age_lookup", 
-      column_name = "AGE"
-    )
-  )
+# Produce a bucketed column of ages by applying a custom SQL query
+micro_with_age_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
+  data = "micro", 
+  lookup = "age_lookup", 
+  column_name = "AGE"
 ) |>
-  head(50) |>
-  collect()
+  sql() |>                 # Convert the SQL string to a SQL object
+  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
+  head(50) |>              # Limit the number of rows
+  collect()                # Collect the results into a data frame
 
-micro_with_hhincome_bucket <- tbl(
-  con, 
-  sql(
-    write_sql_query( # Custom function for creating the SQL query using the lookup table
-      data = "micro", 
-      lookup = "hhincome_lookup", 
-      column_name = "HHINCOME"
-    )
-  )
+
+# Produce a bucketed column of incomes by applying a custom SQL query
+micro_with_hhincome_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
+  data = "micro", 
+  lookup = "hhincome_lookup", 
+  column_name = "HHINCOME"
 ) |>
-  head(50) |>
-  collect()
+  sql() |>                 # Convert the SQL string to a SQL object
+  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
+  head(50) |>              # Limit the number of rows
+  collect()                # Collect the results into a data frame
+
 
 # ----- Step 3: Produce aggregate household sizes in data table
 
