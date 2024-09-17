@@ -58,45 +58,55 @@ create_race_eth_bucket <- function(data) {
 # https://duckdb.org/2024/04/02/duckplyr.html
 
 
-# Create a query that assigns the buckets within the database
-write_sql_query <- function(
-    data,        # STRING: Name of the table or a subquery
-    lookup,      # STRING: Name of the lookup table in the connection
-    column_name  # STRING: Name of the column being transformed
+# Modified write_sql_query() function to handle multiple columns
+write_sql_query_multi <- function(
+    data,          # STRING: Name of the database table in the connection
+    transformations # LIST: List of transformations with lookup and column_name
 ) {
-  # Create a dynamic name for the bucket column
-  bucket_column_name <- paste0(column_name, "_bucket")
+  # Start building the SELECT statement
+  select_columns <- "data.*"
+  left_joins <- ""
   
-  # If data is a subquery (starts with SELECT), wrap it appropriately
-  if (grepl("^\\s*SELECT", data, ignore.case = TRUE)) {
-    data_source <- glue("({data}) AS data")
-    data_ref <- "data"
-  } else {
-    data_source <- data
-    data_ref <- data
+  # Iterate over each transformation to build the SELECT columns and JOINs
+  for (transformation in transformations) {
+    column_name <- transformation$column_name
+    lookup <- transformation$lookup
+    bucket_column_name <- paste0(column_name, "_bucket")
+    
+    # Build the COALESCE expression for the bucketed column
+    select_columns <- glue::glue(
+      "{select_columns},
+      COALESCE({bucket_column_name}_specific.bucket_name, {bucket_column_name}_range.bucket_name) AS {bucket_column_name}"
+    )
+    
+    # Build the LEFT JOINs for specific and range lookups
+    left_joins <- glue::glue(
+      "{left_joins}
+      LEFT JOIN (
+          SELECT *
+          FROM {lookup}
+          WHERE specific_value IS NOT NULL
+      ) AS {bucket_column_name}_specific
+          ON data.{column_name} = {bucket_column_name}_specific.specific_value
+      LEFT JOIN (
+          SELECT *
+          FROM {lookup}
+          WHERE specific_value IS NULL
+      ) AS {bucket_column_name}_range
+          ON data.{column_name} >= {bucket_column_name}_range.lower_bound
+          AND data.{column_name} < {bucket_column_name}_range.upper_bound
+      "
+    )
   }
   
-  # Build the SQL query using glue
+  # Combine everything into the final SQL query
   sql_query <- glue::glue(
     "
     SELECT
-        {data_ref}.*,
-        COALESCE(specific.bucket_name, range.bucket_name) AS {bucket_column_name}
+        {select_columns}
     FROM
-        {data_source}
-    LEFT JOIN (
-        SELECT *
-        FROM {lookup}
-        WHERE specific_value IS NOT NULL
-    ) AS specific
-        ON {data_ref}.{column_name} = specific.specific_value
-    LEFT JOIN (
-        SELECT *
-        FROM {lookup}
-        WHERE specific_value IS NULL
-    ) AS range
-        ON {data_ref}.{column_name} >= range.lower_bound
-        AND {data_ref}.{column_name} < range.upper_bound
+        {data} AS data
+    {left_joins}
     "
   )
   

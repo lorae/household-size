@@ -80,26 +80,26 @@ print(tbl(con, "micro") |> head(n = 10) |> collect())
 # Delete previous data cluttering up the space
 dbExecute(con, "DROP TABLE IF EXISTS micro_with_buckets")
 
-# Define your initial data source
-initial_data <- "micro"
+# Define your transformations
+transformations <- list(
+  list(lookup = "age_lookup", column_name = "AGE"),
+  list(lookup = "hhincome_lookup", column_name = "HHINCOME")
+  # Add more transformations as needed
+)
 
-# Chain the SQL queries
-sql_query <- write_sql_query(
-  data = initial_data,
-  lookup = "age_lookup",
-  column_name = "AGE"
-  ) |>
-  write_sql_query(
-    data = _,
-    lookup = "hhincome_lookup",
-    column_name = "HHINCOME"
-  )
+# Build the final SQL query
+sql_query <- write_sql_query_multi("micro", transformations)
 
-# Execute the final SQL query and create a new table in DuckDB
-test <- tbl(con, sql(sql_query)) %>%
-  compute(name = "micro_with_buckets", temporary = FALSE) |>
+# Execute the SQL query and create the final table
+dbExecute(con, "DROP TABLE IF EXISTS micro_with_buckets")  # Optional: Drop if exists
+
+dbExecute(con, glue::glue("CREATE TABLE micro_with_buckets AS {sql_query}"))
+
+# Access the table in 'con' and collect it into R
+micro_with_buckets_df <- tbl(con, "micro_with_buckets") |>
   head(50) |>
   collect()
+
 
 
 
