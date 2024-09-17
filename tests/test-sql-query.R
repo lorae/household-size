@@ -6,7 +6,7 @@ library("dplyr")
 library("glue")
 
 # Source the function to be tested
-source("src/utils/bucket_utils.R")
+source("src/utils/bucketing_tools.R")
 
 # Test write_sql_query function with mock data and lookup table
 # This test is meant to verify whether the SQL query produced by the write_sql_query()
