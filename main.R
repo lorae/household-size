@@ -52,15 +52,6 @@ dbWriteTable(con, "micro", micro)
 # Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
 # directory. There are several bucketing schemes saved. Here we explicitly choose
 # each .csv file.
-# Write the lookup tables to the connection
-write_lookup_to_db <- function(con, table_name, file_path) {
-  # Read the CSV lookup table
-  lookup_df <- read.csv(file_path, stringsAsFactors = FALSE)
-  
-  # Write the lookup table to DuckDB
-  copy_to(con, lookup_df, table_name, overwrite = TRUE)
-}
-
 write_lookup_to_db(con, "age_lookup", "lookup_tables/age/age_buckets00.csv")
 write_lookup_to_db(con, "hhincome_lookup", "lookup_tables/hhincome/hhincome_buckets00.csv")
 write_lookup_to_db(con, "hispan_lookup", "lookup_tables/hispan/hispan_buckets00.csv")
