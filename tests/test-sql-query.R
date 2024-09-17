@@ -1,9 +1,9 @@
 # tests/testthat/test-bucketing.R
-library(testthat)
-library(DBI)
-library(duckdb)
-library(dplyr)
-library(glue)
+library("testthat")
+library("DBI")
+library("duckdb")
+library("dplyr")
+library("glue")
 
 # Source the function to be tested
 source("src/utils/bucket_utils.R")
