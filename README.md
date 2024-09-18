@@ -165,6 +165,14 @@ The project is set up as an R project with `renv` to manage dependencies. When y
 
     **Household income**: Add information here on how it's defined, whether it's pre-tax/transfer, whether it's only earned or earned and unearned, how it's deflated to compare over time, etc.
 
+# Unit Testing
+
+Tests are located in the `tests/testthat` folder. To run all tests:
+```r
+library("testthat")
+test_dir("tests/testthat/")
+```
+
 # References
 
 - <a name="galster2024" id="galster2024"></a>**George C. Galster (2024)**. *Is There Enough Housing Production? It Matters Which Indicators Are Used to Answer*, Housing Policy Debate. DOI: 10.1080/10511482.2024.2334018
