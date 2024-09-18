@@ -13,6 +13,7 @@ library("glue")
 # ----- Step 1: Helper functions ----- #
 
 source("src/utils/create-synthetic-data.R")
+source("src/utils/bucketing-tools.R")
 
 # ---- Step 2: Generate synthetic IPUMS and save to DB ----- #
 
@@ -34,38 +35,36 @@ dbWriteTable(con, "age_lookup", age_lookup, overwrite = TRUE)
 # ----- Step 4: Bucket the data ----- #
 
 
-# Apply the function to some data (simple data in the workspace)
+# Proof of concept: Apply the range_match_lookup function to a tibble
 range_match_lookup(
   data = synth_ipums,
   lookup = age_lookup,
   input_column = "AGE"
 )
 
-# Apply the function to a database
+# Assign names to connections to database tables
 age_lookup_db <- tbl(con, "age_lookup")
 raw_db <- tbl(con, "synth_ipums")
 
+# Proof of concept: Apply the range_match_lookup function to a table in a database
 range_match_lookup(
   data = raw_db,
   lookup = age_lookup_db,
   input_column = "AGE"
 )
 
-# Load the table from the connection
-raw_db <- tbl(con, "synth_ipums")
+# Proof of concept: Assign the results of the range_match_lookup function to a table
+# in the database connection, and export back to the R environment.
+processed_db <- range_match_lookup(
+  data = raw_db,
+  lookup = age_lookup_db,
+  input_column = "AGE"
+) |>
+  compute("synth_ipums_bucket", temporary = FALSE) 
 
-# Add and categorize the age_bucket column
-processed_db <- raw_db %>%
-  mutate(
-    AGE_bucket = case_when(
-      AGE >= 0 & AGE < 18 ~ 'Under 18',
-      AGE >= 18 & AGE < 35 ~ '18-34',
-      AGE >= 35 & AGE < 50 ~ '35-49',
-      AGE >= 50 & AGE < 200 ~ 'Over 50',
-      TRUE ~ 'Unknown'
-    )
-  )
+processed_tibble <- processed_db |>
+  collect()
 
-# Write the result as a new table using compute()
-processed_db %>%
-  compute("synth_ipums_bucket", temporary = FALSE)
+# Disconnect from DuckDB
+DBI::dbDisconnect(con)
+
