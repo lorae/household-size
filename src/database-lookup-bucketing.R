@@ -33,43 +33,6 @@ dbWriteTable(con, "age_lookup", age_lookup, overwrite = TRUE)
 
 # ----- Step 4: Bucket the data ----- #
 
-# Proof-of-concept matching ranges in a lookup table using non-database data
-# https://stackoverflow.com/questions/75629990/lookup-table-in-r-by-matching-ranges
-
-# TODO: Roxygen documentation
-# A function for bucketing data based on a simple range-based lookup table.
-# Returns the input data with an appended column named `output_column`.
-# Ranges are inclusive on the bottom end and exclusive on the top end.
-# The lookup table must have colnames (bucket_name, lower_bound, upper_bound)
-range_match_lookup <- function(
-    data, # A dataframe, tibble, or db object containing the data
-    lookup, # A dataframe, tibble, or db object containing the lookup table
-    input_column, # The name of the column from `data` to be bucketed
-    output_column = NULL # optional: the name of the output column. Default: {input_column}_bucket
-) {
-  # TODO: build in data check on input object types being consistent w/ one another (db,db) or (df, df)
-  # TODO: build in check verifying that lookup table ranges don't overlap.
-  # That will be fun math problem to solve.
-  # TODO: build in check that colnames match. Add warning if any extra columns in lookup table and say
-  # that they will be unused, listing the colnames.
-  
-  # Rename the output_column  to default, if set to null
-  if(is.null(output_column)) {
-    output_column <- paste0(input_column, "_bucket")
-  }
-  
-  result <- data |>
-    # For every unique row of data, a new row is generated combining it with the lookup table
-    cross_join(lookup) |>
-    # Then only the rows of the lookup table that match the specified data are kept.
-    # Note that this logic means that if the lookup table has overlapping ranges 
-    # that both match the data, it will produce duplicate entries for the same individual.
-    filter(!!sym(input_column) >= lower_bound & !!sym(input_column) < upper_bound) |>
-    select(-lower_bound, -upper_bound) |> # Clean up extra columns
-    rename(!!sym(output_column) := bucket_name)
-  
-  return(result)
-}
 
 # Apply the function to some data (simple data in the workspace)
 range_match_lookup(
