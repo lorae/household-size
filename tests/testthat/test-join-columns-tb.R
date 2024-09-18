@@ -11,13 +11,13 @@ source("src/utils/bucketing-tools.R")
 
 test_that("join_columns works with tibbles in R memory", {
   
-  # Sample data for data1
+  # Create sample data for data1
   data1_tb <- tibble(
     id = c(1, 2, 3, 4, 5, 6, 7),
     AGE_bucket = c("Over 50", "Under 25", "25-50", "Over 50", "Over 50", "25-50", "Over 50")
   )
   
-  # Sample data for data2
+  # Create sample data for data2
   data2_tb <- tibble(
     id = c(1, 2, 3, 4, 5, 6, 7),
     AGE_bucket = c(NA, NA, "30 years old", NA, NA, NA, NA)

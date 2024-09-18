@@ -34,14 +34,14 @@ test_that("range_match_lookup works with a DuckDB connection", {
   age_lookup_db <- tbl(con, "age_lookup")
   
   # Apply the range_match_lookup function
-  result_db <- range_match_lookup(
+  output_db <- range_match_lookup(
     data = raw_db,
     lookup = age_lookup_db,
     input_column = "AGE"
   )
   
   # Collect the result from DuckDB
-  result_df <- result_db %>% collect()
+  output_df <- output_db %>% collect()
   
   # Expected result
   expected_df <- tibble(
@@ -50,7 +50,7 @@ test_that("range_match_lookup works with a DuckDB connection", {
   )
   
   # Assert that the output matches the expected result
-  expect_equal(result_df, expected_df)
+  expect_equal(output_df, expected_df)
   
   # Disconnect from DuckDB
   DBI::dbDisconnect(con)
