@@ -69,30 +69,28 @@ generate_household_data <- function(num_households = 40,
   if (num_households <= 0 || num_households %% 1 != 0) stop("num_households must be a positive integer.")
   if (hhinc_mean < 0) stop("hhinc_mean must be greater than or equal to 0.")
   
-  # Generate data for each household
-  households <- lapply(1:num_households, function(serial) {
-    num_persons <- sample(pphh_range["min"]:pphh_range["max"], 1)
-    hhwt <- sample(hhwt_range["min"]:hhwt_range["max"], 1)
-    pernums <- 1:num_persons
-    ages <- sample(age_range["min"]:age_range["max"], num_persons, replace = TRUE)
-    sexes <- sample(c(1, 2, 9), num_persons, replace = TRUE, prob = sex_probs)
-    # Generate HHINCOME (household income) with a normal distribution and a floor at 0
-    hhincome <- max(0, rnorm(1, mean = hhinc_mean, sd = hhinc_sd))
-    
-    # Return household-level data as a data frame
-    data.frame(SERIAL = rep(serial, num_persons),
-               AGE = ages,
-               SEX = sexes,
-               PERNUM = pernums,
-               NUMPREC = rep(num_persons, num_persons),
-               HHWT = rep(hhwt, num_persons),
-               HHINCOME = rep(hhincome, num_persons))
-  })
+  n_na <- num_households * .1
   
-  # Combine all households into a single data frame
-  df <- do.call(rbind, households)
+  households <- tibble(
+    SERIAL = 1:num_households,
+    NUMPREC = sample(pphh_range["min"]:pphh_range["max"], num_households, replace = TRUE),
+    HHWT = sample(hhwt_range["min"]:hhwt_range["max"], num_households, replace = TRUE),
+    HHINCOME = sample(c(pmax(0, rnorm(num_households - n_na, mean = hhinc_mean, sd = hhinc_sd)), rep(9999999, n_na)))
+  )
   
-  return(df)
+  create_person <- function(serial, num_persons) {
+    tibble(
+      SERIAL = serial,
+      PERNUM = 1:num_persons,
+      AGE = sample(age_range["min"]:age_range["max"], num_persons, replace = TRUE),
+      SEX = sample(c(1, 2, 9), num_persons, replace = TRUE, prob = sex_probs)
+    )
+  }
+  
+  household_members <- map2(households$SERIAL, households$NUMPREC, create_person) |> bind_rows()
+  
+  household_members |> left_join(households, by = "SERIAL")
+  
 }
 
 
