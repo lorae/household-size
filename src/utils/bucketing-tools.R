@@ -193,3 +193,29 @@ join_columns <- function(
   
   return(result)
 }
+
+
+value_match_lookup <- function(
+    data, # A dataframe, tibble, or db object containing the data
+    lookup, # A dataframe, tibble, or db object containing the lookup table
+    input_column, # The name of the column from `data` to be bucketed
+    output_column = NULL # optional: the name of the output column. Default: {input_column}_bucket
+) {
+  # TODO: build in data check on input object types being consistent w/ one another (db,db) or (df, df)
+  # TODO: keep only the "specific_value" and "bucket_name"
+  
+  # Rename the output_column  to default, if set to null
+  if(is.null(output_column)) {
+    output_column <- paste0(input_column, "_bucket")
+  }
+  
+  result <- data |>
+    # For every unique row of data, a new row is generated combining it with the lookup table
+    left_join(lookup, by = setNames("specific_value", input_column)) |>
+    rename(!!sym(output_column) := bucket_name)
+  # Then only the rows of the lookup table that match the specified data are kept.
+  # Note that this logic means that if the lookup table has overlapping ranges 
+  # that both match the data, it will produce duplicate entries for the same individual.
+  
+  return(result)
+}
