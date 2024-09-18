@@ -175,3 +175,21 @@ range_match_lookup <- function(
   return(result)
 }
 
+
+join_columns <- function(
+    data1,   # The deprioritized dataset
+    data2,   # The prioritized dataset
+    column,  # The name of the data column being joined (as a string)
+    id       # The name of the column uniquely identifying observations (as a string)
+){
+  # Join the two datasets on the id column
+  result <- data1 %>%
+    left_join(data2, by = id, suffix = c("_data1", "_data2")) %>%
+    mutate(
+      # Use the value from data2 if it's not NA; otherwise, use the value from data1
+      !!sym(column) := coalesce(!!sym(paste0(column, "_data2")), !!sym(paste0(column, "_data1")))
+    ) %>%
+    select(!!sym(id), !!sym(column))
+  
+  return(result)
+}
