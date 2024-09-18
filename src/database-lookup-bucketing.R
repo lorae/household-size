@@ -71,10 +71,20 @@ range_match_lookup <- function(
   return(result)
 }
 
-# Apply the function to some data
+# Apply the function to some data (simple data in the workspace)
 range_match_lookup(
   data = synth_ipums,
   lookup = age_lookup,
+  input_column = "AGE"
+)
+
+# Apply the function to a database
+age_lookup_db <- tbl(con, "age_lookup")
+raw_db <- tbl(con, "synth_ipums")
+
+range_match_lookup(
+  data = raw_db,
+  lookup = age_lookup_db,
   input_column = "AGE"
 )
 
