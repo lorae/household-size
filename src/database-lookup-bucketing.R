@@ -60,7 +60,7 @@ range_match_lookup <- function(
   
   result <- data |>
     # For every unique row of data, a new row is generated combining it with the lookup table
-    left_join(lookup, by = character()) |>
+    cross_join(lookup) |>
     # Then only the rows of the lookup table that match the specified data are kept.
     # Note that this logic means that if the lookup table has overlapping ranges 
     # that both match the data, it will produce duplicate entries for the same individual.
