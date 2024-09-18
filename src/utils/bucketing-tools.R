@@ -219,3 +219,40 @@ value_match_lookup <- function(
   
   return(result)
 }
+
+
+# A function that reads a lookup table from a csv file path and splits it into 
+# a list with two attributes: 
+# $value - a tibble containing a value lookup table. This table can be fed directly
+# as the `lookup` argument in value_match_lookup()
+# $range - a tibble containing the range lookup table. This table can be fed directly
+# as the `lookup` argument in range_match_lookup()
+# The source lookup table must have four columns:
+# bucket_name
+# lower_bound
+# upper_bound
+# specific_value
+split_lookup_table <- function(
+    filepath # Path to the .csv file
+) {
+  # Read the CSV file into a tibble
+  lookup_raw <- read_csv(filepath)
+  
+  # Separate rows into range-based and value-based lookups
+  range_lookup <- lookup_raw %>%
+    filter(!is.na(lower_bound) & !is.na(upper_bound)) %>%
+    select(bucket_name, lower_bound, upper_bound)
+  
+  value_lookup <- lookup_raw %>%
+    filter(!is.na(specific_value)) %>%
+    select(bucket_name, specific_value)
+  
+  # Create the processed lookup as a list with two component tibbles: value and range
+  lookup_processed <- list(
+    value = value_lookup,
+    range = range_lookup
+  )
+  
+  # Return the result 
+  return(lookup_processed)
+}
