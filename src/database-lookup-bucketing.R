@@ -31,19 +31,10 @@ age_lookup <- tibble::tibble(
 
 dbWriteTable(con, "age_lookup", age_lookup, overwrite = TRUE)
 
-# ----- Step 4: Categorize the data ----- #
+# ----- Step 4: Bucket the data ----- #
 
 # Proof-of-concept matching ranges in a lookup table using non-database data
 # https://stackoverflow.com/questions/75629990/lookup-table-in-r-by-matching-ranges
-synth_ipums |>
-  # For every unique row of data, a new row is generated combining it with the lookup table
-  left_join(age_lookup, by = character()) |>
-  # Then only the rows of the lookup table that match the specified data are kept.
-  # Note that if the lookup table has overlapping ranges that both match the data, it will
-  # produce duplicate entries for the same individual.
-  filter(AGE >= lower_bound & AGE < upper_bound) |>
-  select(-lower_bound, -upper_bound) |> # Clean up extra columns
-  rename(AGE_bucket = bucket_name)
 
 # TODO: Roxygen documentation
 # A function for bucketing data based on a simple range-based lookup table.
@@ -79,7 +70,8 @@ range_match_lookup <- function(
   
   return(result)
 }
-  
+
+# Apply the function to some data
 range_match_lookup(
   data = synth_ipums,
   lookup = age_lookup,
