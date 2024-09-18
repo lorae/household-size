@@ -6,7 +6,6 @@ library("rprojroot")
 # Make sure the working directory is correct
 root <- find_root(is_rstudio_project)
 setwd(root)
-print(getwd())
 
 # Source the function being tested
 source("src/utils/bucketing-tools.R")
