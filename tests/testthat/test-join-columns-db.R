@@ -10,7 +10,7 @@ setwd(root)
 # Source the function being tested
 source("src/utils/bucketing-tools.R")
 
-test_that("join_columns works with tibbles in R memory", {
+test_that("join_columns works with DuckDB data table", {
   
   # Create DuckDB connection
   con <- DBI::dbConnect(duckdb::duckdb(), dbdir = ":memory:")
