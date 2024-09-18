@@ -26,6 +26,8 @@ household-size/
 │   
 └── tests/                     # Testing directory
     ├── testthat/              # Unit tests directory
+    │   ├── range-match-lookup-db.R # Tests range_match_lookup() function on a database
+    │   ├── range-match-lookup-df.R # Tests range_match_lookup() function on a tibble
     │   └── test-bucketing.R   # Test script for bucketing functions
     └── test-data/             # Mock data for testing
         ├── mock_data.csv
