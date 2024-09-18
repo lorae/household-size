@@ -25,14 +25,15 @@ dbWriteTable(con, "synth_ipums", synth_ipums)
 # ----- Step 3: Create a lookup table and save to DB ----- #
 age_lookup <- tibble::tibble(
   bucket_name = c("Under 18", "18-34", "35-49", "Over 50"),
-  lower_bound = c(0, 18, 35, 50),
-  upper_bound = c(18, 35, 50, 200)
+  lower_bound = c(-Inf, 18, 35, 50),
+  upper_bound = c(18, 35, 50, Inf)
 )
 
 dbWriteTable(con, "age_lookup", age_lookup, overwrite = TRUE)
 
 # ----- Step 4: Categorize the data ----- #
 
+# Proof-of-concept matching ranges in a lookup table using non-database data
 # https://stackoverflow.com/questions/75629990/lookup-table-in-r-by-matching-ranges
 synth_ipums |>
   # For every unique row of data, a new row is generated combining it with the lookup table
