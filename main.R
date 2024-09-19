@@ -114,6 +114,14 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_bucketed", temporary = FALSE)
 print("Race bucketed successfully.")
 
+# Use the HISPAN_bucket and RACE_bucket to produce a RACE_ETH_bucket column
+ipums_bucketed_db <- ipums_bucketed_db |>
+  race_eth_bucket(
+    data = _
+  ) |> 
+  compute(name = "ipums_race_eth_bucketed", temporary = FALSE)
+print("Ethnicity/Race coded into a single bucket successfully.")
+
 # Optional: View a subset of the bucketed data
 # Note: will take about 1 minute to load
 data_sample <- ipums_bucketed_db |> head(50) |> collect()
