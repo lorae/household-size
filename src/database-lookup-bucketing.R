@@ -30,51 +30,7 @@ synth_ipums_db <- tbl(con, "synth_ipums") |>
   # Make `id` the first column
   select(id, everything())
 
-# ----- Append a column with bucketed information ---- #
-
-append_bucket_column <- function(
-    con,             # Database connection
-    filepath,        # Path to the lookup table CSV file
-    data,            # Lazy database reference (input data)
-    input_column,    # The column to be bucketed/matched
-    id_column        # The unique ID column
-) {
-  # Step 1: Split the lookup table into range and value components
-  lookup_tb <- split_lookup_table(filepath)
-  
-  # Step 2: Write the lookup tables to the database
-  dbWriteTable(con, paste0(input_column, "_lookup_range"), lookup_tb$range, overwrite = TRUE)
-  dbWriteTable(con, paste0(input_column, "_lookup_value"), lookup_tb$value, overwrite = TRUE)
-  
-  # Step 3: Create lazy references to these tables
-  lookup_range_db <- tbl(con, paste0(input_column, "_lookup_range"))
-  lookup_value_db <- tbl(con, paste0(input_column, "_lookup_value"))
-  
-  # Step 4: Perform range and value lookups
-  data1_db <- range_match_lookup(
-    data = data,
-    lookup = lookup_range_db,
-    input_column = input_column
-  )
-  
-  data2_db <- value_match_lookup(
-    data = data,
-    lookup = lookup_value_db,
-    input_column = input_column
-  )
-  
-  # Step 5: Join the results
-  result <- join_columns(
-    data1 = data1_db,
-    data2 = data2_db,
-    column = paste0(input_column, "_bucket"),
-    id = id_column
-  )
-  
-  # Return lazy database reference (result)
-  return(result)
-}
-
+# ----- Step 3: Bucket the data ---- #
 
 # Try out the function
 result <- append_bucket_column(
