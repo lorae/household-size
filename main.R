@@ -64,6 +64,11 @@ ipums_db <- tbl(con, "ipums") |>
   # Make `id` the first column
   select(id, everything())
 
+obs_count <- ipums_db %>%
+  summarise(count = n()) %>%
+  collect()
+print(paste("Number of observations in IPUMS data:", obs_count))
+
 # ----- Step 3: Bucket the data ---- #
 
 # Append AGE_bucketed according to the lookup table
@@ -78,6 +83,11 @@ ipums_bucketed_db <- ipums_db |>
   compute(name = "ipums_age_bucketed", temporary = FALSE)
 print("Ages bucketed successfully.")
 
+obs_count <- ipums_bucketed_db %>%
+  summarise(count = n()) %>%
+  collect()
+print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+
 # Append HHINCOME_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
   append_bucket_column(
@@ -89,6 +99,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   ) |> 
   compute(name = "ipums_hhincome_bucketed", temporary = FALSE)
 print("Household incomes bucketed successfully.")
+
+obs_count <- ipums_bucketed_db %>%
+  summarise(count = n()) %>%
+  collect()
+print(paste("Number of observations in bucketed IPUMS data:", obs_count))
 
 # Append HISPAN_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
@@ -102,6 +117,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_hispan_bucketed", temporary = FALSE)
 print("Ethnicity bucketed successfully.")
 
+obs_count <- ipums_bucketed_db %>%
+  summarise(count = n()) %>%
+  collect()
+print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+
 # Append RACE_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
   append_bucket_column(
@@ -114,6 +134,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_bucketed", temporary = FALSE)
 print("Race bucketed successfully.")
 
+obs_count <- ipums_bucketed_db %>%
+  summarise(count = n()) %>%
+  collect()
+print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+
 # Use the HISPAN_bucket and RACE_bucket to produce a RACE_ETH_bucket column
 ipums_bucketed_db <- ipums_bucketed_db |>
   race_eth_bucket(
@@ -122,10 +147,37 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_eth_bucketed", temporary = FALSE)
 print("Ethnicity/Race coded into a single bucket successfully.")
 
+obs_count <- ipums_bucketed_db %>%
+  summarise(count = n()) %>%
+  collect()
+print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+
 # Optional: View a subset of the bucketed data
 # Note: will take about 1 minute to load
 data_sample <- ipums_bucketed_db |> head(50) |> collect()
 ipums |> head(1000) |> collect() |> View()
+
+# ----- Step 4: Calculate Weighted Mean ----- #
+
+# Calculate the weighted mean of NUMPREC by PERWT for each combination of buckets
+weighted_mean_query <- ipums_bucketed_db |>
+  group_by(HHINCOME_bucket, AGE_bucket, RACE_ETH_bucket, SEX) |>
+  summarize(
+    total_numprec_weighted = sum(NUMPREC * PERWT, na.rm = TRUE),
+    total_weight = sum(PERWT, na.rm = TRUE),
+    count_obs = n()  # Count of observations in each group
+  ) |>
+  mutate(weighted_mean_numprec = total_numprec_weighted / total_weight) |>
+  select(HHINCOME_bucket, AGE_bucket, RACE_ETH_bucket, SEX, count_obs, weighted_mean_numprec) |>
+  compute(name = "weighted_mean_numprec", temporary = FALSE)
+
+# Collect results into memory for viewing if needed
+result <- weighted_mean_query |> collect()
+
+# View first few rows of the result
+head(result)
+
+
 
 
 # ----- Step 4: Clean up ----- #
