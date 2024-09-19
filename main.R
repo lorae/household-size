@@ -165,11 +165,11 @@ weighted_mean_query <- ipums_bucketed_db |>
   summarize(
     total_numprec_weighted = sum(NUMPREC * PERWT, na.rm = TRUE),
     total_weight = sum(PERWT, na.rm = TRUE),
-    count_obs = n()  # Count of observations in each group
+    count = n()  # Count of observations in each group
   ) |>
-  mutate(weighted_mean_numprec = total_numprec_weighted / total_weight) |>
-  select(HHINCOME_bucket, AGE_bucket, RACE_ETH_bucket, SEX, count_obs, weighted_mean_numprec) |>
-  compute(name = "weighted_mean_numprec", temporary = FALSE)
+  mutate(weighted_mean = total_numprec_weighted / total_weight) |>
+  select(HHINCOME_bucket, AGE_bucket, RACE_ETH_bucket, SEX, count, weighted_mean) |>
+  compute(name = "weighted_mean", temporary = FALSE)
 
 # Collect results into memory for viewing if needed
 result <- weighted_mean_query |> collect()
