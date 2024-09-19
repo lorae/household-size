@@ -11,17 +11,23 @@
 # TODO: two matrices not necessary? Each cell has two dimensions of values,
 # nobs and hhsize?
 
-# ----- Step 0: Initialize libraries and modules
-library("ipumsr")
+# ----- Step 0: Load required packages ----- #
+library("magrittr")
 library("dplyr")
-library("data.table")
 library("duckdb")
-library("duckplyr")
+library("ipumsr")
+# library("duckplyr")
 library("dbplyr")
 library("glue")
+library("readr")
+library("purrr")
+
+# ----- Step 1: Source helper functions ----- #
+
 source("src/utils/bucketing-tools.R")
 
-# ----- Step 1: Load data
+# ---- Step 2: Load in IPUMS data and save to DB ----- #
+
 # Current code assumes data is saved to computer. 
 # TODO: build in an API call instead to make the code more easily replicable.
 # Helpful information on IPUMS and ipumsr from: 
@@ -34,71 +40,70 @@ ddi <- read_ipums_ddi("usa_00003.xml")
 # Note: This file takes about 3 minutes to read
 print("Reading in IPUMS microdata")
 start_time <- Sys.time() # For elapsed time
-micro <- read_ipums_micro(
+ipums <- read_ipums_micro(
   ddi,
   var_attrs = c() # Scrub variable attributes so that the data can be read into duckplyr
 )
 end_time <- Sys.time() # For elapsed time
-print(paste("Time taken to read in IPUMS microdata:", round(difftime(end_time, start_time, units = "secs"), 3), "seconds"))
-
-# Connect to DuckDB
-con <- dbConnect(duckdb::duckdb(), ":memory:")
-
-# Write the IPUMS microdata table to the connection
-dbWriteTable(con, "micro", micro)
-
-# ----- Step 2: Bucket the data
-# Buckets are defined in lookup tables that are stored as .csv files in the /lookup_tables/
-# directory. There are several bucketing schemes saved. Here we explicitly choose
-# each .csv file.
-read_csv_into_db(
-  con = con, 
-  data_title = "age_lookup", 
-  file_path = "lookup_tables/age/age_buckets00.csv"
-  )
-read_csv_into_db(
-  con = con, 
-  data_title = "hhincome_lookup", 
-  file_path = "lookup_tables/hhincome/hhincome_buckets00.csv"
-  )
-read_csv_into_db(
-  con = con, 
-  data_title = "hispan_lookup", 
-  file_path = "lookup_tables/hispan/hispan_buckets00.csv"
-  )
-read_csv_into_db(
-  con = con, 
-  data_title = "race", 
-  file_path = "lookup_tables/race/race_buckets00.csv"
+print(
+  paste(
+    "Time taken to read in IPUMS microdata:", 
+    round(difftime(end_time, start_time, units = "secs"), 3), 
+    "seconds")
   )
 
-# Optional: print the tables to verify everything looks good
-print(tbl(con, "age_lookup") |> collect())
-print(tbl(con, "micro") |> head(n = 10) |> collect())
+con <- dbConnect(duckdb::duckdb(), "db/ipums.db", overwrite = TRUE)
+dbWriteTable(con, "ipums", ipums, overwrite = TRUE)
 
-# Produce a bucketed column of ages by applying a custom SQL query
-micro_with_age_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
-  data = "micro", 
-  lookup = "age_lookup", 
-  column_name = "AGE"
-) |>
-  sql() |>                 # Convert the SQL string to a SQL object
-  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
-  head(50) |>              # Limit the number of rows
-  collect()                # Collect the results into a data frame
+ipums_db <- tbl(con, "ipums") |>
+  # Create a column of unique person-level ids
+  # Census documentation: "A combination of SAMPLE and SERIAL provides a unique 
+  # identifier for every household in the IPUMS; the combination of SAMPLE, SERIAL, 
+  # and PERNUM uniquely identifies every person in the database."
+  mutate(id = paste(SAMPLE, SERIAL, PERNUM, sep = "_")) |>
+  # Make `id` the first column
+  select(id, everything())
+
+# ----- Step 3: Bucket the data ---- #
+
+# Try out the function
+ipums_bucketed_db <- ipums_db |>
+  # Append AGE_bucketed according to the lookup table
+  append_bucket_column(
+    con = con,
+    filepath = "lookup_tables/age/age_buckets00.csv", 
+    data = _, 
+    input_column = "AGE", 
+    id_column = "id"
+  ) |>
+  # Append INCOME_bucketed according to the lookup table
+  append_bucket_column(
+    con = con,
+    filepath = "lookup_tables/hhincome/hhincome_buckets00.csv",
+    data = _,
+    input_column = "HHINCOME",
+    id_column = "id"
+  ) 
+
+# |>
+# # Append HISPAN_bucketed according to the lookup table
+# append_bucket_column(
+#   con = con,
+#   filepath = "lookup_tables/hispan/hispan_buckets00.csv",
+#   data = _,
+#   input_column = "HISPAN",
+#   id_column = "id"
+# )
+
+# ----- Step 4: Clean up ----- #
+
+# Disconnect from DuckDB
+DBI::dbDisconnect(con)
 
 
-# Produce a bucketed column of incomes by applying a custom SQL query
-micro_with_hhincome_bucket <- write_sql_query( # Custom function for creating the SQL query using the lookup table
-  data = "micro", 
-  lookup = "hhincome_lookup", 
-  column_name = "HHINCOME"
-) |>
-  sql() |>                 # Convert the SQL string to a SQL object
-  tbl(con, from = _) |>    # Create a reference to the database table with the SQL query
-  head(50) |>              # Limit the number of rows
-  collect()                # Collect the results into a data frame
-
+######################################################################
+##### NEARLY DEPRECATED CODE THAT I'M NOT YET READY TO PART WITH #####
+######################################################################
 
 # ----- Step 3: Produce aggregate household sizes in data table
 
