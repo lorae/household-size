@@ -102,9 +102,23 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_hispan_bucketed", temporary = FALSE)
 print("Ethnicity bucketed successfully.")
 
+# Append RACE_bucketed according to the lookup table
+ipums_bucketed_db <- ipums_bucketed_db |>
+  append_bucket_column(
+    con = con,
+    filepath = "lookup_tables/race/race_buckets00.csv",
+    data = _,
+    input_column = "RACE",
+    id_column = "id"
+  ) |> 
+  compute(name = "ipums_race_bucketed", temporary = FALSE)
+print("Race bucketed successfully.")
+
 # Optional: View a subset of the bucketed data
 # Note: will take about 1 minute to load
-ipums_bucketed_db |> head(50) |> collect() |> View()
+data_sample <- ipums_bucketed_db |> head(50) |> collect()
+ipums |> head(1000) |> collect() |> View()
+
 
 # ----- Step 4: Clean up ----- #
 
