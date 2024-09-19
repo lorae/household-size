@@ -21,16 +21,16 @@ set.seed(42) # Pseudorandom seed for replicability
 synth_ipums <- generate_household_data() # Generate synthetic ipums data
 
 con <- dbConnect(duckdb::duckdb(), ":memory:")
-dbWriteTable(con, "synth_ipums", synth_ipums) 
-
-# ----- Step 3: Create a lookup table and save to DB ----- #
-age_lookup <- tibble::tibble(
-  bucket_name = c("Under 18", "18-34", "35-49", "Over 50"),
-  lower_bound = c(-Inf, 18, 35, 50),
-  upper_bound = c(18, 35, 50, Inf)
+dbWriteTable(con, "synth_ipums", synth_ipums)
+synth_ipums_db <- tbl(con, "synth_ipums") |>
+  # Create a column of unique person-level ids
+  mutate(id = paste(SERIAL, PERNUM, sep = "_")) |>
+  # Make `id` the first column
+  select(id, everything()) |>
+  collect() |>
+  print()
 )
 
-dbWriteTable(con, "age_lookup", age_lookup, overwrite = TRUE)
 
 # ----- Step 4: Bucket the data ----- #
 
