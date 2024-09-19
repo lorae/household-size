@@ -9,6 +9,7 @@ library("duckdb")
 # library("duckplyr")
 library("dbplyr")
 library("glue")
+library("readr")
 
 # ----- Step 1: Helper functions ----- #
 
@@ -26,9 +27,39 @@ synth_ipums_db <- tbl(con, "synth_ipums") |>
   # Create a column of unique person-level ids
   mutate(id = paste(SERIAL, PERNUM, sep = "_")) |>
   # Make `id` the first column
-  select(id, everything()) |>
-  collect() |>
-  print()
+  select(id, everything())
+
+# ----- Process using the lookup table
+
+# Create a list of tibbles defining lookup functions
+age_lookup_tb <- split_lookup_table(
+  "lookup_tables/age/age_buckets00.csv"
+  )
+# Write the tibbles to the database connection
+dbWriteTable(con, "age_lookup_range", age_lookup_tb$range)
+dbWriteTable(con, "age_lookup_value", age_lookup_tb$value)
+
+# Create lazy references to these tables
+age_lookup_range_db <- tbl(con, "age_lookup_range")
+age_lookup_value_db <- tbl(con, "age_lookup_value")
+
+data1_db <- range_match_lookup(
+  data = synth_ipums_db,
+  lookup = age_lookup_range_db,
+  input_column = "AGE"
+)
+
+data2_db <- value_match_lookup(
+  data = synth_ipums_db,
+  lookup = age_lookup_value_db,
+  input_column = "AGE"
+)
+
+join_columns(
+  data1 = data1_db,
+  data2 = data2_db,
+  column = "AGE",
+  id = "id"
 )
 
 
