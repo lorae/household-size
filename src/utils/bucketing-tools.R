@@ -79,6 +79,15 @@ range_match_lookup <- function(
     output_column <- paste0(input_column, "_bucket")
   }
   
+  # Check if the lookup table is empty
+  if((lookup |> count() |> collect())$n == 0) {
+    
+    # Add a new column called output_column and assign all NA
+    result <- data |>
+      mutate(!!sym(output_column) := NA)
+    
+  } else {
+    
   result <- data |>
     # For every unique row of data, a new row is generated combining it with the lookup table
     cross_join(lookup) |>
@@ -88,6 +97,7 @@ range_match_lookup <- function(
     filter(!!sym(input_column) >= lower_bound & !!sym(input_column) < upper_bound) |>
     select(-lower_bound, -upper_bound) |> # Clean up extra columns
     rename(!!sym(output_column) := bucket_name)
+  }
   
   return(result)
 }
