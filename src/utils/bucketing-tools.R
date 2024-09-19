@@ -189,8 +189,17 @@ join_columns <- function(
       # Use the value from data2 if it's not NA; otherwise, use the value from data1
       !!sym(column) := coalesce(!!sym(paste0(column, "_data2")), !!sym(paste0(column, "_data1")))
     ) |>
-    # Select all columns except the ones added for the join
-    select(-!!sym(paste0(column, "_data1")), -!!sym(paste0(column, "_data2")))
+    # Remove the two versions of `column` used for the join, so that only
+    # the merged column remains
+    select(-!!sym(paste0(column, "_data1")), -!!sym(paste0(column, "_data2"))) |>
+    # Remove all `_data2` suffixed columns to delete all other duplicates
+    # Note: It would have been equally fine to remove all `_data1` columns instead,
+    # since we expect that these two input datasets were exactly identical except
+    # for the column called `column`
+    select(-ends_with("_data2")) |>
+    # Rename the columns ending in "_data1" back to their original names
+    rename_with(~ gsub("_data1$", "", .), ends_with("_data1"))
+    
   
   return(result)
 }
