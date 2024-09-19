@@ -22,11 +22,7 @@ source("src/utils/bucketing-tools.R")
 set.seed(42) # Pseudorandom seed for replicability
 synth_ipums <- generate_household_data() # Generate synthetic ipums data
 
-con <- dbConnect(
-  duckdb::duckdb(), 
-  "db/synth_ipums.db", 
-  overwrite = TRUE
-)
+con <- dbConnect(duckdb::duckdb(), ":memory:")
 dbWriteTable(
   con, 
   "synth_ipums", 
@@ -41,9 +37,8 @@ synth_ipums_db <- tbl(con, "synth_ipums") |>
 
 # ----- Step 3: Bucket the data ---- #
 
-# Try out the function
+# Append AGE_bucketed according to the lookup table
 synth_ipums_bucketed_db <- synth_ipums_db |>
-  # Append AGE_bucketed according to the lookup table
   append_bucket_column(
     con = con,
     filepath = "lookup_tables/age/age_buckets00.csv", 
@@ -51,14 +46,34 @@ synth_ipums_bucketed_db <- synth_ipums_db |>
     input_column = "AGE", 
     id_column = "id"
   ) |>
-  # Append INCOME_bucketed according to the lookup table
+  compute(name = "synth_ipums_age_bucketed", temporary = FALSE)
+print("Ages bucketed successfully.")
+
+# Append HHINCOME_bucketed according to the lookup table
+synth_ipums_bucketed_db <- synth_ipums_bucketed_db |>
   append_bucket_column(
     con = con,
     filepath = "lookup_tables/hhincome/hhincome_buckets00.csv",
     data = _,
     input_column = "HHINCOME",
     id_column = "id"
-  )
+  ) |> 
+  compute(name = "synth_ipums_hhincome_bucketed", temporary = FALSE)
+print("Household incomes bucketed successfully.")
+
+# Append RACE_bucketed according to the lookup table
+synth_ipums_bucketed_db <- synth_ipums_bucketed_db |>
+  append_bucket_column(
+    con = con,
+    filepath = "lookup_tables/race/race_buckets00.csv",
+    data = _,
+    input_column = "RACE",
+    id_column = "id"
+  ) |> 
+  compute(name = "synth_ipums_race_bucketed", temporary = FALSE)
+print("Race bucketed successfully.")
+
+synth_ipums_bucketed_db |> collect() |> View()
 
 # ----- Step 4: Clean up ----- #
 
