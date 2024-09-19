@@ -33,7 +33,7 @@ synth_ipums_db <- tbl(con, "synth_ipums") |>
 # ----- Step 3: Bucket the data ---- #
 
 # Try out the function
-result <- append_bucket_column(
+synth_ipums_bucketed_db <- append_bucket_column(
   con = con,
   filepath = "lookup_tables/age/age_buckets00.csv", 
   data = synth_ipums_db, 
@@ -41,38 +41,7 @@ result <- append_bucket_column(
   id_column = "id"
 )
 
-# ----- Step 4: Bucket the data ----- #
-
-
-# Proof of concept: Apply the range_match_lookup function to a tibble
-range_match_lookup(
-  data = synth_ipums,
-  lookup = age_lookup,
-  input_column = "AGE"
-)
-
-# Assign names to connections to database tables
-age_lookup_db <- tbl(con, "age_lookup")
-raw_db <- tbl(con, "synth_ipums")
-
-# Proof of concept: Apply the range_match_lookup function to a table in a database
-range_match_lookup(
-  data = raw_db,
-  lookup = age_lookup_db,
-  input_column = "AGE"
-)
-
-# Proof of concept: Assign the results of the range_match_lookup function to a table
-# in the database connection, and export back to the R environment.
-processed_db <- range_match_lookup(
-  data = raw_db,
-  lookup = age_lookup_db,
-  input_column = "AGE"
-) |>
-  compute("synth_ipums_bucket", temporary = FALSE) 
-
-processed_tibble <- processed_db |>
-  collect()
+# ----- Step 4: Clean up ----- #
 
 # Disconnect from DuckDB
 DBI::dbDisconnect(con)
