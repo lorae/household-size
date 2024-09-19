@@ -183,13 +183,14 @@ join_columns <- function(
     id       # The name of the column uniquely identifying observations (as a string)
 ){
   # Join the two datasets on the id column
-  result <- data1 %>%
-    left_join(data2, by = id, suffix = c("_data1", "_data2")) %>%
+  result <- data1 |>
+    left_join(data2, by = id, suffix = c("_data1", "_data2")) |>
     mutate(
       # Use the value from data2 if it's not NA; otherwise, use the value from data1
       !!sym(column) := coalesce(!!sym(paste0(column, "_data2")), !!sym(paste0(column, "_data1")))
-    ) %>%
-    select(!!sym(id), !!sym(column))
+    ) |>
+    # Select all columns except the ones added for the join
+    select(-!!sym(paste0(column, "_data1")), -!!sym(paste0(column, "_data2")))
   
   return(result)
 }
