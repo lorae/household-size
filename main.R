@@ -159,23 +159,37 @@ ipums |> head(1000) |> collect() |> View()
 
 # ----- Step 4: Calculate Weighted Mean ----- #
 
-# Calculate the weighted mean of NUMPREC by PERWT for each combination of buckets
-weighted_mean_query <- ipums_bucketed_db |>
-  group_by(HHINCOME_bucket, AGE_bucket, RACE_ETH_bucket, SEX) |>
-  summarize(
-    total_numprec_weighted = sum(NUMPREC * PERWT, na.rm = TRUE),
-    total_weight = sum(PERWT, na.rm = TRUE),
-    count = n()  # Count of observations in each group
-  ) |>
-  mutate(weighted_mean = total_numprec_weighted / total_weight) |>
-  select(HHINCOME_bucket, AGE_bucket, RACE_ETH_bucket, SEX, count, weighted_mean) |>
-  compute(name = "weighted_mean", temporary = FALSE)
+weighted_mean <- function(data, value_column, weight_column, group_by_columns) {
+  # Use quasiquotation to handle column names passed as strings
+  value_col <- sym(value_column)
+  weight_col <- sym(weight_column)
+  
+  # Dynamically reference grouping columns
+  group_by_cols <- syms(group_by_columns)
+  
+  # Calculate the weighted mean and count of observations
+  data %>%
+    group_by(!!!group_by_cols) %>%
+    summarize(
+      total_value_weighted = sum(!!value_col * !!weight_col, na.rm = TRUE),
+      total_weight = sum(!!weight_col, na.rm = TRUE),
+      count = n()
+    ) %>%
+    mutate(weighted_mean = total_value_weighted / total_weight) %>%
+    select(!!!group_by_cols, count, weighted_mean) %>%
+    compute(name = "weighted_mean", temporary = FALSE)
+}
 
-# Collect results into memory for viewing if needed
-result <- weighted_mean_query |> collect()
+# Example usage with the same arguments as before
+weighted_mean_result <- calculate_weighted_mean(
+  data = ipums_bucketed_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
+)
 
-# View first few rows of the result
-head(result)
+# Collect results to memory for testing
+result <- weighted_mean_result %>% collect()
 
 
 
