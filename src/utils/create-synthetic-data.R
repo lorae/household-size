@@ -47,6 +47,8 @@
 #'     a survey context.}
 #'   \item{HHINCOME}{Numeric. Household income, generated using a normal distribution 
 #'     with a floor at 0. This value is the same for all members of a household.}
+#'   \item{RACE}{Integer. A random value between 1 and 9 representing the race of 
+#'     the individual.}
 #' }
 #'
 #' @export
@@ -83,7 +85,8 @@ generate_household_data <- function(num_households = 40,
       SERIAL = serial,
       PERNUM = 1:num_persons,
       AGE = sample(age_range["min"]:age_range["max"], num_persons, replace = TRUE),
-      SEX = sample(c(1, 2, 9), num_persons, replace = TRUE, prob = sex_probs)
+      SEX = sample(c(1, 2, 9), num_persons, replace = TRUE, prob = sex_probs),
+      RACE = sample(1:9, num_persons, replace = TRUE)  # New column for RACE
     )
   }
   
@@ -92,5 +95,6 @@ generate_household_data <- function(num_households = 40,
   household_members |> left_join(households, by = "SERIAL")
   
 }
+
 
 
