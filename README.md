@@ -173,6 +173,14 @@ library("testthat")
 test_dir("tests/testthat/")
 ```
 
+# Performance Testing
+
+Ad hoc performance tests can be run suing the `profvis()` function in the `profvis` package. To  test performance of `main.R` for example:
+```r
+library("profvis")
+profvis(source("main.R"))
+```
+
 # References
 
 - <a name="galster2024" id="galster2024"></a>**George C. Galster (2024)**. *Is There Enough Housing Production? It Matters Which Indicators Are Used to Answer*, Housing Policy Debate. DOI: 10.1080/10511482.2024.2334018
