@@ -10,6 +10,7 @@ library("duckdb")
 library("dbplyr")
 library("glue")
 library("readr")
+library("purrr")
 
 # ----- Step 1: Helper functions ----- #
 
@@ -55,12 +56,14 @@ data2_db <- value_match_lookup(
   input_column = "AGE"
 )
 
-join_columns(
+result <- join_columns(
   data1 = data1_db,
   data2 = data2_db,
-  column = "AGE",
+  column = "AGE_bucket",
   id = "id"
 )
+
+result_tb <- result |> collect()
 
 
 # ----- Step 4: Bucket the data ----- #
