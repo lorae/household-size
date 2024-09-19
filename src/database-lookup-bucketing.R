@@ -22,8 +22,17 @@ source("src/utils/bucketing-tools.R")
 set.seed(42) # Pseudorandom seed for replicability
 synth_ipums <- generate_household_data() # Generate synthetic ipums data
 
-con <- dbConnect(duckdb::duckdb(), ":memory:")
-dbWriteTable(con, "synth_ipums", synth_ipums)
+con <- dbConnect(
+  duckdb::duckdb(), 
+  "db/synth_ipums.db", 
+  overwrite = TRUE
+)
+dbWriteTable(
+  con, 
+  "synth_ipums", 
+  synth_ipums, 
+  overwrite = TRUE
+)
 synth_ipums_db <- tbl(con, "synth_ipums") |>
   # Create a column of unique person-level ids
   mutate(id = paste(SERIAL, PERNUM, sep = "_")) |>
@@ -33,13 +42,23 @@ synth_ipums_db <- tbl(con, "synth_ipums") |>
 # ----- Step 3: Bucket the data ---- #
 
 # Try out the function
-synth_ipums_bucketed_db <- append_bucket_column(
-  con = con,
-  filepath = "lookup_tables/age/age_buckets00.csv", 
-  data = synth_ipums_db, 
-  input_column = "AGE", 
-  id_column = "id"
-)
+synth_ipums_bucketed_db <- synth_ipums_db |>
+  # Append AGE_bucketed according to the lookup table
+  append_bucket_column(
+    con = con,
+    filepath = "lookup_tables/age/age_buckets00.csv", 
+    data = _, 
+    input_column = "AGE", 
+    id_column = "id"
+  ) |>
+  # Append INCOME_bucketed according to the lookup table
+  append_bucket_column(
+    con = con,
+    filepath = "lookup_tables/hhincome/hhincome_buckets00.csv",
+    data = _,
+    input_column = "HHINCOME",
+    id_column = "id"
+  )
 
 # ----- Step 4: Clean up ----- #
 
