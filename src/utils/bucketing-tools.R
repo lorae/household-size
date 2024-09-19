@@ -246,7 +246,7 @@ split_lookup_table <- function(
     filepath # Path to the .csv file
 ) {
   # Read the CSV file into a tibble
-  lookup_raw <- read_csv(filepath)
+  lookup_raw <- read_csv(filepath, show_col_types = FALSE)
   
   # Separate rows into range-based and value-based lookups
   range_lookup <- lookup_raw %>%
