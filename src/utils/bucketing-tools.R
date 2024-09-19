@@ -4,56 +4,6 @@
 # of continuous (such as income, age) and categorical (such as race, ethnicity)
 # variables.
 
-# The purpose of this function is to take inputs from the RACE_bucket and
-# HISPAN_bucket columns as defined in the race_buckets00 and hispan_buckets00
-# lookup files and use them to generate a joint race/ethnicity column.
-create_race_eth_bucket <- function(data) {
-  
-  # Check if the RACE_bucket and HISPAN_bucket columns exist in the data frame
-  if (!"RACE_bucket" %in% names(data)) {
-    stop("Column RACE_bucket not found in the data frame.")
-  }
-  if (!"HISPAN_bucket" %in% names(data)) {
-    stop("Column HISPAN_bucket not found in the data frame.")
-  }
-  
-  # Check that the RACE_ETH_bucket column does not already exist in the data frame
-  if ("RACE_ETH_bucket" %in% names(data)) {
-    warning("Column RACE_ETH_bucket already exists in the data frame and will be overwritten.")
-  }
-  
-  # Initialize the new column with NA
-  data[["RACE_ETH_bucket"]] <- NA
-  
-  # Assign "hispanic" to all observations where HISPAN_bucket is "hispanic"
-  data[["RACE_ETH_bucket"]][data[["HISPAN_bucket"]] == "hispanic"] <- "hispanic"
-  
-  # Assign "black" to remaining observations where RACE_bucket is "black"
-  data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "black"] <- "black"
-  
-  # Assign "aapi" to remaining observations where RACE_bucket is "aapi"
-  data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "aapi"] <- "aapi"
-  
-  # Assign "aian" to remaining observations where RACE_bucket is "aian"
-  data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "aian"] <- "aian"
-  
-  # Assign "multi" to remaining observations where RACE_bucket is "multi"
-  data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "multi"] <- "multi"
-  
-  # Assign "white" to remaining observations where RACE_bucket is "white"
-  data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "white"] <- "white"
-  
-  # Assign "other" to remaining observations where RACE_bucket is "other"
-  data[["RACE_ETH_bucket"]][is.na(data[["RACE_ETH_bucket"]]) & data[["RACE_bucket"]] == "other"] <- "other"
-  
-  # Convert the RACE_ETH_bucket to a factor with levels in the desired order
-  race_eth_levels <- c("hispanic", "black", "aapi", "aian", "multi", "white", "other")
-  data[["RACE_ETH_bucket"]] <- factor(data[["RACE_ETH_bucket"]], levels = race_eth_levels)
-  
-  # Return the modified data frame
-  return(data)
-}
-
 # Proof-of-concept matching ranges in a lookup table using non-database data
 # https://stackoverflow.com/questions/75629990/lookup-table-in-r-by-matching-ranges
 
@@ -79,6 +29,15 @@ range_match_lookup <- function(
     output_column <- paste0(input_column, "_bucket")
   }
   
+  # Check if the lookup table is empty
+  if((lookup |> count() |> collect())$n == 0) {
+    
+    # Add a new column called output_column and assign all NA
+    result <- data |>
+      mutate(!!sym(output_column) := NA)
+    
+  } else {
+    
   result <- data |>
     # For every unique row of data, a new row is generated combining it with the lookup table
     cross_join(lookup) |>
@@ -88,6 +47,7 @@ range_match_lookup <- function(
     filter(!!sym(input_column) >= lower_bound & !!sym(input_column) < upper_bound) |>
     select(-lower_bound, -upper_bound) |> # Clean up extra columns
     rename(!!sym(output_column) := bucket_name)
+  }
   
   return(result)
 }
@@ -228,6 +188,38 @@ append_bucket_column <- function(
   )
   
   # Return lazy database reference (result)
+  return(result)
+}
+
+
+# The purpose of this function is to take inputs from the RACE_bucket and
+# HISPAN_bucket columns as defined in the race_buckets00 and hispan_buckets00
+# lookup files and use them to generate a joint race/ethnicity column.
+race_eth_bucket <- function(data) {
+  
+  # Check if the RACE_bucket and HISPAN_bucket columns exist in the data frame or database table
+  if (!("RACE_bucket" %in% colnames(data))) {
+    stop("Column RACE_bucket not found in the data.")
+  }
+  if (!("HISPAN_bucket" %in% colnames(data))) {
+    stop("Column HISPAN_bucket not found in the data.")
+  }
+  
+  # Create the RACE_ETH_bucket column using dplyr's mutate and case_when
+  result <- data %>%
+    mutate(
+      RACE_ETH_bucket = case_when(
+        HISPAN_bucket == "hispanic" ~ "hispanic",
+        RACE_bucket == "black" ~ "black",
+        RACE_bucket == "aapi" ~ "aapi",
+        RACE_bucket == "aian" ~ "aian",
+        RACE_bucket == "multi" ~ "multi",
+        RACE_bucket == "white" ~ "white",
+        RACE_bucket == "other" ~ "other",
+        TRUE ~ NA_character_  # For any unmatched cases, set NA
+      )
+    )
+  
   return(result)
 }
 
