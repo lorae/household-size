@@ -26,6 +26,8 @@ household-size/
 │   
 └── tests/                     # Testing directory
     ├── testthat/              # Unit tests directory
+    │   ├── test-range-match-lookup-db.R # Tests range_match_lookup() function on a database
+    │   ├── test-range-match-lookup-df.R # Tests range_match_lookup() function on a tibble
     │   └── test-bucketing.R   # Test script for bucketing functions
     └── test-data/             # Mock data for testing
         ├── mock_data.csv
@@ -162,6 +164,14 @@ The project is set up as an R project with `renv` to manage dependencies. When y
     **Race**: Add info here
 
     **Household income**: Add information here on how it's defined, whether it's pre-tax/transfer, whether it's only earned or earned and unearned, how it's deflated to compare over time, etc.
+
+# Unit Testing
+
+Tests are located in the `tests/testthat` folder. To run all tests:
+```r
+library("testthat")
+test_dir("tests/testthat/")
+```
 
 # References
 
