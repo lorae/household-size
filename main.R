@@ -165,15 +165,35 @@ ipums_bucketed_db |> head(1000) |> collect() |> View()
 # ----- Step 4: Calculate Weighted Mean ----- #
 
 # Example usage with the same arguments as before
-weighted_mean_result <- weighted_mean(
+weighted_mean_db <- weighted_mean(
   data = ipums_bucketed_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
   group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
-)
+) |> 
+  compute(name = "weighted_mean", temporary = FALSE)
 
 # Collect results to memory for testing
 result <- weighted_mean_result |> collect()
+
+# This is not the correct way to calculate household size. Person weights
+# should not be used; instead, household weights should be used, with
+# one observation per household. However, comparing these two summary
+# values is still a helpful data validation check to ensure that the
+# weighted averages are correctly computed. See 
+# tests/test-data/weighted-mean-inputs.xlsx, sheet entitled "Mean
+# Household Size" for more information.
+mean_hh_size_method1 <- ipums_db |>
+  summarize(mean = sum(PERWT * NUMPREC, na.rm = TRUE)/sum(PERWT)) |>
+  pull(mean)
+
+mean_hh_size_method2 <- weighted_mean_db |>
+  ungroup() |>  # Remove existing groupings
+  summarize(mean = sum(weighted_mean * sum_weights, na.rm = TRUE) / sum(sum_weights, na.rm = TRUE)) |>
+  pull(mean)
+
+print(mean_hh_size_method1)
+print(mean_hh_size_method2)
 
 
 
