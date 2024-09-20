@@ -25,6 +25,7 @@ library("purrr")
 # ----- Step 1: Source helper functions ----- #
 
 source("src/utils/bucketing-tools.R")
+source("src/utils/aggregation-tools.R")
 
 # ---- Step 2: Load in IPUMS data and save to DB ----- #
 
@@ -153,9 +154,7 @@ obs_count <- ipums_bucketed_db %>%
 print(paste("Number of observations in bucketed IPUMS data:", obs_count))
 
 # Optional: View a subset of the bucketed data
-# Note: will take about 1 minute to load
-data_sample <- ipums_bucketed_db |> head(50) |> collect()
-ipums |> head(1000) |> collect() |> View()
+ipums_bucketed_db |> head(1000) |> collect() |> View()
 
 # ----- Step 4: Calculate Weighted Mean ----- #
 
