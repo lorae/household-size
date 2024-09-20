@@ -52,7 +52,7 @@ print(
     "Time taken to read in IPUMS microdata:", 
     round(difftime(end_time, start_time, units = "secs"), 3), 
     "seconds")
-  )
+)
 
 con <- dbConnect(duckdb::duckdb(), ":memory:")
 dbWriteTable(con, "ipums", ipums, overwrite = TRUE)
@@ -173,9 +173,6 @@ weighted_mean_db <- weighted_mean(
 ) |> 
   compute(name = "weighted_mean", temporary = FALSE)
 
-# Collect results to memory for testing
-result <- weighted_mean_result |> collect()
-
 # To perform the data check I use the raw IPUMS data to calculate average 
 # household size. I then use the aggregated weighted_mean tables to 
 # calculate what should be an algebraically identical household size. 
@@ -187,6 +184,9 @@ result <- weighted_mean_result |> collect()
 # weights. However, these steps serve as another helpful indicator on 
 # whether weighted mean tables have gone awry.
 # 
+# It's the difference between the average household size and the average
+# household size a person lives in.
+#
 # See tests/test-data/weighted-mean-inputs.xlsx, sheet entitled "Mean
 #  Household Size" for more information.
 
