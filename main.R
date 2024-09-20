@@ -176,13 +176,20 @@ weighted_mean_db <- weighted_mean(
 # Collect results to memory for testing
 result <- weighted_mean_result |> collect()
 
-# This is not the correct way to calculate household size. Person weights
-# should not be used; instead, household weights should be used, with
-# one observation per household. However, comparing these two summary
-# values is still a helpful data validation check to ensure that the
-# weighted averages are correctly computed. See 
-# tests/test-data/weighted-mean-inputs.xlsx, sheet entitled "Mean
-# Household Size" for more information.
+# To perform the data check I use the raw IPUMS data to calculate average 
+# household size. I then use the aggregated weighted_mean tables to 
+# calculate what should be an algebraically identical household size. 
+# I print both outputs to confirm their similarity.
+# 
+# Note that these are not valid statistical ways for calculating average
+# household size: Average household size should truly be measured by 
+# using one observation per household and useing the HHWT, not PERWT, 
+# weights. However, these steps serve as another helpful indicator on 
+# whether weighted mean tables have gone awry.
+# 
+# See tests/test-data/weighted-mean-inputs.xlsx, sheet entitled "Mean
+#  Household Size" for more information.
+
 mean_hh_size_method1 <- ipums_db |>
   summarize(mean = sum(PERWT * NUMPREC, na.rm = TRUE)/sum(PERWT)) |>
   pull(mean)
