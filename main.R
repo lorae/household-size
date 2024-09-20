@@ -25,6 +25,8 @@ library("purrr")
 # ----- Step 1: Source helper functions ----- #
 
 source("src/utils/bucketing-tools.R")
+source("src/utils/aggregation-tools.R")
+source("src/utils/data-validation.R")
 
 # ---- Step 2: Load in IPUMS data and save to DB ----- #
 
@@ -50,7 +52,7 @@ print(
     "Time taken to read in IPUMS microdata:", 
     round(difftime(end_time, start_time, units = "secs"), 3), 
     "seconds")
-  )
+)
 
 con <- dbConnect(duckdb::duckdb(), ":memory:")
 dbWriteTable(con, "ipums", ipums, overwrite = TRUE)
@@ -63,6 +65,11 @@ ipums_db <- tbl(con, "ipums") |>
   mutate(id = paste(SAMPLE, SERIAL, PERNUM, sep = "_")) |>
   # Make `id` the first column
   select(id, everything())
+
+obs_count <- ipums_db %>%
+  summarise(count = n()) %>%
+  pull()
+print(paste("Number of observations in IPUMS data:", obs_count))
 
 # ----- Step 3: Bucket the data ---- #
 
@@ -78,6 +85,12 @@ ipums_bucketed_db <- ipums_db |>
   compute(name = "ipums_age_bucketed", temporary = FALSE)
 print("Ages bucketed successfully.")
 
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by age group"
+)
+
 # Append HHINCOME_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
   append_bucket_column(
@@ -89,6 +102,12 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   ) |> 
   compute(name = "ipums_hhincome_bucketed", temporary = FALSE)
 print("Household incomes bucketed successfully.")
+
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by household-level income group"
+)
 
 # Append HISPAN_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
@@ -102,6 +121,12 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_hispan_bucketed", temporary = FALSE)
 print("Ethnicity bucketed successfully.")
 
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by ethnicity"
+)
+
 # Append RACE_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
   append_bucket_column(
@@ -114,6 +139,12 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_bucketed", temporary = FALSE)
 print("Race bucketed successfully.")
 
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by race"
+)
+
 # Use the HISPAN_bucket and RACE_bucket to produce a RACE_ETH_bucket column
 ipums_bucketed_db <- ipums_bucketed_db |>
   race_eth_bucket(
@@ -122,10 +153,66 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_eth_bucketed", temporary = FALSE)
 print("Ethnicity/Race coded into a single bucket successfully.")
 
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed into a combined race-ethnicity column"
+)
+
 # Optional: View a subset of the bucketed data
-# Note: will take about 1 minute to load
-data_sample <- ipums_bucketed_db |> head(50) |> collect()
-ipums |> head(1000) |> collect() |> View()
+ipums_bucketed_db |> head(1000) |> collect() |> View()
+
+# ----- Step 4: Calculate Weighted Mean ----- #
+
+# Example usage with the same arguments as before
+weighted_mean_db <- weighted_mean(
+  data = ipums_bucketed_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
+) |> 
+  compute(name = "weighted_mean", temporary = FALSE)
+
+# To perform the data check I use the raw IPUMS data to calculate average 
+# household size. I then use the aggregated weighted_mean tables to 
+# calculate what should be an algebraically identical household size. 
+# I print both outputs to confirm their similarity.
+# 
+# Note that these are not valid statistical ways for calculating average
+# household size: Average household size should truly be measured by 
+# using one observation per household and useing the HHWT, not PERWT, 
+# weights. However, these steps serve as another helpful indicator on 
+# whether weighted mean tables have gone awry.
+# 
+# It's the difference between the average household size and the average
+# household size a person lives in.
+#
+# See tests/test-data/weighted-mean-inputs.xlsx, sheet entitled "Mean
+#  Household Size" for more information.
+
+mean_hh_size_method1 <- ipums_db |>
+  summarize(mean = sum(PERWT * NUMPREC, na.rm = TRUE)/sum(PERWT)) |>
+  pull(mean)
+
+mean_hh_size_method2 <- weighted_mean_db |>
+  ungroup() |>  # Remove existing groupings
+  summarize(mean = sum(weighted_mean * sum_weights, na.rm = TRUE) / sum(sum_weights, na.rm = TRUE)) |>
+  pull(mean)
+
+print(mean_hh_size_method1)
+print(mean_hh_size_method2)
+
+
+# ----- Step 5: Calculate aggregates for every PUMA ----- #
+# Example usage with the same arguments as before
+puma_mean_db <- weighted_mean(
+  data = ipums_bucketed_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("CPUMA0010")
+) |> 
+  compute(name = "puma_mean", temporary = FALSE)
+
 
 
 # ----- Step 4: Clean up ----- #
