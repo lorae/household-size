@@ -26,6 +26,7 @@ library("purrr")
 
 source("src/utils/bucketing-tools.R")
 source("src/utils/aggregation-tools.R")
+source("src/utils/data-validation.R")
 
 # ---- Step 2: Load in IPUMS data and save to DB ----- #
 
@@ -67,7 +68,7 @@ ipums_db <- tbl(con, "ipums") |>
 
 obs_count <- ipums_db %>%
   summarise(count = n()) %>%
-  collect()
+  pull()
 print(paste("Number of observations in IPUMS data:", obs_count))
 
 # ----- Step 3: Bucket the data ---- #
@@ -84,10 +85,11 @@ ipums_bucketed_db <- ipums_db |>
   compute(name = "ipums_age_bucketed", temporary = FALSE)
 print("Ages bucketed successfully.")
 
-obs_count <- ipums_bucketed_db %>%
-  summarise(count = n()) %>%
-  collect()
-print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by age group"
+)
 
 # Append HHINCOME_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
@@ -101,10 +103,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_hhincome_bucketed", temporary = FALSE)
 print("Household incomes bucketed successfully.")
 
-obs_count <- ipums_bucketed_db %>%
-  summarise(count = n()) %>%
-  collect()
-print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by household-level income group"
+)
 
 # Append HISPAN_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
@@ -118,10 +121,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_hispan_bucketed", temporary = FALSE)
 print("Ethnicity bucketed successfully.")
 
-obs_count <- ipums_bucketed_db %>%
-  summarise(count = n()) %>%
-  collect()
-print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by ethnicity"
+)
 
 # Append RACE_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_bucketed_db |>
@@ -135,10 +139,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_bucketed", temporary = FALSE)
 print("Race bucketed successfully.")
 
-obs_count <- ipums_bucketed_db %>%
-  summarise(count = n()) %>%
-  collect()
-print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed by race"
+)
 
 # Use the HISPAN_bucket and RACE_bucket to produce a RACE_ETH_bucket column
 ipums_bucketed_db <- ipums_bucketed_db |>
@@ -148,10 +153,11 @@ ipums_bucketed_db <- ipums_bucketed_db |>
   compute(name = "ipums_race_eth_bucketed", temporary = FALSE)
 print("Ethnicity/Race coded into a single bucket successfully.")
 
-obs_count <- ipums_bucketed_db %>%
-  summarise(count = n()) %>%
-  collect()
-print(paste("Number of observations in bucketed IPUMS data:", obs_count))
+validate_row_counts(
+  db = ipums_bucketed_db,
+  expected_count = obs_count,
+  step_description = "data were bucketed into a combined race-ethnicity column"
+)
 
 # Optional: View a subset of the bucketed data
 ipums_bucketed_db |> head(1000) |> collect() |> View()
