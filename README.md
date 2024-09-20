@@ -175,11 +175,19 @@ test_dir("tests/testthat/")
 
 # Performance Testing
 
-Ad hoc performance tests can be run suing the `profvis()` function in the `profvis` package. To  test performance of `main.R` for example:
+Ad hoc performance tests can be run suing the `profvis()` function in the `profvis` package. For example, to test the performance of `main.R`, run:
+
 ```r
 library("profvis")
 profvis(source("main.R"))
 ```
+# Data Validation
+
+As we process the data, we run several tests to validate that the pipeline is working as expected. The module containing these validation functions is located at `src/utils/data-validation.R`.
+
+Current data checks include:
+
+- **Row count validation during data bucketing:**. After the IPUMS data is read and loaded into the database, the number of observations is recorded in `obs_count`. Subsequent data bucketing steps are validated against this expected count using the `validate_row_counts()` function. If any rows are unexpectedly dropped, execution will stop, and an error will be raised.
 
 # References
 
