@@ -203,6 +203,16 @@ print(mean_hh_size_method1)
 print(mean_hh_size_method2)
 
 
+# ----- Step 5: Calculate aggregates for every PUMA ----- #
+# Example usage with the same arguments as before
+puma_mean_db <- weighted_mean(
+  data = ipums_bucketed_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("CPUMA0010")
+) |> 
+  compute(name = "puma_mean", temporary = FALSE)
+
 
 
 # ----- Step 4: Clean up ----- #
