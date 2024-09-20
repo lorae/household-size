@@ -35,10 +35,10 @@ source("src/utils/data-validation.R")
 # Helpful information on IPUMS and ipumsr from: 
 # https://www.youtube.com/watch?v=OT6upQ1dBgU
 
-# On my computer, the usa_00003 data pull represents just data from 2000. It is 
+# On my computer, the usa_00004 data pull represents data from 2000 and 2020. It is 
 # currently .gitignored. Later, I will make this code more replicable by using
 # an API call.
-ddi <- read_ipums_ddi("usa_00003.xml")
+ddi <- read_ipums_ddi("usa_00004.xml")
 # Note: This file takes about 3 minutes to read
 print("Reading in IPUMS microdata")
 start_time <- Sys.time() # For elapsed time
