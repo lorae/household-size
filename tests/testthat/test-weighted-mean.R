@@ -56,6 +56,7 @@ test_that("weighted_mean produces correct results", {
   expect_equal(output$AGE_bucket, expected$AGE_bucket)
   expect_equal(output$RACE_ETH_bucket, expected$RACE_ETH_bucket)
   expect_equal(output$SEX, expected$SEX)
+  expect_equal(output$sum_weights, expected$sum_weights)
   
   # Step 8: Clean up (disconnect from DuckDB)
   dbDisconnect(con, shutdown = TRUE)
