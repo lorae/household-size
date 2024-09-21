@@ -177,16 +177,31 @@ ipums_bucketed_2020_db |> summarize(count = n()) |> pull() # in 2020
 # Optional: View a subset of the bucketed data
 ipums_bucketed_db |> head(1000) |> collect() |> View()
 
-# ----- Step 4: Calculate Weighted Mean ----- #
+# ----- Step 6: Calculate weighted mean household size ----- #
 
-# Example usage with the same arguments as before
-weighted_mean_db <- weighted_mean(
+weighted_mean_db <- weighted_mean( # Overall
   data = ipums_bucketed_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
   group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
 ) |> 
   compute(name = "weighted_mean", temporary = FALSE)
+
+weighted_mean_2000_db <- weighted_mean( # Just 2000
+  data = ipums_bucketed_2000_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
+) |> 
+  compute(name = "weighted_mean_2000", temporary = FALSE)
+
+weighted_mean_2020_db <- weighted_mean( # Just 2020
+  data = ipums_bucketed_2020_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
+) |> 
+  compute(name = "weighted_mean_2020", temporary = FALSE)
 
 # To perform the data check I use the raw IPUMS data to calculate average 
 # household size. I then use the aggregated weighted_mean tables to 
