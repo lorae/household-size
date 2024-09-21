@@ -159,6 +159,21 @@ validate_row_counts(
   step_description = "data were bucketed into a combined race-ethnicity column"
 )
 
+# ----- Step 5: Create the individual databases for each year ----- #
+ipums_bucketed_2000_db <- ipums_bucketed_db |> # 2000
+  filter(YEAR == 2000) |>
+  # Force computation now so later aggregation is faster
+  compute(name = "ipums_bucketed_2000", temporary = FALSE)
+
+ipums_bucketed_2020_db <- ipums_bucketed_db |> # 2020
+  filter(YEAR == 2020) |>
+  # Force computation now so later aggregation is faster
+  compute(name = "ipums_bucketed_2020", temporary = FALSE)
+
+# Count the number of entries in each year
+ipums_bucketed_2000_db |> summarize(count = n()) |> pull() # in 2000
+ipums_bucketed_2020_db |> summarize(count = n()) |> pull() # in 2020
+
 # Optional: View a subset of the bucketed data
 ipums_bucketed_db |> head(1000) |> collect() |> View()
 
