@@ -233,9 +233,9 @@ print(mean_hh_size_method1)
 print(mean_hh_size_method2)
 
 
-# ----- Step 5: Calculate aggregates for every PUMA ----- #
-# Example usage with the same arguments as before
-puma_mean_db <- weighted_mean(
+# ----- Step 7: Calculate aggregates for every PUMA ----- #
+
+puma_mean_db <- weighted_mean( # Overall
   data = ipums_bucketed_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
@@ -243,7 +243,35 @@ puma_mean_db <- weighted_mean(
 ) |> 
   compute(name = "puma_mean", temporary = FALSE)
 
+puma_mean_2000_db <- weighted_mean( # Overall
+  data = ipums_bucketed_2000_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("CPUMA0010")
+) |> 
+  compute(name = "puma_mean_2000", temporary = FALSE)
 
+puma_mean_2020_db <- weighted_mean( # Overall
+  data = ipums_bucketed_2020_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("CPUMA0010")
+) |> 
+  compute(name = "puma_mean_2020", temporary = FALSE)
+
+puma_diff <- puma_mean_2000_db %>%
+  select(CPUMA0010, weighted_mean_2000 = weighted_mean) %>%  # Select relevant columns and rename
+  inner_join(
+    puma_mean_2020_db %>% 
+      select(CPUMA0010, weighted_mean_2020 = weighted_mean),  # Select relevant columns and rename
+    by = "CPUMA0010"
+  ) %>%
+  # Calculate the difference (weighted_mean_2020 - weighted_mean_2000)
+  mutate(diff = weighted_mean_2020 - weighted_mean_2000) %>%
+  # Arrange columns as needed
+  select(CPUMA0010, weighted_mean_2020, weighted_mean_2000, diff)
+
+puma_diff_tb <- puma_diff |> collect()
 
 # ----- Step 4: Clean up ----- #
 
