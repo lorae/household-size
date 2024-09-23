@@ -1,0 +1,6 @@
+# Ignore all files in the ipums_cpuma0010 folder
+*
+
+# Allow .gitignore and README.md to be tracked
+!.gitignore
+!README.md
