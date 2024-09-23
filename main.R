@@ -21,6 +21,8 @@ library("dbplyr")
 library("glue")
 library("readr")
 library("purrr")
+library("sf")
+library("ggplot2")
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -92,6 +94,7 @@ validate_row_counts(
 )
 
 # Append HHINCOME_bucketed according to the lookup table
+# TODO: Must deflate HH income from 2020 to 2000 levels.
 ipums_bucketed_db <- ipums_bucketed_db |>
   append_bucket_column(
     con = con,
@@ -273,7 +276,49 @@ puma_diff <- puma_mean_2000_db %>%
 
 puma_diff_tb <- puma_diff |> collect()
 
-# ----- Step 4: Clean up ----- #
+# ----- Step 8: Map it ----- #
+
+my_sf <- read_sf("ipums_cpuma0010/ipums_cpuma0010.shp")
+
+# Merge with the data from ipums 
+my_sf_merged <- my_sf |>
+  left_join(puma_diff_tb, by = "CPUMA0010")
+
+sf_ohio <- my_sf_merged |> 
+  filter(STATEFIP == 39)
+
+sf_nj <- my_sf_merged |>
+  filter(STATEFIP == 34)
+
+sf_ny <- my_sf_merged |>
+  filter(STATEFIP == 36)
+
+
+# Plot ohio
+ggplot(sf_ohio) +
+  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
+  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
+  theme_void()  # Keep the void theme
+
+
+# Plot New Jersey
+ggplot(sf_nj) +
+  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
+  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
+  theme_void()  # Keep the void theme
+
+# Plot New York
+ggplot(sf_ny) +
+  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
+  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
+  theme_void()  # Keep the void theme
+
+# # This one takes longer
+# ggplot(my_sf_merged) +
+#   geom_sf(aes(fill = diff())) +
+#   theme_void()
+
+# ----- Step 9: Clean up ----- #
 
 # Disconnect from DuckDB
 DBI::dbDisconnect(con)
