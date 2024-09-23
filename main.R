@@ -246,7 +246,7 @@ puma_mean_db <- weighted_mean( # Overall
 ) |> 
   compute(name = "puma_mean", temporary = FALSE)
 
-puma_mean_2000_db <- weighted_mean( # Overall
+puma_mean_2000_db <- weighted_mean( # 2000
   data = ipums_bucketed_2000_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
@@ -254,7 +254,7 @@ puma_mean_2000_db <- weighted_mean( # Overall
 ) |> 
   compute(name = "puma_mean_2000", temporary = FALSE)
 
-puma_mean_2020_db <- weighted_mean( # Overall
+puma_mean_2020_db <- weighted_mean( # 2020
   data = ipums_bucketed_2020_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
@@ -263,16 +263,31 @@ puma_mean_2020_db <- weighted_mean( # Overall
   compute(name = "puma_mean_2020", temporary = FALSE)
 
 puma_diff <- puma_mean_2000_db %>%
-  select(CPUMA0010, weighted_mean_2000 = weighted_mean) %>%  # Select relevant columns and rename
+  select(   # Rename certain columns to distinguish between years
+    CPUMA0010, # The column on which the data are being joined
+    weighted_mean_2000 = weighted_mean, 
+    count_2000 = count
+    ) %>%
   inner_join(
     puma_mean_2020_db %>% 
-      select(CPUMA0010, weighted_mean_2020 = weighted_mean),  # Select relevant columns and rename
+      select(
+        CPUMA0010, 
+        weighted_mean_2020 = weighted_mean,
+        count_2020 = count
+        ),
     by = "CPUMA0010"
   ) %>%
   # Calculate the difference (weighted_mean_2020 - weighted_mean_2000)
-  mutate(diff = weighted_mean_2020 - weighted_mean_2000) %>%
-  # Arrange columns as needed
-  select(CPUMA0010, weighted_mean_2020, weighted_mean_2000, diff)
+  mutate(diff = weighted_mean_2020 - weighted_mean_2000) |>
+  # Arrange columns
+  select(
+    CPUMA0010,
+    diff,
+    weighted_mean_2020, 
+    weighted_mean_2000, 
+    count_2020,
+    count_2000
+  )
 
 puma_diff_tb <- puma_diff |> collect()
 
