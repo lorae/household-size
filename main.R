@@ -275,7 +275,6 @@ puma_diff_db <- difference_means(
 ) |> 
   compute(name = "puma_diff", temporary = FALSE)
 
-
 # Store these results into memory
 puma_diff_tb <- puma_diff_db |> collect()
 
@@ -287,7 +286,6 @@ sf <- read_sf("ipums_cpuma0010/ipums_cpuma0010.shp")
 puma_diff_sf <- sf |>
   left_join(puma_diff_tb, by = "CPUMA0010")
 
-sf_ohio <- my_sf_merged |> 
 # Summarize population size differences across states
 puma_diff_by_states <- puma_diff_sf %>%
   filter(STATEFIP != "72") %>%  # Remove Puerto Rico
@@ -337,14 +335,42 @@ ggplot(puma_diff_by_states, aes(x = State)) +
     y = "Change in People Per Household, 2000 - 2020"
   )
 
+sf_il <- puma_diff_sf |>
+  filter(STATEFIP == 17)
+
+sf_dc <- puma_diff_sf |>
+  filter(STATEFIP == 11)
+
+sf_id <- puma_diff_sf |> 
+  filter(STATEFIP == 16)
+
+sf_ohio <- puma_diff_sf |> 
   filter(STATEFIP == 39)
 
-sf_nj <- my_sf_merged |>
+sf_nj <- puma_diff_sf |>
   filter(STATEFIP == 34)
 
-sf_ny <- my_sf_merged |>
+sf_ny <- puma_diff_sf |>
   filter(STATEFIP == 36)
 
+# Create a plot of Idaho PUMA to show that it is only one PUMA for the whole state
+ggplot(sf_id) +
+  geom_sf(fill = "white", color = "black") +  # Set fill to white and borders to black
+  theme_void()  # Keep the void theme
+
+# Plot Chicago
+ggplot(
+  sf_il |> filter(CPUMA0010 > 315)
+  ) +
+  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
+  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
+  theme_void()  # Keep the void theme
+
+# Plot DC
+ggplot(sf_dc) +
+  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
+  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
+  theme_void()  # Keep the void theme
 
 # Plot ohio
 ggplot(sf_ohio) +
