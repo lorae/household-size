@@ -35,10 +35,10 @@ source("src/utils/data-validation.R")
 # Helpful information on IPUMS and ipumsr from: 
 # https://www.youtube.com/watch?v=OT6upQ1dBgU
 
-# On my computer, the usa_00003 data pull represents just data from 2000. It is 
+# On my computer, the usa_00004 data pull represents data from 2000 and 2020. It is 
 # currently .gitignored. Later, I will make this code more replicable by using
 # an API call.
-ddi <- read_ipums_ddi("usa_00003.xml")
+ddi <- read_ipums_ddi("usa_00004.xml")
 # Note: This file takes about 3 minutes to read
 print("Reading in IPUMS microdata")
 start_time <- Sys.time() # For elapsed time
@@ -159,19 +159,49 @@ validate_row_counts(
   step_description = "data were bucketed into a combined race-ethnicity column"
 )
 
+# ----- Step 5: Create the individual databases for each year ----- #
+ipums_bucketed_2000_db <- ipums_bucketed_db |> # 2000
+  filter(YEAR == 2000) |>
+  # Force computation now so later aggregation is faster
+  compute(name = "ipums_bucketed_2000", temporary = FALSE)
+
+ipums_bucketed_2020_db <- ipums_bucketed_db |> # 2020
+  filter(YEAR == 2020) |>
+  # Force computation now so later aggregation is faster
+  compute(name = "ipums_bucketed_2020", temporary = FALSE)
+
+# Count the number of entries in each year
+ipums_bucketed_2000_db |> summarize(count = n()) |> pull() # in 2000
+ipums_bucketed_2020_db |> summarize(count = n()) |> pull() # in 2020
+
 # Optional: View a subset of the bucketed data
 ipums_bucketed_db |> head(1000) |> collect() |> View()
 
-# ----- Step 4: Calculate Weighted Mean ----- #
+# ----- Step 6: Calculate weighted mean household size ----- #
 
-# Example usage with the same arguments as before
-weighted_mean_db <- weighted_mean(
+weighted_mean_db <- weighted_mean( # Overall
   data = ipums_bucketed_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
   group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
 ) |> 
   compute(name = "weighted_mean", temporary = FALSE)
+
+weighted_mean_2000_db <- weighted_mean( # Just 2000
+  data = ipums_bucketed_2000_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
+) |> 
+  compute(name = "weighted_mean_2000", temporary = FALSE)
+
+weighted_mean_2020_db <- weighted_mean( # Just 2020
+  data = ipums_bucketed_2020_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("HHINCOME_bucket", "AGE_bucket", "RACE_ETH_bucket", "SEX")
+) |> 
+  compute(name = "weighted_mean_2020", temporary = FALSE)
 
 # To perform the data check I use the raw IPUMS data to calculate average 
 # household size. I then use the aggregated weighted_mean tables to 
@@ -203,9 +233,9 @@ print(mean_hh_size_method1)
 print(mean_hh_size_method2)
 
 
-# ----- Step 5: Calculate aggregates for every PUMA ----- #
-# Example usage with the same arguments as before
-puma_mean_db <- weighted_mean(
+# ----- Step 7: Calculate aggregates for every PUMA ----- #
+
+puma_mean_db <- weighted_mean( # Overall
   data = ipums_bucketed_db,
   value_column = "NUMPREC",
   weight_column = "PERWT",
@@ -213,7 +243,35 @@ puma_mean_db <- weighted_mean(
 ) |> 
   compute(name = "puma_mean", temporary = FALSE)
 
+puma_mean_2000_db <- weighted_mean( # Overall
+  data = ipums_bucketed_2000_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("CPUMA0010")
+) |> 
+  compute(name = "puma_mean_2000", temporary = FALSE)
 
+puma_mean_2020_db <- weighted_mean( # Overall
+  data = ipums_bucketed_2020_db,
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("CPUMA0010")
+) |> 
+  compute(name = "puma_mean_2020", temporary = FALSE)
+
+puma_diff <- puma_mean_2000_db %>%
+  select(CPUMA0010, weighted_mean_2000 = weighted_mean) %>%  # Select relevant columns and rename
+  inner_join(
+    puma_mean_2020_db %>% 
+      select(CPUMA0010, weighted_mean_2020 = weighted_mean),  # Select relevant columns and rename
+    by = "CPUMA0010"
+  ) %>%
+  # Calculate the difference (weighted_mean_2020 - weighted_mean_2000)
+  mutate(diff = weighted_mean_2020 - weighted_mean_2000) %>%
+  # Arrange columns as needed
+  select(CPUMA0010, weighted_mean_2020, weighted_mean_2000, diff)
+
+puma_diff_tb <- puma_diff |> collect()
 
 # ----- Step 4: Clean up ----- #
 
