@@ -262,34 +262,17 @@ puma_mean_2020_db <- weighted_mean( # 2020
 ) |> 
   compute(name = "puma_mean_2020", temporary = FALSE)
 
-puma_diff <- puma_mean_2000_db %>%
-  select(   # Rename certain columns to distinguish between years
-    CPUMA0010, # The column on which the data are being joined
-    weighted_mean_2000 = weighted_mean, 
-    count_2000 = count
-    ) %>%
-  inner_join(
-    puma_mean_2020_db %>% 
-      select(
-        CPUMA0010, 
-        weighted_mean_2020 = weighted_mean,
-        count_2020 = count
-        ),
-    by = "CPUMA0010"
-  ) %>%
-  # Calculate the difference (weighted_mean_2020 - weighted_mean_2000)
-  mutate(diff = weighted_mean_2020 - weighted_mean_2000) |>
-  # Arrange columns
-  select(
-    CPUMA0010,
-    diff,
-    weighted_mean_2020, 
-    weighted_mean_2000, 
-    count_2020,
-    count_2000
-  )
+# Difference the tables to determine which CPUMAs saw increases or decreases
+# in household size
+puma_diff_db <- difference_means(
+  data2000 = puma_mean_2000_db,
+  data2020 = puma_mean_2020_db
+) |> 
+  compute(name = "puma_diff", temporary = FALSE)
 
-puma_diff_tb <- puma_diff |> collect()
+
+# Store these results into memory
+puma_diff_tb <- puma_diff_db |> collect()
 
 # ----- Step 8: Map it ----- #
 
