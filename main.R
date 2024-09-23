@@ -23,6 +23,7 @@ library("readr")
 library("purrr")
 library("sf")
 library("ggplot2")
+library("writexl")
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -280,13 +281,62 @@ puma_diff_tb <- puma_diff_db |> collect()
 
 # ----- Step 8: Map it ----- #
 
-my_sf <- read_sf("ipums_cpuma0010/ipums_cpuma0010.shp")
+sf <- read_sf("ipums_cpuma0010/ipums_cpuma0010.shp")
 
-# Merge with the data from ipums 
-my_sf_merged <- my_sf |>
+# Merge shapefile with the differenced IPUMS data 
+puma_diff_sf <- sf |>
   left_join(puma_diff_tb, by = "CPUMA0010")
 
 sf_ohio <- my_sf_merged |> 
+# Summarize population size differences across states
+puma_diff_by_states <- puma_diff_sf %>%
+  filter(STATEFIP != "72") %>%  # Remove Puerto Rico
+  group_by(STATEFIP, State) %>%
+  summarize(
+    min_diff = min(diff, na.rm = TRUE),
+    Q1_diff = quantile(diff, 0.25, na.rm = TRUE),
+    median_diff = median(diff, na.rm = TRUE),
+    Q3_diff = quantile(diff, 0.75, na.rm = TRUE),
+    max_diff = max(diff, na.rm = TRUE),
+    min_CPUMA = CPUMA0010[which.min(diff)],
+    max_CPUMA = CPUMA0010[which.max(diff)]
+  ) %>%
+  ungroup()
+
+# Save the summarized results to an Excel file
+write_xlsx(puma_diff_by_states, "results/puma_diff_by_states.xlsx")
+# Save the unsummarized results, too
+write_xlsx(puma_diff_sf, "results/puma_diff.xlsx")
+
+# Ensure 'State' is a factor to maintain order
+puma_diff_by_states <- puma_diff_by_states %>%
+  mutate(State = factor(State, levels = State))
+
+# Reorder states based on median_diff (comment out if you want states ordered
+# alphabetically)
+puma_diff_by_states <- puma_diff_by_states %>%
+  mutate(State = reorder(State, median_diff))
+
+# Create the box and whisker plot
+ggplot(puma_diff_by_states, aes(x = State)) +
+  geom_boxplot(
+    aes(
+      ymin = min_diff,
+      lower = Q1_diff,
+      middle = median_diff,
+      upper = Q3_diff,
+      ymax = max_diff
+    ),
+    stat = "identity"
+  ) +
+  coord_flip() +  # Flip coordinates for better readability
+  theme_minimal() +
+  labs(
+    title = "Household Size Differences by State",
+    x = "State",
+    y = "Change in People Per Household, 2000 - 2020"
+  )
+
   filter(STATEFIP == 39)
 
 sf_nj <- my_sf_merged |>
