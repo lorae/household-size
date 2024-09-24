@@ -350,11 +350,17 @@ map_geographies(puma_diff_sf |> filter(State == "Idaho"))
 
 # Plot differences in various geographies
 map_data(puma_diff_sf |> filter(State == "Illinois" & CPUMA0010 > 315)) # Chicago
-map_data(puma_diff_sf |> filter(State == "District of Columbia")) # DC
-map_data(puma_diff_sf |> filter(State == "Ohio")) # Ohio
-map_data(puma_diff_sf |> filter(State == "New Jersey")) # New Jersey
+map_data(puma_diff_sf |> filter(State == "District of Columbia"))
+map_data(puma_diff_sf |> filter(State == "Ohio"))
+map_data(puma_diff_sf |> filter(State == "New Jersey"))
 map_data(puma_diff_sf |> filter(State == "New York"), borders = FALSE) # New York State
 map_data(puma_diff_sf |> filter(State == "New York" & CPUMA0010 > 705)) # New York City
+map_data(puma_diff_sf |> filter(State == "California" & CPUMA0010 %in% # Bay Area
+                                  c(58, 62, 101, 102, 105, 111, 112, 122, 123, 124, 
+                                    125, 126, 127, 128, 129, 131, 132, 133, 134, 
+                                    135, 136, 138, 139, 140, 141, 142, 143, 144,
+                                    145, 147, 148, 149, 150, 151, 152, 153, 158)
+                                )) 
 
 # ----- Step 9: Clean up ----- #
 
