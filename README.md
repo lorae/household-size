@@ -124,25 +124,17 @@ The project is set up as an R project with `renv` to manage dependencies. When y
 
 # FAQ
 
-1. How granular is this analysis, geographically?
+1. **How granular is this analysis, geographically?**
 
-    There are roughly 2,000 Census PUMAs in the United States. However, their size varies widely. In Minnesota, the smallest PUMA encompasses [what city?] and the largest PUMA encompasses [the rest of the state?]. 
-
-    [map of Ohio PUMAs in 2020]
-
-    Here's a map of the PUMAs in the United States.
-
-    [map of all PUMAs]
+    The Census Bureau divides the United States into [Public Use Microdata Areas (PUMAs)](https://www.census.gov/programs-surveys/geography/guidance/geo-areas/pumas.html). They're designed to collectively cover the entire U.S. population, not cross state boundaries, and "contain no fewer than 100,000 people each." There are roughly 2,000 PUMAs total.
     
-    Unfortunately, PUMAs do not perfectly correspond with each other between the 2000 and 2020 Census.
+    Due to migration and demographic shifts, the Census Bureau is continually redrawing the boundaries of its PUMAs. This can pose a challenge for comparing values in the same region over multiple years. Luckily, for this purpose, the Bureau also defines [Constant Public Use Microdata Areas (ConsPUMAs, or CPUMAs)](https://usa.ipums.org/usa-action/variables/CPUMA0010#description_section) for various date ranges. The ConsPUMAs we use in this analysis are CPUMA0010, which "represents areas that are consistent among 2000 and 2010 PUMAs" and "can be consistently identified from the geographic codes available in U.S. Census PUMS from 2000 to 2021 samples."
     
-    [map with altered PUMA boundaries]
+    Compared to PUMAs, ConsPUMAs are larger: there 1,085 ConsPUMAS defined in CPUMA0010. The land area of these ConsPUMAs varies widely: in unpopulated regions, they can be quite large, while in populated regions they can be quite small. In Minnesota, for example, the smallest ConsPUMA encompass only a small portion of Minneapolis, while the largest ConsPUMA encompasses much of the state.
     
-2. How do you get around the issue of mismatched PUMAs?
+    ![Map of Minnestota PUMAs in 2020](docs/images/minnesota_cpumas.svg)
 
-  [TODO: Explain several robusteness tests here]
-
-3. How granular is this analysis, demographically?
+2. **How granular is this analysis, demographically?**
 
     The variables we use to bin individuals into groups are the following. See our codebook [link to codebook] for more information.
 
