@@ -335,14 +335,6 @@ ggplot(puma_diff_by_states, aes(x = State)) +
     y = "Change in People Per Household, 2000 - 2020"
   )
 
-sf_il <- puma_diff_sf |>
-  filter(STATEFIP == 17)
-
-sf_dc <- puma_diff_sf |>
-  filter(STATEFIP == 11)
-
-sf_id <- puma_diff_sf |> 
-  filter(STATEFIP == 16)
 
 sf_ohio <- puma_diff_sf |> 
   filter(STATEFIP == 39)
@@ -354,47 +346,15 @@ sf_ny <- puma_diff_sf |>
   filter(STATEFIP == 36)
 
 # Create a plot of Idaho PUMA to show that it is only one PUMA for the whole state
-ggplot(sf_id) +
-  geom_sf(fill = "white", color = "black") +  # Set fill to white and borders to black
-  theme_void()  # Keep the void theme
+map_geographies(puma_diff_sf |> filter(State == "Idaho"))
 
-# Plot Chicago
-ggplot(
-  sf_il |> filter(CPUMA0010 > 315)
-  ) +
-  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
-  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
-  theme_void()  # Keep the void theme
-
-# Plot DC
-ggplot(sf_dc) +
-  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
-  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
-  theme_void()  # Keep the void theme
-
-# Plot ohio
-ggplot(sf_ohio) +
-  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
-  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
-  theme_void()  # Keep the void theme
-
-
-# Plot New Jersey
-ggplot(sf_nj) +
-  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
-  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
-  theme_void()  # Keep the void theme
-
-# Plot New York
-ggplot(sf_ny) +
-  geom_sf(aes(fill = diff), color = NA) +  # Remove borders
-  scale_fill_gradient2(low = "blue", mid = "white", high = "orange", midpoint = 0) +  # Set color scale
-  theme_void()  # Keep the void theme
-
-# # This one takes longer
-# ggplot(my_sf_merged) +
-#   geom_sf(aes(fill = diff())) +
-#   theme_void()
+# Plot differences in various geographies
+map_data(puma_diff_sf |> filter(State == "Illinois" & CPUMA0010 > 315)) # Chicago
+map_data(puma_diff_sf |> filter(State == "District of Columbia")) # DC
+map_data(puma_diff_sf |> filter(State == "Ohio")) # Ohio
+map_data(puma_diff_sf |> filter(State == "New Jersey")) # New Jersey
+map_data(puma_diff_sf |> filter(State == "New York"), borders = FALSE) # New York State
+map_data(puma_diff_sf |> filter(State == "New York" & CPUMA0010 > 705)) # New York City
 
 # ----- Step 9: Clean up ----- #
 
