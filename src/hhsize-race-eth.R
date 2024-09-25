@@ -24,9 +24,6 @@ con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
 # See what exists in the connection
 dbListTables(conn = con)
 
-ipums_bucketed_2000_db <- tbl(con, "ipums_bucketed_2000")
-ipums_bucketed_2000_db |> head(1000) |> collect() |> View()
-
 race_agg_2000_db <- weighted_mean(
   data = tbl(con, "ipums_bucketed_2000"),
   value_column = "NUMPREC",
@@ -59,36 +56,35 @@ custom_colors <- c(
   "#577590"  
 )
 
-# Side by side panels
-ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = RACE_ETH_bucket)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~year, ncol = 2) +  # Create side-by-side facets
-  labs(x = "", y = "People per household", title = "Average Size of a Household A Person Lives in\nby Race/Ethnicity (2000 vs 2020)") +
-  scale_fill_manual(values = custom_colors) +  # Apply custom colors
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    legend.position = "none",
-    panel.border = element_rect(color = "black", fill = NA, size = 1)  # Add black border around panels
-  )
-
 # Create the bar plot with side-by-side bars for 2000 and 2020
-ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = RACE_ETH_bucket)) +
+fig01 <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = RACE_ETH_bucket)) +
   geom_bar(stat = "identity", aes(group = year, alpha = factor(year)), 
            position = position_dodge(width = 0.8),  # Adjust bar separation
            width = 0.8,  # Make the bars thinner
            color = "black") +  # Add black border to the bars
+  geom_text(aes(label = round(weighted_mean, 2), group = year), 
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5,  # Adjust label position above the bars
+            size = 3) +  # Adjust text size for readability
   scale_alpha_manual(values = c("2000" = 0.4, "2020" = 0.8), guide = guide_legend(title = NULL)) +  # Custom alpha values for years
   scale_fill_manual(values = custom_colors, guide = "none") +  # Apply custom colors, no legend for fill
-  labs(x = "", y = "People per household", 
-       title = "Average Size of a Household A Person Lives in\nby Race/Ethnicity (2000 vs 2020)") +  # Break title into two lines
+  labs(y = "People per household") +  # Remove x-axis label
   theme_minimal() +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
     panel.border = element_blank(),  # No border around the panel
     legend.position = "bottom",  # Place the legend at the bottom
     legend.box = "horizontal",   # Make the legend horizontal
-    legend.title = element_blank()  # Remove the title of the legend
+    legend.title = element_blank(),  # Remove the title of the legend
+    axis.title.x = element_blank(),  # Remove the space reserved for the x-axis label
+    plot.margin = margin(t = 10, r = 10, b = 0, l = 10)  # Adjust bottom margin to minimize white space
   ) +
   guides(alpha = guide_legend(override.aes = list(fill = c("gray40", "gray40"), color = "black")))  # Custom legend with color boxes
 
+# Save the plot as a PNG file
+ggsave("results/fig01.png", plot = fig01, width = 6.5, height = 3.5, dpi = 300)
+
+
+
+# Disconnect from DuckDB
+DBI::dbDisconnect(con)
