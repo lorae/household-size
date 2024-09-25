@@ -3,13 +3,6 @@
 # Process 2000 IPUMS data into two multidimensional demographic matrices.
 # In both matrices, each each cell represents a unique combination of variables 
 # (age, sex, race, and PUMA).
-# In output matrix `nobs`, the value within each cell represents the number
-# of observations.
-# In output matrix `hhsize`, the value within each cell represents the size of 
-# the household
-#
-# TODO: two matrices not necessary? Each cell has two dimensions of values,
-# nobs and hhsize?
 
 # ----- Step 0: Load required packages ----- #
 library("magrittr")
@@ -60,11 +53,14 @@ print(
 # A nice static HTML page labelling the data. This can be useful for understanding
 # a dataset after importing it.
 ipums_view(ddi)
+# Connect to the database
+con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
+dbWriteTable(con, "ipums_raw", ipums, overwrite = TRUE)
 
-con <- dbConnect(duckdb::duckdb(), ":memory:")
-dbWriteTable(con, "ipums", ipums, overwrite = TRUE)
+# See what exists in the connection
+dbListTables(conn = con)
 
-ipums_db <- tbl(con, "ipums") |>
+ipums_db <- tbl(con, "ipums_raw") |>
   # Create a column of unique person-level ids
   # Census documentation: "A combination of SAMPLE and SERIAL provides a unique 
   # identifier for every household in the IPUMS; the combination of SAMPLE, SERIAL, 
@@ -72,6 +68,24 @@ ipums_db <- tbl(con, "ipums") |>
   mutate(id = paste(SAMPLE, SERIAL, PERNUM, sep = "_")) |>
   # Make `id` the first column
   select(id, everything())
+
+# Write changes back to database
+compute(ipums_db, name = "ipums", temporary = FALSE, overwrite = TRUE)
+
+# Delete the "ipums_raw" table
+dbExecute(con, "DROP TABLE IF EXISTS ipums_raw")
+
+# Disconnect
+DBI::dbDisconnect(con)
+
+# Reconnect
+con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
+
+# See what exists in the connection
+dbListTables(conn = con)
+
+ipums_db <- tbl(con, "ipums")
+
 
 obs_count <- ipums_db %>%
   summarise(count = n()) %>%
