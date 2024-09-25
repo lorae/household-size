@@ -209,13 +209,13 @@ race_eth_bucket <- function(data) {
   result <- data %>%
     mutate(
       RACE_ETH_bucket = case_when(
-        HISPAN_bucket == "hispanic" ~ "hispanic",
-        RACE_bucket == "black" ~ "black",
-        RACE_bucket == "aapi" ~ "aapi",
-        RACE_bucket == "aian" ~ "aian",
-        RACE_bucket == "multi" ~ "multi",
-        RACE_bucket == "white" ~ "white",
-        RACE_bucket == "other" ~ "other",
+        HISPAN_bucket == "hispanic" ~ "Hispanic",
+        RACE_bucket == "black" ~ "Black",
+        RACE_bucket == "aapi" ~ "AAPI",
+        RACE_bucket == "aian" ~ "AIAN",
+        RACE_bucket == "multi" ~ "Multiracial",
+        RACE_bucket == "white" ~ "White",
+        RACE_bucket == "other" ~ "Other",
         TRUE ~ NA_character_  # For any unmatched cases, set NA
       )
     )
