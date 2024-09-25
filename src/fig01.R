@@ -1,3 +1,10 @@
+# fig01.R
+#
+# This script produces Figure 1. Average Size of a Household by Race/Ethnicity and Year
+# The figure is a bar chart with x-axis categories representing 7 race/ethnicity groups
+# (AAPI, AIAN, Black, Hispanic, Multiracial, Other, and White) in 2 years: 2000 and 2020.
+# The Y axis is the people per household.
+
 # ----- Step 0: Load required packages ----- #
 library("magrittr")
 library("dplyr")
