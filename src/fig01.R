@@ -92,6 +92,40 @@ fig01 <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = 
 ggsave("results/fig01.png", plot = fig01, width = 6.5, height = 3.5, dpi = 300)
 
 
+##### Redo in greyscale
+
+# Define a single shade of grey for all bars
+grey_color <- "gray40"
+
+# Create the bar plot with side-by-side bars for 2000 and 2020
+fig01a <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = RACE_ETH_bucket)) +
+  geom_bar(stat = "identity", aes(group = year, alpha = factor(year)), 
+           position = position_dodge(width = 0.8),  # Adjust bar separation
+           width = 0.8,  # Make the bars thinner
+           color = "black") +  # Add black border to the bars
+  geom_text(aes(label = round(weighted_mean, 2), group = year), 
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5,  # Adjust label position above the bars
+            size = 3) +  # Adjust text size for readability
+  scale_alpha_manual(values = c("2000" = 0.4, "2020" = 0.8), guide = guide_legend(title = NULL)) +  # Custom alpha values for years
+  scale_fill_manual(values = rep(grey_color, length(unique(race_agg_tb$RACE_ETH_bucket))), guide = "none") +  # Apply grey color, no legend for fill
+  labs(y = "People per household") +  # Remove x-axis label
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    panel.border = element_blank(),  # No border around the panel
+    legend.position = "bottom",  # Place the legend at the bottom
+    legend.box = "horizontal",   # Make the legend horizontal
+    legend.title = element_blank(),  # Remove the title of the legend
+    axis.title.x = element_blank(),  # Remove the space reserved for the x-axis label
+    plot.margin = margin(t = 10, r = 10, b = 0, l = 10)  # Adjust bottom margin to minimize white space
+  ) +
+  guides(alpha = guide_legend(override.aes = list(fill = "gray60", color = "black")))  # Custom legend with grey color
+
+# Save the plot as a PNG file
+ggsave("results/fig01a.png", plot = fig01a, width = 6.5, height = 3.5, dpi = 300)
+
+
 
 # Disconnect from DuckDB
 DBI::dbDisconnect(con)
