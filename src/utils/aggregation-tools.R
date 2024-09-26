@@ -22,7 +22,7 @@ weighted_mean <- function(data, value_column, weight_column, group_by_columns) {
 }
 
 
-
+# Universalize this function
 difference_means <- function(
     data2000, 
     data2020
