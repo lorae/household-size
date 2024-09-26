@@ -26,6 +26,33 @@ age_buckets00 <- rbind(
 
 write.csv(age_buckets00, "age/age_buckets00.csv", row.names = FALSE)
 
+# Define and populate the age lookup table row-wise
+age_buckets01 <- rbind(
+  c("0-4", 0, 5, NA),
+  c("5-9", 5, 10, NA),
+  c("10-14", 10, 15, NA),
+  c("15-19", 15, 20, NA),
+  c("20-24", 20, 25, NA),
+  c("25-29", 25, 30, NA),
+  c("30-34", 30, 35, NA),
+  c("35-39", 35, 40, NA),
+  c("40-44", 40, 45, NA),
+  c("45-49", 45, 50, NA),
+  c("50-54", 50, 55, NA),
+  c("55-59", 55, 60, NA),
+  c("60-64", 60, 65, NA),
+  c("65-69", 65, 70, NA),
+  c("70-74", 70, 75, NA),
+  c("75-79", 75, 80, NA),
+  c("80-84", 80, 85, NA),
+  c("85+", 85, Inf, NA)
+) %>%
+  as.data.frame() %>%
+  setNames(c("bucket_name", "lower_bound", "upper_bound", "specific_value")) %>% # Add column names
+  type.convert(as.is = TRUE) # Convert column encoding to character or numeric
+
+write.csv(age_buckets01, "lookup_tables/age/age_buckets01.csv", row.names = FALSE)
+
 # ----- Household income lookup tables -----
 
 # hhincome_buckets00.csv
