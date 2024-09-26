@@ -14,20 +14,16 @@
 # ----- Step 0: Load packages ----- #
 library("dplyr")
 library("duckdb")
+library("ipumsr")
 
 # ----- Step 1: Load and process IPUMS data ----- #
 
 ddi <- read_ipums_ddi("usa_00004.xml")
 ipums_tb <- read_ipums_micro(ddi, var_attrs = c()) 
 
-# Create unique person ID and reorder columns
-ipums_tb_id <- ipums_tb |> 
-  mutate(id = paste(SAMPLE, SERIAL, PERNUM, sep = "_")) |> 
-  select(id, everything())
-
 # ----- Step 2: Save to DuckDB ----- #
 
 con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
-dbWriteTable(con, "ipums", ipums_tb_id, overwrite = TRUE)
+dbWriteTable(con, "ipums", ipums_tb, overwrite = TRUE)
 DBI::dbDisconnect(con)
 
