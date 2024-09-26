@@ -23,6 +23,7 @@ library("writexl")
 source("src/utils/bucketing-tools.R")
 source("src/utils/aggregation-tools.R")
 source("src/utils/data-validation.R")
+source("src/utils/graphing-tools.R")
 
 # ---- Step 2: Load in IPUMS data and save to DB ----- #
 
@@ -181,6 +182,10 @@ validate_row_counts(
   step_description = "data were bucketed into a combined race-ethnicity column"
 )
 
+# Save this bucketed db to the database
+ipums_bucketed_db <- ipums_bucketed_db |>
+  compute(name = "ipums_bucketed", temporary = FALSE)
+
 # ----- Step 5: Create the individual databases for each year ----- #
 ipums_bucketed_2000_db <- ipums_bucketed_db |> # 2000
   filter(YEAR == 2000) |>
@@ -253,6 +258,16 @@ mean_hh_size_method2 <- weighted_mean_db |>
 
 print(mean_hh_size_method1)
 print(mean_hh_size_method2)
+
+# Mean HH size in 2000 and 2020
+mean2000 <- ipums_db |> filter(YEAR == 2000) |>
+  summarize(mean = sum(PERWT * NUMPREC, na.rm = TRUE)/sum(PERWT)) |>
+  pull(mean)
+
+mean2020 <- ipums_db |> filter(YEAR == 2020) |>
+  summarize(mean = sum(PERWT * NUMPREC, na.rm = TRUE)/sum(PERWT)) |>
+  pull(mean)
+mean_hh_size_method1 
 
 
 # ----- Step 7: Calculate aggregates for every PUMA ----- #
