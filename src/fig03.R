@@ -124,15 +124,39 @@ tnc_map_final <- df %>%
 tnc_map_final_diff <- tnc_map_final %>%
   left_join(state_mean_diff_tb, by = c("STATEFP" = "STATEFIP"))
 
-# Plot the choropleth map
-ggplot(tnc_map_final_diff) + 
+# Adjust the choropleth map with additional break
+fig03 <- ggplot(tnc_map_final_diff) + 
   geom_sf(aes(geometry = geometry, fill = diff), color = "black", size = 0.5) +
   scale_fill_gradient2(
-    name = "Change in people\nper household,\n2000 to 2020",
+    name = "2000 to 2020 \ndifference",
     low = "#577590",
     mid = "white",
     high = "#F94144",
-    midpoint = 0
+    midpoint = 0,
+    breaks = seq(from =-0.2, to = 0.05, by = 0.05) # Add the desired breaks, including a positive number
   ) +
   theme_void()
+
+# Save the plot as a PNG file
+ggsave("results/fig03.png", plot = fig03, width = 6.5, height = 5, dpi = 300)
+
+
+##### Alternate
+# color scale is Black and White
+
+# Create the black and white version of the choropleth map with gradual gray shades
+fig03a <- ggplot(tnc_map_final_diff) + 
+  geom_sf(aes(geometry = geometry, fill = diff), color = "black", size = 0.5) +
+  scale_fill_gradient(
+    name = "2000 to 2020 \ndifference",
+    low = "black",
+    high = "white",
+    limits = c(-0.2, 0.05),  # Set the limits to control the range
+    oob = scales::squish  # Squish values outside the range into the limit
+  ) +
+  theme_void()
+
+# Save the black and white plot as fig03a
+ggsave("results/fig03a.png", plot = fig03a, width = 6.5, height = 5, dpi = 300)
+
 
