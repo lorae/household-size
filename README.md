@@ -181,6 +181,15 @@ Current data checks include:
 
 - **Row count validation during data bucketing:**. After the IPUMS data is read and loaded into the database, the number of observations is recorded in `obs_count`. Subsequent data bucketing steps are validated against this expected count using the `validate_row_counts()` function. If any rows are unexpectedly dropped, execution will stop, and an error will be raised.
 
+# Project convention
+
+In this project, variables representing data are assigned suffixes based on the following convention:
+
+- `_tb` for tibbles stored in the R global environment.
+- `_db` for tables stored within a database connection.
+
+For example, `ipums_raw_tb` would represent a tibble of raw IPUMS data; `ipums_raw_db` would represent a connection to a database table containing raw IPUMS data. This helps avoid confusion and accidental mixing of tibbles and database tables.
+
 # References
 
 - <a name="galster2024" id="galster2024"></a>**George C. Galster (2024)**. *Is There Enough Housing Production? It Matters Which Indicators Are Used to Answer*, Housing Policy Debate. DOI: 10.1080/10511482.2024.2334018
