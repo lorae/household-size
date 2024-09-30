@@ -11,25 +11,35 @@ The following is an overview of the project's file structure:
 
 ```
 household-size/
-├── README.md                  # The document you're currently reading
-├── household-size.Rproj       # RStudio project file
-├── renv/                      # R environment directory
+├── README.md                       # The document you're currently reading
+├── household-size.Rproj            # RStudio project file
+├── renv/                           # R environment directory
 │   ├── activate.R             
 │   ├── settings.dcf           
 │   └── library/               
-├── src/                       # Source code directory
-│   ├── utils/                 # Utility scripts
-│   │   ├── bucketing-tools.R  # Functions for bucketing data
-│   │   ├── create-summary-array.R  # May be deprecated soon
+├── src/                            # Source code directory
+│   ├── utils/                      # Helper functions for other scripts
+│   │   ├── aggregation-tools.R     # Functions for aggregating observations
+│   │   ├── bucketing-tools.R       # Functions for bucketing observations by age, income, etc
+│   │   ├── data-validation.R       # Functions for validating data during the pipeline
+│   │   ├── graphing-tools.R        # Functions to help graphing
 │   │   └── create-synthetic-data.R # For testing? Maybe move to tests/
-│   └── sample_code_for_sarah.R # Demonstrates SQL requests using lookup tables using DuckDB
+│   └── scripts                     # Scripts that execute the analysis
+│       ├── import-ipums.R          # Imports raw data and saves to database
+│       ├── process-ipums.R         # Adds bucket and other cols, saves to database
+│       ├── fig01.R 
+│       ├── fig02.R
+│       ├── ...
+│       ├── quick-facts.R           # Produces quick statistics from our paper
+│       └── proof-of-concept-bucketing.R # May be deprecated soon
 │   
-└── tests/                     # Testing directory
-    ├── testthat/              # Unit tests directory
-    │   ├── test-range-match-lookup-db.R # Tests range_match_lookup() function on a database
-    │   ├── test-range-match-lookup-df.R # Tests range_match_lookup() function on a tibble
-    │   └── test-bucketing.R   # Test script for bucketing functions
-    └── test-data/             # Mock data for testing
+└── tests/                          
+    ├── testthat/                   # Unit tests
+    │   ├── test-difference-means.R
+    │   ├── test-join-columns-db.R
+    │   ├── test-join-columns-tb.R
+    │   └── ...
+    └── test-data/                  # Mock data for unit tests
         ├── mock_data.csv
         ├── mock_age_lookup.csv
         ├── mock_income_lookup.csv
