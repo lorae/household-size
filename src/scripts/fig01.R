@@ -10,7 +10,6 @@ library("magrittr")
 library("dplyr")
 library("duckdb")
 library("ipumsr")
-# library("duckplyr")
 library("dbplyr")
 library("glue")
 library("readr")
@@ -25,29 +24,28 @@ source("src/utils/bucketing-tools.R")
 source("src/utils/aggregation-tools.R")
 source("src/utils/data-validation.R")
 
-# Reconnect
-con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
+# ----- Step 2: Import and wrangle data ----- #
 
-# See what exists in the connection
-dbListTables(conn = con)
+con <- dbConnect(duckdb::duckdb(), "db/ipums-processed.duckdb")
 
 race_agg_2000_db <- weighted_mean(
-  data = tbl(con, "ipums_bucketed_2000"),
+  data = tbl(con, "ipums_bucketed") |> filter(YEAR == 2000),
   value_column = "NUMPREC",
   weight_column = "PERWT",
   group_by_columns = "RACE_ETH_bucket"
-)
-race_agg_2000_tb <- race_agg_2000_db |> mutate(year = 2000) |> collect()
+) |> 
+  mutate(year = 2000)
 
 race_agg_2020_db <- weighted_mean(
-  data = tbl(con, "ipums_bucketed_2020"),
+  data = tbl(con, "ipums_bucketed") |> filter(YEAR == 2020),
   value_column = "NUMPREC",
   weight_column = "PERWT",
   group_by_columns = "RACE_ETH_bucket"
-)
-race_agg_2020_tb <- race_agg_2020_db |> mutate(year = 2020) |> collect()
+) |> 
+  mutate(year = 2020)
 
-race_agg_tb <- bind_rows(race_agg_2000_tb, race_agg_2020_tb)
+race_agg_db <- union_all(race_agg_2000_db, race_agg_2020_db) # Row bind the tables
+race_agg_tb <- race_agg_db |> collect() # Export into memory
 
 # ----- Step 3: Produce the graph ----- #
 
@@ -55,7 +53,7 @@ race_agg_tb <- bind_rows(race_agg_2000_tb, race_agg_2020_tb)
 grey_color <- "gray40"
 
 # Create the bar plot with side-by-side bars for 2000 and 2020
-fig01a <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = RACE_ETH_bucket)) +
+fig01 <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = RACE_ETH_bucket)) +
   geom_bar(stat = "identity", aes(group = year, alpha = factor(year)), 
            position = position_dodge(width = 0.8),  # Adjust bar separation
            width = 0.8,  # Make the bars thinner
@@ -80,8 +78,7 @@ fig01a <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill =
   guides(alpha = guide_legend(override.aes = list(fill = "gray60", color = "black")))  # Custom legend with grey color
 
 # Save the plot as a PNG file
-ggsave("results/fig01a.png", plot = fig01a, width = 6.5, height = 3.5, dpi = 300)
-
+ggsave("results/fig01.png", plot = fig01, width = 6.5, height = 3.5, dpi = 300)
 
 
 # Disconnect from DuckDB
