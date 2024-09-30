@@ -159,8 +159,8 @@ append_bucket_column <- function(
   lookup_tb <- split_lookup_table(filepath)
   
   # Step 2: Write the lookup tables to the database
-  dbWriteTable(con, paste0(input_column, "_lookup_range"), lookup_tb$range, overwrite = TRUE)
-  dbWriteTable(con, paste0(input_column, "_lookup_value"), lookup_tb$value, overwrite = TRUE)
+  dbWriteTable(con, paste0(input_column, "_lookup_range"), lookup_tb$range, overwrite = TRUE, temporary = TRUE)
+  dbWriteTable(con, paste0(input_column, "_lookup_value"), lookup_tb$value, overwrite = TRUE, temporary = TRUE)
   
   # Step 3: Create lazy references to these tables
   lookup_range_db <- tbl(con, paste0(input_column, "_lookup_range"))
