@@ -5,7 +5,7 @@ The purpose of this project is to analyze the extent to which demographic change
 The project uses American Community Survey (ACS) IPUMS microdata, which are freely available to the public after registering for an API key.
 
 # Project Structure
-## File
+## File Tree
 
 The following is an overview of the project's file tree:
 
