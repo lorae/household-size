@@ -3,6 +3,7 @@
 # Creates a data/process flow diagram for the project
 
 library("DiagrammeR")
+library("DiagrammeRsvg")
 library("glue")
 
 # Labels for raw dat
@@ -28,7 +29,7 @@ label_r_fig03png <- "fig03.png"
 label_r_qfhtml <- "quick-facts.html"
 
 # Use glue to embed the variables into the Graphviz code
-grViz(glue("
+graph <- grViz(glue("
   digraph TD {{
     # Raw data input
     raw_ipums [label = '{label_raw_ipums}', shape = box];
@@ -76,4 +77,9 @@ grViz(glue("
   }}
 "))
 
+# Convert the graph to SVG
+graph_svg <- export_svg(graph)
+
+# Save the SVG file to 'docs/images/dfd.svg'
+writeLines(graph_svg, "docs/images/dfd.svg")
 
