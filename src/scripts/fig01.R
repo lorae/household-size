@@ -74,7 +74,6 @@ fig01 <- ggplot(race_agg_tb, aes(x = RACE_ETH_bucket, y = weighted_mean, fill = 
   ) +
   guides(alpha = guide_legend(override.aes = list(fill = "gray60", color = "black")))
 
-# Save the plot as a PNG file
 ggsave("results/fig01.png", plot = fig01, width = 6.5, height = 3.5, dpi = 300)
 
 # Disconnect from DuckDB
