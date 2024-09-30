@@ -57,6 +57,19 @@ tabulate_aggregates <- function(
   return(combined_table)
 }
 
+# Define a custom set of themes that are universal between Figures 2 and 2a
+custom_theme <- theme_minimal() +
+  theme(
+    strip.text = element_text(size = 12),  # Adjust facet label size
+    axis.text.x = element_text(angle = 60, hjust = 1, size = 6),
+    axis.title.x = element_blank(),
+    axis.text.y = element_text(size = 8), 
+    panel.grid.major.x = element_line(color = "grey", size = 0.05), 
+    panel.grid.minor.x = element_blank(),  # Remove minor vertical gridlines
+    panel.grid.major.y = element_line(color = "grey", size = 0.3), 
+    panel.grid.minor.y = element_blank()   # Remove minor horizontal gridlines
+  )
+
 # ----- Step 2: Generate tables underlying graphs ----- #
 con <- dbConnect(duckdb::duckdb(), "db/ipums-processed.duckdb")
 
@@ -75,50 +88,30 @@ race_age_bucket_tb <- tabulate_aggregates(group_by = c("RACE_ETH_bucket", "AGE_b
 race_age_tb <- tabulate_aggregates(group_by = c("RACE_ETH_bucket", "AGE")) |>
   collect()
 
-# ---- Step 3: Generate graphs ----- #
+# ----- Step 3: Generate graphs ----- #
 
 # Figure 02 (Ages are bucketed)
 fig02 <- ggplot(race_age_bucket_tb, aes(x = AGE_bucket, y = weighted_mean, color = year)) +
-  geom_point(alpha = 0.6, size = 2) + 
-  facet_wrap(~RACE_ETH_bucket, nrow = 3, ncol = 3, scales = "free_x") +  # Facet by race, with individual facets for each race and free x-axis
-  labs(y = "People per household", color = "Year") +  # Set y-axis label and legend title
-  scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) + 
-  scale_y_continuous(breaks = seq(2, 5, by = 1)) +  # Horizontal gridlines only for whole numbers 2, 3, 4, 5
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12),  # Adjust facet label size
-    axis.text.x = element_text(angle = 60, hjust = 1, size = 6),  # Rotate x-axis labels and reduce size
-    axis.title.x = element_blank(),  # Remove the space reserved for the x-axis label
-    axis.text.y = element_text(size = 8),  # Reduce y-axis text size
-    panel.grid.major.x = element_line(color = "grey", size = 0.05),  # Customize the vertical gridlines
-    panel.grid.minor.x = element_blank(),  # Remove minor vertical gridlines
-    panel.grid.major.y = element_line(color = "grey", size = 0.3),  # Customize the horizontal gridlines
-    panel.grid.minor.y = element_blank(),  # Remove minor horizontal gridlines
-    legend.position = c(0.52, 0.13)  # Move the legend into an empty facet spot
-  )
+  facet_wrap(~RACE_ETH_bucket, nrow = 3, ncol = 3, scales = "free_x") +  
+  geom_point(alpha = 0.6, size = 2) + # Semitransparent points, size 2
+  scale_y_continuous(breaks = seq(2, 5, by = 1)) + # Horiz gridlines, whole numbers
+  scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) + # Color scheme
+  labs(y = "People per household", color = "Year") +  # Labels
+  custom_theme + # Defined in step 1 above
+  theme(legend.position = c(0.52, 0.13)) # Move the legend into an empty facet spot
 
 ggsave("results/fig02.png", plot = fig02, width = 6.5, height = 5, dpi = 300)
 
 # Figure 02a (ages grouped in 1-year increments)
 fig02a <- ggplot(race_age_tb, aes(x = AGE, y = weighted_mean, color = factor(year))) +
-  geom_point(alpha = 0.6, size = 1) + 
-  facet_wrap(~RACE_ETH_bucket, nrow = 2, ncol = 4, scales = "free_x") +  # Facet by race, with individual x-axis scales
-  labs(y = "Number of People in Household", color = "Year") +  # Set y-axis label and legend title
-  scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) + 
-  scale_y_continuous(breaks = seq(1, 7, by = 1)) +  # Horizontal gridlines only for whole numbers
+  facet_wrap(~RACE_ETH_bucket, nrow = 2, ncol = 4, scales = "free_x") + 
+  geom_point(alpha = 0.6, size = 1) + # Semitransparent points, size 2
+  scale_y_continuous(breaks = seq(1, 7, by = 1)) +  # Horiz gridlines, whole numbers
   scale_x_continuous(breaks = seq(0, 100, by = 10)) +  # Vert gridlines, decade increments
-  theme_minimal() +
-  theme(
-    strip.text = element_text(size = 12),  # Adjust facet label size
-    axis.text.x = element_text(angle = 60, hjust = 1, size = 6),
-    axis.title.x = element_blank(),  # Remove the space reserved for the x-axis label
-    axis.text.y = element_text(size = 8),  # Reduce y-axis text size
-    panel.grid.major.x = element_line(color = "grey", size = 0.05),  # Customize the vertical gridlines
-    panel.grid.minor.x = element_blank(),  # Remove minor vertical gridlines
-    panel.grid.major.y = element_line(color = "grey", size = 0.3),  # Customize the horizontal gridlines
-    panel.grid.minor.y = element_blank(),  # Remove minor horizontal gridlines
-    legend.position = c(0.87, 0.20)  # Move the legend into an empty facet spot
-  )
+  scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) + # Color scheme
+  labs(y = "Number of People in Household", color = "Year") +  # Labels
+  custom_theme + # Defined in step 1 above
+  theme(legend.position = c(0.87, 0.20)) # Move the legend into an empty facet spot
 
 ggsave("results/fig02a.png", plot = fig02a, width = 6.5, height = 5, dpi = 300)
 
