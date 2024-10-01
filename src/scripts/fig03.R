@@ -1,13 +1,13 @@
 # fig03.R
 #
-# This script produces Figure 3. Changes in Average Size of a Household between 2000 and 2020, by State
+# This script produces Figure 3: Changes in Average Size of a Household between 
+# 2000 and 2020, by State
 
 # ----- Step 0: Load required packages ----- #
 library("magrittr")
 library("dplyr")
 library("duckdb")
 library("ipumsr")
-# library("duckplyr")
 library("dbplyr")
 library("glue")
 library("readr")
@@ -16,6 +16,7 @@ library("sf")
 library("ggplot2")
 library("writexl")
 library("tigris")
+library("DBI")
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -23,41 +24,15 @@ source("src/utils/bucketing-tools.R")
 source("src/utils/aggregation-tools.R")
 source("src/utils/data-validation.R")
 
-# Reconnect
-con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
 
-# Install the spatial extension
-library(DBI)
-con <- dbConnect(duckdb::duckdb(), "db/ipums.duckdb")
-dbExecute(con, "INSTALL spatial;")
-dbExecute(con, "LOAD spatial;")
+# ----- Step 2: Load in data ----- #
 
+con <- dbConnect(duckdb::duckdb(), "data/db/ipums-processed.duckdb")
 
-# See what exists in the connection
-dbListTables(conn = con)
+# ----- Step 3: Calculate means by state and year
 
-# Read in the shapefile into the connection and save as `sf`
-dbExecute(con, "DROP TABLE IF EXISTS puma_sf")
-dbExecute(con, "DROP TABLE IF EXISTS state_sf")
-dbExecute(con, "CREATE TABLE puma_sf AS SELECT * FROM ST_Read('ipums_cpuma0010/ipums_cpuma0010.shp');")
-dbExecute(con, "CREATE TABLE state_sf AS SELECT * FROM ST_Read('tl_2023_us_state/tl_2023_us_state.shp');")
-
-puma_sf <- tbl(con, "puma_sf")
-state_sf <- tbl(con, "state_sf") |>
-  mutate(STATEFIP = STATEFP)
-ipums_bucketed_db <- tbl(con, "ipums_bucketed")
-
-# Merge bucketed IPUMS data with CPUMA file, which contains
-# state FIPS codes
-# TODO: I don't need the geography shapefiles. Maybe I 
-# eliminate this stepand just create a lookup table of 
-# CPUMA0010 to state fips
-ipums_bucketed_puma <- puma_sf |>
-  left_join(ipums_bucketed_db, by = "CPUMA0010")
-
-# calculate means by state and year
 state_mean_db <- weighted_mean(
-  data = ipums_bucketed_puma,
+  data = tbl(con, "ipums_bucketed"),
   value_column = "NUMPREC",
   weight_column = "PERWT",
   group_by_columns = c("STATEFIP", "YEAR")
@@ -159,4 +134,5 @@ fig03a <- ggplot(tnc_map_final_diff) +
 # Save the black and white plot as fig03a
 ggsave("results/fig03a.png", plot = fig03a, width = 6.5, height = 5, dpi = 300)
 
-
+# Disconnect from DuckDB
+DBI::dbDisconnect(con)
