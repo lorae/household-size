@@ -1,4 +1,8 @@
-weighted_mean <- function(data, value_column, weight_column, group_by_columns) {
+weighted_mean <- function(
+    data, 
+    value_column, 
+    weight_column, 
+    group_by_columns) {
   # Use quasiquotation to handle column names passed as strings
   value_col <- sym(value_column)
   weight_col <- sym(weight_column)
@@ -22,40 +26,40 @@ weighted_mean <- function(data, value_column, weight_column, group_by_columns) {
 }
 
 
-# Universalize this function
+
+
 difference_means <- function(
     data2000, 
-    data2020
-    ) {
+    data2020,
+    match_by,   # The column to match the data from both years along
+    diff_by,    # The column along which to calculate differences
+    keep = NULL # The columns to keep in addition to the diff_by column
+) {
   
-  # Prep the data for merging by renaming columns to indicate year
-  data2020 <- data2020 |>
-    select(
-      CPUMA0010,
-      weighted_mean_2020 = weighted_mean,
-      count_2020 = count
-    )
+  suffixed_cols <- c(diff_by, keep)
   
+  # Rename columns with their year suffixes; Keep only `match_by` and suffixed columns
   data2000 <- data2000 |>
-    select(
-      CPUMA0010,
-      weighted_mean_2000 = weighted_mean,
-      count_2000 = count
-    )
+    select({{ match_by }}, all_of(suffixed_cols)) |>
+    rename_with(~ paste0(., "_2000"), all_of(suffixed_cols))
   
-  # Merge data_2000 and data_2020 by CPUMA0010
-  diff <- data2000 |>
-    inner_join(data2020, by = "CPUMA0010") |>
-    mutate(diff = weighted_mean_2020 - weighted_mean_2000) |>
+  # Rename columns with their year suffixes; Keep only `match_by` and suffixed columns
+  data2020 <- data2020 |>
+    select({{ match_by }}, all_of(suffixed_cols)) |>
+    rename_with(~ paste0(., "_2020"), all_of(suffixed_cols))
+  
+  # Merge data2000 and data2020 by the matching column
+  diff1 <- data2000 |>
+    inner_join(data2020, by = as_string(ensym(match_by))) |>
+    mutate(
+      diff = !!sym(paste0(diff_by, "_2020")) - !!sym(paste0(diff_by, "_2000"))
+    ) |>
     # Arrange column order
     select(
-      CPUMA0010,
+      {{ match_by }},
       diff,
-      weighted_mean_2020, 
-      weighted_mean_2000, 
-      count_2020,
-      count_2000
+      everything()
     )
   
-  return(diff)
+  return(diff1)
 }
