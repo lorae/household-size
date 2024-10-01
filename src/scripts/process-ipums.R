@@ -175,7 +175,7 @@ copy_to(
 )
 
 ipums_bucketed_state_db <- ipums_bucketed_db |>
-  right_join(tbl(con_processed, "cpuma-state-cross"), by = "CPUMA0010") |>
+  left_join(tbl(con_processed, "cpuma-state-cross"), by = "CPUMA0010") |>
   select("id", "YEAR", "CPUMA0010", "PUMA", "STATEFIP", "State", everything()) # reorder cols
 
 validate_row_counts(
@@ -184,12 +184,16 @@ validate_row_counts(
   step_description = "State and STATEFIP columns were added"
 )
 
+# TODO: Add a validation step that lists any rows from the lefthand source that 
+# failed to find a match in the righthand source.
+
 # ----- Step 5: Save to the database ----- #
 
 ipums_bucketed_state_db <- ipums_bucketed_state_db |>
   compute(
     name = "ipums_bucketed", 
-    temporary = FALSE
+    temporary = FALSE,
+    overwrite = TRUE
   )
 
 # ----- Step 6: Clean up ----- #
