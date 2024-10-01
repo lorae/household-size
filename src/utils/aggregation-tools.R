@@ -28,6 +28,8 @@ weighted_mean <- function(
 
 
 
+# TODO: genericize this function further to difference any two data sources, without
+# enforcing the _2000 and _2020 suffixes.
 difference_means <- function(
     data2000, 
     data2020,
@@ -49,7 +51,7 @@ difference_means <- function(
     rename_with(~ paste0(., "_2020"), all_of(suffixed_cols))
   
   # Merge data2000 and data2020 by the matching column
-  diff1 <- data2000 |>
+  diff <- data2000 |>
     inner_join(data2020, by = as_string(ensym(match_by))) |>
     mutate(
       diff = !!sym(paste0(diff_by, "_2020")) - !!sym(paste0(diff_by, "_2000"))
@@ -61,5 +63,5 @@ difference_means <- function(
       everything()
     )
   
-  return(diff1)
+  return(diff)
 }
