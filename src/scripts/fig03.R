@@ -38,29 +38,18 @@ state_mean_db <- weighted_mean(
   group_by_columns = c("STATEFIP", "YEAR")
 )
 
-# Now subtract the 2020 values from the 2000 values
-state_mean_2000_db <- state_mean_db |>
-  filter(YEAR == 2000)
-state_mean_2020_db <- state_mean_db |>
-  filter(YEAR == 2020)
-
-# TODO: universalize the difference_means function and use it
-# instead
-state_mean_diff_tb <- state_mean_2000_db |>
-  inner_join(state_mean_2020_db, by = "STATEFIP", suffix = c("_2000", "_2020")) |>
-  mutate(diff = weighted_mean_2020 - weighted_mean_2000) |>
-  select(
-    STATEFIP, 
-    diff, 
-    weighted_mean_2000, 
-    count_2000, 
-    sum_weights_2000, 
-    weighted_mean_2020, 
-    count_2020,
-    sum_weights_2020
-    ) |>
+# Subtract 2000 weighted mean household size from 2020 weighted mean household size,
+# and save to `state_mean_diff_tb`
+state_mean_diff_tb <- difference_means(
+    data2000 = state_mean_db |> filter(YEAR == 2000), 
+    data2020 = state_mean_db |> filter(YEAR == 2020),
+    match_by = "STATEFIP",
+    diff_by = "weighted_mean",
+    keep = c("count", "sum_weights") # Columns to keep in addition to the diff_by column
+) |>
   collect()
-
+  
+  
 
 df <- tigris::states(cb = T, class = 'sf')
 
