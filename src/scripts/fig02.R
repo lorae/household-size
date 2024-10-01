@@ -71,7 +71,7 @@ custom_theme <- theme_minimal() +
   )
 
 # ----- Step 2: Generate tables underlying graphs ----- #
-con <- dbConnect(duckdb::duckdb(), "db/ipums-processed.duckdb")
+con <- dbConnect(duckdb::duckdb(), "data/db/ipums-processed.duckdb")
 
 # For Fig 2: Ages are bucketed
 # Note, this is brittle, since age buckets may change

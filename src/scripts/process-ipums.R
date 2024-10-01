@@ -23,10 +23,10 @@ source("src/utils/data-validation.R")
 # ----- Step 2: Prepare the new database ----- #
 
 # Read in raw data
-con_raw <- dbConnect(duckdb::duckdb(), "db/ipums-raw.duckdb")
+con_raw <- dbConnect(duckdb::duckdb(), "data/db/ipums-raw.duckdb")
 
 # Create database for processed data
-con_processed <- dbConnect(duckdb::duckdb(), "db/ipums-processed.duckdb")
+con_processed <- dbConnect(duckdb::duckdb(), "data/db/ipums-processed.duckdb")
 
 copy_to(
   dest = con_processed, 

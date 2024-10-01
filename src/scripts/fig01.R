@@ -20,7 +20,7 @@ source("src/utils/aggregation-tools.R")
 
 # ----- Step 2: Import and wrangle data ----- #
 
-con <- dbConnect(duckdb::duckdb(), "db/ipums-processed.duckdb")
+con <- dbConnect(duckdb::duckdb(), "data/db/ipums-processed.duckdb")
 
 race_agg_2000_db <- weighted_mean(
   data = tbl(con, "ipums_bucketed") |> filter(YEAR == 2000),

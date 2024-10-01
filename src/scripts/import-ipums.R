@@ -19,7 +19,7 @@ ipums_tb <- read_ipums_micro(ddi, var_attrs = c())
 
 # ----- Step 2: Save to DuckDB ----- #
 
-con <- dbConnect(duckdb::duckdb(), "db/ipums-raw.duckdb")
+con <- dbConnect(duckdb::duckdb(), "data/db/ipums-raw.duckdb")
 dbWriteTable(con, "ipums", ipums_tb, overwrite = TRUE)
 DBI::dbDisconnect(con)
 
