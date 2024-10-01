@@ -30,7 +30,7 @@ household-size/
 │       ├── fig01.R 
 │       ├── fig02.R
 │       ├── ...
-│       ├── quick-facts.R           # Produces quick statistics from our paper
+│       ├── quick-facts.Rmd         # Produces quick statistics from our paper
 │       └── proof-of-concept-bucketing.R # May be deprecated soon
 │   
 └── tests/                          
@@ -53,51 +53,52 @@ household-size/
 
 # Project Setup
 
-The project is set up as an R project with `renv` to manage dependencies. When you open the project in RStudio, `renv` will automatically load the required environment, and you will have access to the correct versions of all the necessary packages.
-
 ## If you're running the code for the first time...
 
-1. Sign up for an IPUMS account and obtain an API key.
+**1**. Sign up for an IPUMS account and obtain an API key.
 
-2. Clone the repository:
+**2**. Clone the repository:
 
     ```sh
     git clone https://github.com/lorae/household-size.git
     ```
 
-3. Open the R project file (`household-size.Rproj`) in RStudio. 
+**3**. Open the R project file (`household-size.Rproj`) in RStudio. 
 
-4. Verify that [RTools](https://cran.r-project.org/bin/windows/Rtools/) is already installed on your computer. RTools is required for compiling some of the packages in this project's library.
+**4**. Verify that [RTools](https://cran.r-project.org/bin/windows/Rtools/) is already installed on your computer. RTools is required for compiling some of the packages in this project's library.
 
-    a. Load the `pkgbuild` package, installing if necessary:
+   **a.** Load the `pkgbuild` package, installing it if necessary:
 
-        ```r
-        if (!requireNamespace("pkgbuild", quietly = TRUE)) {
-          install.packages("pkgbuild")
-        }
-        library("pkgbuild")
-        ```
+     ```r
+     if (!requireNamespace("pkgbuild", quietly = TRUE)) {
+       install.packages("pkgbuild")
+     }
+     library("pkgbuild")
+     ```
 
-    b. Use the `find_rtools()` function from the `pkgbuild` package to verify that RTools is installed and configured.
+   **b.** Use the `find_rtools()` function from the `pkgbuild` package to verify that RTools is installed and configured.
 
-        ```r
-        pkgbuild::find_rtools()
-        ```
+     ```r
+     pkgbuild::find_rtools()
+     ```
 
-        If the output is `[1] TRUE`, RTools is installed and ready to use. Proceed to step 5.
-        
-        If the output is `[2] FALSE`:
-        
-          i. Verify your current version of R by running 
-          
-              ```r 
-              R.version.string
-              ```
-          ii. Navigate to https://cran.r-project.org/bin/windows/Rtools/. Download the version of RTools consistent with your version of R: For example, install RTools44 for version 4.4.0 and above, and RTools43 for version 4.3.0 and above.
-          
-          iii. Close any instances of R and RStudio and open the executable to follow installation instructions. Once downloaded, reopen RStudio rerun the above steps to verify proper RTools installation. 
+     - If the output is `[1] TRUE`, RTools is installed and ready to use. Proceed to step 5.
+     - If the output is `[2] FALSE`:
 
-5. Install the `renv` package by running the following command in R:
+       **i.** Verify your current version of R by running:
+
+         ```r
+         R.version.string
+         ```
+
+       **ii.** Navigate to [CRAN RTools](https://cran.r-project.org/bin/windows/Rtools/) and download the version of RTools that corresponds to your R version (e.g., RTools44 for version 4.4.0 and above).
+
+       **iii.** Close any instances of R and RStudio, then open the executable and follow the installation instructions. After installation, reopen RStudio and rerun the above steps to verify RTools installation.
+
+
+**5**. Install the `renv` package by running the following command in R:
+    
+    [TODO: write instructions to check if renv is already installed, then install if needed. Also, doesn't a user need to library(renv) before step 6?]
 
     ```r
     install.packages("renv")
@@ -108,14 +109,14 @@ The project is set up as an R project with `renv` to manage dependencies. When y
     ```r
     renv::restore()
     ```
-
+    [TODO: modify these instructions to reflect the menu of 4 options a user sees the first time they enter this command.]
     This will ensure that your environment is set up with the same package versions used in the project.
   
 7. Run the main script to perform the analysis. 
 
    [TODO: instructions here]
 
-8. View the results as needed.
+8. View the results in [TODO: DESCRIBE HOW RESULTS APPEAR]
 
 ## If you're running the code any subsequent time...
 
