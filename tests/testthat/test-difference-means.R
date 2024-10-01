@@ -1,7 +1,9 @@
+# ----- Step 0: Workspace setup ----- #
+
 library("testthat")
 library("dplyr")
-library("duckdb")
 library("rlang")
+library("duckdb")
 library("rprojroot")
 
 # Make sure the working directory is correct
@@ -11,7 +13,9 @@ setwd(root)
 # Source the function being tested
 source("src/utils/aggregation-tools.R")
 
-# Create sample input data
+# ----- Step 1: Create test inputs ----- #
+
+# Test tibble inputs
 data2000_tb <- tibble(
   CPUMA0010 = c(1001, 1002, 1003),
   weighted_mean = c(2.5, 3.1, 2.9),
@@ -30,13 +34,22 @@ data2020_tb <- tibble(
   decoy_col_2 = c(3, 1, 6) 
 )
 
-# Copy sample inputs into DuckDB connection
+# Test database table inputs
 test_con <- dbConnect(duckdb::duckdb(), ":memory:")
 data2000_db <- copy_to(test_con, data2000_tb, name = "data2000_db", temporary = TRUE)
 data2020_db <- copy_to(test_con, data2020_tb, name = "data2020_db", temporary = TRUE)
 
-# Unit test for difference_means function
-test_that("difference_means produces correct results and only keeps specified columns", {
+# ----- Step 2: Define helper functions ----- #
+
+compare_results <- function(output_tb, expected_tb) {
+  output_tb <- output_tb |> select(sort(colnames(output_tb))) |> arrange(CPUMA0010)
+  expected_tb <- expected_tb |> select(sort(colnames(expected_tb))) |> arrange(CPUMA0010)
+  expect_equal(output_tb, expected_tb)
+}
+
+# ----- Step 3: Unit tests ----- #
+
+test_that("difference_means produces correct results on tibble inputs", {
   
   expected_tb <- tibble(
     CPUMA0010 = c(1001, 1002, 1003),
@@ -49,30 +62,19 @@ test_that("difference_means produces correct results and only keeps specified co
     other_col_2020 = c(7, 12, 17)
   )
   
-  output_db <- difference_means(
-    data2000 = data2000_db,
-    data2020 = data2020_db,
+  output_tb <- difference_means(
+    data2000 = data2000_tb,
+    data2020 = data2020_tb,
     match_by = "CPUMA0010",
     diff_by = "weighted_mean",
     keep = c("count", "other_col")
   )
   
-  # Collect output back to R memory
-  output_tb <- output_db |> collect()
+  compare_results(output_tb, expected_tb)
   
-  # Sort both expected and output the same way to ensure they're comparable
-  output_tb <- output_tb |> select(sort(colnames(output_tb))) |> arrange(CPUMA0010)
-  expected_tb <- expected_tb |> select(sort(colnames(expected_tb))) |> arrange(CPUMA0010)
-
-  # Compare the actual output to the expected output
-  expect_equal(output_tb, expected_tb)
-  
-  # Disconnect DuckDB connection
-  dbDisconnect(test_con, shutdown = TRUE)
 })
 
-# Unit test for difference_means function
-test_that("difference_means produces correct results when `keep` argument is set to NULL", {
+test_that("difference_means produces correct results on tibble inputs when `keep` argument is set to NULL", {
   
   expected_tb <- tibble(
     CPUMA0010 = c(1001, 1002, 1003),
@@ -81,27 +83,66 @@ test_that("difference_means produces correct results when `keep` argument is set
     weighted_mean_2020 = c(2.7, 2.8, 3.0)
   )
   
-  output_db <- difference_means(
-    data2000 = data2000_db,
-    data2020 = data2020_db,
+  output_tb <- difference_means(
+    data2000 = data2000_tb,
+    data2020 = data2020_tb,
     match_by = "CPUMA0010",
     diff_by = "weighted_mean",
     keep = NULL
   )
   
-  # Collect output back to R memory
-  output_tb <- output_db |> collect()
-  
-  # Sort both expected and output the same way to ensure they're comparable
-  output_tb <- output_tb |> select(sort(colnames(output_tb))) |> arrange(CPUMA0010)
-  expected_tb <- expected_tb |> select(sort(colnames(expected_tb))) |> arrange(CPUMA0010)
-  
-  # Compare the actual output to the expected output
-  expect_equal(output_tb, expected_tb)
+  compare_results(output_tb, expected_tb)
   
 })
 
-# Disconnect from DuckDB connection
+test_that("difference_means produces correct results on database inputs", {
+  
+  expected_tb <- tibble(
+    CPUMA0010 = c(1001, 1002, 1003),
+    diff = c(0.2, -0.3, 0.1),   
+    weighted_mean_2000 = c(2.5, 3.1, 2.9),
+    weighted_mean_2020 = c(2.7, 2.8, 3.0),
+    count_2000 = c(100, 200, 150),
+    count_2020 = c(110, 210, 140),
+    other_col_2000 = c(5, 10, 15),
+    other_col_2020 = c(7, 12, 17)
+  )
+  
+  output_tb <- difference_means(
+    data2000 = data2000_db,
+    data2020 = data2020_db,
+    match_by = "CPUMA0010",
+    diff_by = "weighted_mean",
+    keep = c("count", "other_col")
+  ) |> collect()
+  
+  compare_results(output_tb, expected_tb)
+  
+})
+
+test_that("difference_means produces correct results on database inputs when `keep` argument is set to NULL", {
+  
+  expected_tb <- tibble(
+    CPUMA0010 = c(1001, 1002, 1003),
+    diff = c(0.2, -0.3, 0.1),   
+    weighted_mean_2000 = c(2.5, 3.1, 2.9),
+    weighted_mean_2020 = c(2.7, 2.8, 3.0)
+  )
+  
+  output_tb <- difference_means(
+    data2000 = data2000_db,
+    data2020 = data2020_db,
+    match_by = "CPUMA0010",
+    diff_by = "weighted_mean",
+    keep = NULL
+  ) |> collect()
+  
+  compare_results(output_tb, expected_tb)
+  
+})
+
+# ----- Step 4: Clean up ----- #
+
 dbDisconnect(test_con, shutdown = TRUE)
 
 
