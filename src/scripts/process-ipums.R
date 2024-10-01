@@ -22,12 +22,13 @@ source("src/utils/data-validation.R")
 
 # ----- Step 2: Prepare the new database ----- #
 
-# Read in raw data
+# Connect to the databases
 con_raw <- dbConnect(duckdb::duckdb(), "data/db/ipums-raw.duckdb")
-
-# Create database for processed data
 con_processed <- dbConnect(duckdb::duckdb(), "data/db/ipums-processed.duckdb")
+con_helpers <- dbConnect(duckdb::duckdb(), "data/db/helpers.duckdb")
 
+# Create the "ipums_raw" data in the con_processed connection. Make it temporary:
+# we'll eventually only save the processed data table in this connection.
 copy_to(
   dest = con_processed, 
   df = tbl(con_raw, "ipums"), 
@@ -36,17 +37,20 @@ copy_to(
   overwrite = TRUE
   )
 
+# ----- Step 3: Add "id" column ----- #
+
+# TODO: name ipums_db above and only add the id column here
 ipums_db <- tbl(con_processed, "ipums_raw") |>
   mutate(id = paste(SAMPLE, SERIAL, PERNUM, sep = "_")) |>
   select(id, everything())
 
-# ----- Step 3: Create bucket columns in the new database ----- #
 
 # For data validation: ensure no rows are dropped
 obs_count <- ipums_db |>
   summarise(count = n()) |>
   pull()
 
+# ----- Step 4: Add "AGE", "HHINCOME", "RACE_ETH" _bucket columns ----- # 
 # Append AGE_bucketed according to the lookup table
 ipums_bucketed_db <- ipums_db |>
   append_bucket_column(
@@ -154,15 +158,42 @@ validate_row_counts(
   step_description = "data were bucketed into a combined race-ethnicity column"
 )
 
-# Save this bucketed db to the database
-ipums_bucketed_db <- ipums_bucketed_db |>
+# ----- Step 4: Add "State" and "STATEFIP" columns ----- #
+
+# TODO: maybe refactor generate-cpuma-state-crosswalk to automatically save
+# this helper table into ipums-processed?
+# If so, then the ipums data talbe should be renamed to ipums-processed and the 
+# entire database should be renamed to something more generic, like "processed.duckdb"
+
+# Temporarily copy the helper into ipums-processed
+copy_to(
+  dest = con_processed, 
+  df = tbl(con_helpers, "cpuma-state-cross"), 
+  name = "cpuma-state-cross", 
+  temporary = TRUE, 
+  overwrite = TRUE
+)
+
+ipums_bucketed_state_db <- ipums_bucketed_db |>
+  right_join(tbl(con_processed, "cpuma-state-cross"), by = "CPUMA0010") |>
+  select("id", "YEAR", "CPUMA0010", "PUMA", "STATEFIP", "State", everything()) # reorder cols
+
+validate_row_counts(
+  db = ipums_bucketed_state_db,
+  expected_count = obs_count,
+  step_description = "State and STATEFIP columns were added"
+)
+
+# ----- Step 5: Save to the database ----- #
+
+ipums_bucketed_state_db <- ipums_bucketed_state_db |>
   compute(
     name = "ipums_bucketed", 
     temporary = FALSE
-    )
+  )
 
-
-# ----- Step 4: Clean up ----- #
+# ----- Step 6: Clean up ----- #
 
 DBI::dbDisconnect(con_raw)
 DBI::dbDisconnect(con_processed)
+DBI::dbDisconnect(con_helpers)
