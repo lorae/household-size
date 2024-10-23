@@ -23,10 +23,8 @@ source("src/utils/aggregation-tools.R")
 # Creates a 2x2 matrix representing the rotation transformation relative to angle
 # a
 rot <- function(a) {
-  matrix(
-    c(cos(a), sin(a), -sin(a), cos(a)), 
-    2, 2
-    )
+  c(cos(a), sin(a), -sin(a), cos(a)) |>
+    matrix(_, 2, 2)
 }
 
 # Moves a state according to custom specifications
