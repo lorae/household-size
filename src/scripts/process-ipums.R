@@ -17,187 +17,132 @@ library("readr")
 
 # ----- Step 1: Source helper functions ----- #
 
-source("src/utils/bucketing-tools.R")
-source("src/utils/data-validation.R")
+devtools::load_all("../dataduck")
 
-# ----- Step 2: Prepare the new database ----- #
+# ----- Step 2: Connect to the database ----- #
 
-# Connect to the databases
-con_raw <- dbConnect(duckdb::duckdb(), "data/db/ipums-raw.duckdb")
-con_processed <- dbConnect(duckdb::duckdb(), "data/db/ipums-processed.duckdb")
-con_helpers <- dbConnect(duckdb::duckdb(), "data/db/helpers.duckdb")
-
-# Create the "ipums_raw" data in the con_processed connection. Make it temporary:
-# we'll eventually only save the processed data table in this connection.
-copy_to(
-  dest = con_processed, 
-  df = tbl(con_raw, "ipums"), 
-  name = "ipums_raw", 
-  temporary = TRUE, 
-  overwrite = TRUE
-  )
-
-# ----- Step 3: Add "id" column ----- #
-
-# TODO: name ipums_db above and only add the id column here
-ipums_db <- tbl(con_processed, "ipums_raw") |>
-  mutate(id = paste(SAMPLE, SERIAL, PERNUM, sep = "_")) |>
-  select(id, everything())
-
+con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
+ipums_db <- tbl(con, "ipums")
 
 # For data validation: ensure no rows are dropped
 obs_count <- ipums_db |>
   summarise(count = n()) |>
   pull()
 
-# ----- Step 4: Add "AGE", "HHINCOME", "RACE_ETH" _bucket columns ----- # 
-# Append AGE_bucketed according to the lookup table
-ipums_bucketed_db <- ipums_db |>
-  append_bucket_column(
-    con = con_processed,
-    filepath = "lookup_tables/age/age_buckets01.csv", 
-    data = _, 
-    input_column = "AGE", 
-    id_column = "id"
-  ) |>
-  compute(
-    name = "ipums_age_bucketed", 
-    temporary = TRUE
-  )
+# ----- Step 3: Create a new table to write processed columns to ----- #
 
-print("Ages bucketed successfully.")
-
-validate_row_counts(
-  db = ipums_bucketed_db,
-  expected_count = obs_count,
-  step_description = "data were bucketed by age group"
+compute(
+  tbl(con, "ipums"),
+  name = "ipums_processed",
+  temporary = FALSE,
+  overwrite = TRUE
 )
 
-# Append HHINCOME_bucketed according to the lookup table
-# TODO: Must deflate HH income from 2020 to 2000 levels.
-ipums_bucketed_db <- ipums_bucketed_db |>
-  append_bucket_column(
-    con = con_processed,
-    filepath = "lookup_tables/hhincome/hhincome_buckets00.csv",
-    data = _,
-    input_column = "HHINCOME",
-    id_column = "id"
-  ) |> 
-  compute(
-    name = "ipums_hhincome_bucketed", 
-    temporary = TRUE
-  )
+# ----- Step 4: Add pers_id" and "hh_id" columns to "ipums_processed" ---- #
 
-print("Household incomes bucketed successfully.")
+# "pers_id" column
+dbExecute(con, "
+  ALTER TABLE ipums_processed ADD COLUMN pers_id TEXT;
+  UPDATE ipums_processed
+  SET pers_id = SAMPLE || '_' || SERIAL || '_' || PERNUM;
+")
 
 validate_row_counts(
-  db = ipums_bucketed_db,
+  db = tbl(con, "ipums_processed"),
   expected_count = obs_count,
-  step_description = "data were bucketed by household-level income group"
+  step_description = "pers_id column was added"
 )
 
-# Append HISPAN_bucketed according to the lookup table
-ipums_bucketed_db <- ipums_bucketed_db |>
-  append_bucket_column(
-    con = con_processed,
-    filepath = "lookup_tables/hispan/hispan_buckets00.csv",
-    data = _,
-    input_column = "HISPAN",
-    id_column = "id"
-  ) |> 
-  compute(
-    name = "ipums_hispan_bucketed", 
-    temporary = TRUE
-  )
-
-print("Ethnicity bucketed successfully.")
+# "hh_id" column
+dbExecute(con, "
+  ALTER TABLE ipums_processed ADD COLUMN hh_id TEXT;
+  UPDATE ipums_processed
+  SET hh_id = SAMPLE || '_' || SERIAL;
+")
 
 validate_row_counts(
-  db = ipums_bucketed_db,
+  db = tbl(con, "ipums_processed"),
   expected_count = obs_count,
-  step_description = "data were bucketed by ethnicity"
+  step_description = "hh_id column was added"
 )
 
-# Append RACE_bucketed according to the lookup table
-ipums_bucketed_db <- ipums_bucketed_db |>
-  append_bucket_column(
-    con = con_processed,
-    filepath = "lookup_tables/race/race_buckets00.csv",
-    data = _,
-    input_column = "RACE",
-    id_column = "id"
-  ) |> 
-  compute(
-    name = "ipums_race_bucketed", 
-    temporary = TRUE
+# ----- Step 5: Generate and execute SQL queries for bucketed columns ----- #
+
+# Define the list of bucket columns to be added
+bucket_columns <- list(
+  list(
+    lookup_filepath = "lookup_tables/age/age_buckets01.csv",
+    input_column = "AGE"
+  ),
+  list(
+    lookup_filepath = "lookup_tables/hhincome/hhincome_buckets02.csv",
+    input_column = "HHINCOME"
+  ),
+  list(
+    lookup_filepath = "lookup_tables/hispan/hispan_buckets00.csv",
+    input_column = "HISPAN"
+  ),
+  list(
+    lookup_filepath = "lookup_tables/race/race_buckets00.csv",
+    input_column = "RACE"
   )
-
-print("Race bucketed successfully.")
-
-validate_row_counts(
-  db = ipums_bucketed_db,
-  expected_count = obs_count,
-  step_description = "data were bucketed by race"
 )
 
-# Use the HISPAN_bucket and RACE_bucket to produce a RACE_ETH_bucket column
-ipums_bucketed_db <- ipums_bucketed_db |>
-  race_eth_bucket(
-    data = _
-  ) |> 
-  compute(
-    name = "ipums_race_eth_bucketed", 
-    temporary = TRUE
+# Add bucketed columns using the lookup tables
+for (bucket in bucket_columns) {
+  # Load lookup table
+  lookup_table <- read_csv(bucket$lookup_filepath, col_types = cols())
+  
+  # Split lookup table into range and value tables
+  lookup_split <- split_lookup_table(bucket$lookup_filepath)
+  range_lookup_table <- lookup_split$range
+  value_lookup_table <- lookup_split$value
+  
+  # Write SQL to add the bucketed column
+  start_time <- Sys.time()
+  sql_query <- write_sql_query(
+    range_lookup_table = range_lookup_table,
+    value_lookup_table = value_lookup_table,
+    col = bucket$input_column,
+    table = "ipums_processed"
   )
+  
+  # Execute the query to add the new column
+  # Split the SQL query in 2: you cannot alter table and execute at once
+  queries <- strsplit(sql_query, ";")[[1]]
+  # Extracting each part
+  sql_query_alter <- paste0(queries[1], ";")  # First part (ALTER TABLE)
+  sql_query_update <- paste0(queries[2], ";")  # Second part (UPDATE)
+  
+  dbExecute(con, sql_query_alter)  # Execute the ALTER TABLE part
+  dbExecute(con, sql_query_update)  # Execute the UPDATE part
+  end_time <- Sys.time()
+  cat("Time taken for", bucket$input_column, "bucketing: ", end_time - start_time, "\n")
+  
+  # Validate row count
+  validate_row_counts(
+    db = tbl(con, "ipums_processed"),
+    expected_count = obs_count,
+    step_description = glue::glue("{bucket$input_column} bucketed column was added")
+  )
+}
 
-print("Ethnicity/Race coded into a single bucket successfully.")
+# "RACE_ETH_bucket" (by combining entries in HISPAN_bucket and RACE_bucket)
+start_time <- Sys.time()
+sql_query <- write_race_eth_sql_query(
+  table = "ipums_processed"
+)
+dbExecute(con, sql_query)
+end_time <- Sys.time()
+cat("Time taken for race/ethnicity bucketing: ", end_time - start_time, "\n")
 
 validate_row_counts(
-  db = ipums_bucketed_db,
+  db = ipums_db,
   expected_count = obs_count,
   step_description = "data were bucketed into a combined race-ethnicity column"
 )
 
-# ----- Step 4: Add "State" and "STATEFIP" columns ----- #
-
-# TODO: maybe refactor generate-cpuma-state-crosswalk to automatically save
-# this helper table into ipums-processed?
-# If so, then the ipums data talbe should be renamed to ipums-processed and the 
-# entire database should be renamed to something more generic, like "processed.duckdb"
-
-# Temporarily copy the helper into ipums-processed
-copy_to(
-  dest = con_processed, 
-  df = tbl(con_helpers, "cpuma-state-cross"), 
-  name = "cpuma-state-cross", 
-  temporary = TRUE, 
-  overwrite = TRUE
-)
-
-ipums_bucketed_state_db <- ipums_bucketed_db |>
-  left_join(tbl(con_processed, "cpuma-state-cross"), by = "CPUMA0010") |>
-  select("id", "YEAR", "CPUMA0010", "PUMA", "STATEFIP", "State", everything()) # reorder cols
-
-validate_row_counts(
-  db = ipums_bucketed_state_db,
-  expected_count = obs_count,
-  step_description = "State and STATEFIP columns were added"
-)
-
-# TODO: Add a validation step that lists any rows from the lefthand source that 
-# failed to find a match in the righthand source.
-
-# ----- Step 5: Save to the database ----- #
-
-ipums_bucketed_state_db <- ipums_bucketed_state_db |>
-  compute(
-    name = "ipums_bucketed", 
-    temporary = FALSE,
-    overwrite = TRUE
-  )
-
 # ----- Step 6: Clean up ----- #
 
-DBI::dbDisconnect(con_raw)
-DBI::dbDisconnect(con_processed)
-DBI::dbDisconnect(con_helpers)
+DBI::dbDisconnect(con)
+
