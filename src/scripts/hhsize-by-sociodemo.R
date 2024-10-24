@@ -72,7 +72,23 @@ crosstab_2000_2020 <- full_join(
     
     # Bonferroni correction: Significant if pval <= 0.05 / number of rows
     sig_bonferroni = pval <= 0.05 / nrow(merged_data)
-  )
+  ) |>
+  select(
+    RACE_ETH_bucket,
+    AGE_bucket,
+    count_2000,
+    count_2020,
+    weighted_count_2000,
+    weighted_count_2020,
+    weighted_mean_2000,
+    weighted_mean_2020,
+    -mean_standard_error_2000,
+    -mean_standard_error_2020,
+    diff,
+    pval,
+    sig,
+    sig_bonferroni
+    )
 
 # ----- Step 3: Save results and clean up ----- #
 
