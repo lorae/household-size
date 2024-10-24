@@ -49,7 +49,7 @@ crosstab_2020 <- crosstab_mean(
   arrange(RACE_ETH_bucket, AGE_bucket)
 
 
-merged_data <- full_join(
+crosstab_2000_2020 <- full_join(
   crosstab_2000 %>% rename_with(~paste0(., "_2000"), -c(AGE_bucket, RACE_ETH_bucket)),
   crosstab_2020 %>% rename_with(~paste0(., "_2020"), -c(AGE_bucket, RACE_ETH_bucket)),
   by = c("AGE_bucket", "RACE_ETH_bucket")
@@ -74,4 +74,9 @@ merged_data <- full_join(
     sig_bonferroni = pval <= 0.05 / nrow(merged_data)
   )
 
+# ----- Step 3: Save results and clean up ----- #
+
+saveRDS(crosstab_2000_2020, file = "data/throughput/crosstab_2000_2020.rds")
+
+DBI::dbDisconnect(con)
 
