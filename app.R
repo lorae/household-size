@@ -3,7 +3,7 @@ library(DT)  # For creating the interactive data table
 library(dplyr)
 
 # Load the data (change the path if the RDS file is located elsewhere)
-crosstab_2000_2020 <- readRDS("../data/throughput/crosstab_2000_2020.rds") |>
+crosstab_2000_2020 <- readRDS("data/throughput/crosstab_2000_2020.rds") |>
   mutate(
     weighted_mean_2000 = round(weighted_mean_2000, 3),
     weighted_mean_2020 = round(weighted_mean_2020, 3),

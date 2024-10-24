@@ -53,7 +53,11 @@ crosstab_2000_2020 <- full_join(
   crosstab_2000 %>% rename_with(~paste0(., "_2000"), -c(AGE_bucket, RACE_ETH_bucket)),
   crosstab_2020 %>% rename_with(~paste0(., "_2020"), -c(AGE_bucket, RACE_ETH_bucket)),
   by = c("AGE_bucket", "RACE_ETH_bucket")
-) %>%
+) 
+
+bonferroni_corrector <- nrow(crosstab_2000_2020)
+
+crosstab_2000_2020 <- crosstab_2000_2020 |>
   mutate(
     # Difference between 2020 and 2000 weighted means
     diff = weighted_mean_2020 - weighted_mean_2000,
@@ -70,8 +74,8 @@ crosstab_2000_2020 <- full_join(
     # Significant if pval <= 0.05
     sig = pval <= 0.05,
     
-    # Bonferroni correction: Significant if pval <= 0.05 / number of rows
-    sig_bonferroni = pval <= 0.05 / nrow(merged_data)
+    # Bonferroni correction: Significant if pval <= 0.05 / (number of comparisons made) 
+    sig_bonferroni = pval <= 0.05 / bonferroni_corrector
   ) |>
   select(
     RACE_ETH_bucket,
