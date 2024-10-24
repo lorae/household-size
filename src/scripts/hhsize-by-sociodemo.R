@@ -96,7 +96,7 @@ crosstab_2000_2020 <- crosstab_2000_2020 |>
 
 # ----- Step 3: Save results and clean up ----- #
 
-saveRDS(crosstab_2000_2020, file = "data/throughput/crosstab_2000_2020.rds")
+saveRDS(crosstab_2000_2020, file = "shiny-app/data/crosstab_2000_2020.rds")
 
 DBI::dbDisconnect(con)
 
