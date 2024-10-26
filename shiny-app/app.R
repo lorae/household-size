@@ -50,6 +50,12 @@ ui <- fluidPage(
              inputId = "show_error_bars",
              label = "Show 95% Confidence Intervals",
              value = FALSE
+           ),
+           radioButtons(
+             inputId = "plot_type",
+             label = "Select Plot Type:",
+             choices = c("Plot Household Size" = "household_size", "Plot Difference" = "difference"),
+             selected = "household_size"
            )
     )
   )
@@ -93,70 +99,62 @@ server <- function(input, output) {
     crosstab_2000_2020 %>%
       filter(RACE_ETH_bucket == input$race_eth_bucket) %>%
       # Convert AGE_bucket to a factor with ordered levels
-      mutate(AGE_bucket = factor(AGE_bucket, levels = unique(AGE_bucket))) %>%
-      # Gather the data for plotting
-      select(AGE_bucket, weighted_mean_2000, weighted_mean_2020) %>%
-      tidyr::pivot_longer(
-        cols = c("weighted_mean_2000", "weighted_mean_2020"),
-        names_to = "Year",
-        values_to = "Weighted_Mean"
-      ) %>%
-      mutate(
-        Year = ifelse(Year == "weighted_mean_2000", "2000", "2020"),
-        Year = factor(Year, levels = c("2000", "2020"))
-      )
+      mutate(AGE_bucket = factor(AGE_bucket, levels = unique(AGE_bucket)))
   })
   
-  # Compute confidence intervals if needed
-  plot_data_with_ci <- reactive({
+  # Render the plot based on plot type selection
+  output$household_size_plot <- renderPlot({
     data <- plot_data()
     
-    if (input$show_error_bars) {
-      # Assuming you have standard errors or need to compute them
-      # For demonstration, we'll compute dummy confidence intervals
-      # Replace this with your actual computation
-      data <- data %>%
+    if (input$plot_type == "household_size") {
+      data_long <- data %>%
+        select(AGE_bucket, weighted_mean_2000, weighted_mean_2020) %>%
+        tidyr::pivot_longer(
+          cols = c("weighted_mean_2000", "weighted_mean_2020"),
+          names_to = "Year",
+          values_to = "Weighted_Mean"
+        ) %>%
         mutate(
-          # Example: Assuming a standard error of 0.1 (replace with actual SE)
-          SE = 0.1,
-          CI_Lower = Weighted_Mean - 1.96 * SE,
-          CI_Upper = Weighted_Mean + 1.96 * SE
+          Year = ifelse(Year == "weighted_mean_2000", "2000", "2020"),
+          Year = factor(Year, levels = c("2000", "2020"))
         )
-    } else {
-      data <- data %>%
-        mutate(
-          CI_Lower = NA,
-          CI_Upper = NA
+      
+      # Plot household size
+      ggplot(data_long, aes(x = AGE_bucket, y = Weighted_Mean, color = Year, group = Year)) +
+        geom_point(alpha = 0.8, size = 3) +
+        geom_line(alpha = 0.8) +
+        # Add error bars if showing confidence intervals
+        { if (input$show_error_bars) geom_errorbar(aes(ymin = Weighted_Mean - 0.1 * 1.96, ymax = Weighted_Mean + 0.1 * 1.96), width = 0.2) } +
+        scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) +
+        labs(
+          title = paste("Average Household Size by Age for", input$race_eth_bucket),
+          x = "Age Group",
+          y = "Average Household Size",
+          color = "Year"
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 60, hjust = 1, size = 8),
+          legend.position = "bottom"
+        )
+    } else if (input$plot_type == "difference") {
+      # Plot difference
+      ggplot(data, aes(x = AGE_bucket, y = diff)) +
+        geom_bar(stat = "identity", fill = "#F94144", alpha = 0.8) +
+        geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+        labs(
+          title = paste("Difference in Household Size (2020 - 2000) by Age for", input$race_eth_bucket),
+          x = "Age Group",
+          y = "Difference in Average Household Size"
+        ) +
+        theme_minimal() +
+        theme(
+          axis.text.x = element_text(angle = 60, hjust = 1, size = 8)
         )
     }
-    return(data)
-  })
-  
-  # Render the plot
-  output$household_size_plot <- renderPlot({
-    data <- plot_data_with_ci()
-    
-    ggplot(data, aes(x = AGE_bucket, y = Weighted_Mean, color = Year, group = Year)) +
-      geom_point(alpha = 0.8, size = 3) +
-      geom_line(alpha = 0.8) +
-      # Add error bars if showing confidence intervals
-      { if (input$show_error_bars) geom_errorbar(aes(ymin = CI_Lower, ymax = CI_Upper), width = 0.2) } +
-      scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) +
-      labs(
-        title = paste("Average Household Size by Age for", input$race_eth_bucket),
-        x = "Age Group",
-        y = "Average Household Size",
-        color = "Year"
-      ) +
-      theme_minimal() +
-      theme(
-        axis.text.x = element_text(angle = 60, hjust = 1, size = 8),
-        legend.position = "bottom"
-      )
   })
 }
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
 
