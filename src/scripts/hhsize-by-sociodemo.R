@@ -28,6 +28,15 @@ calc_pval <- function(mean_2000, mean_2020, se_2000, se_2020) {
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
 ipums_db <- tbl(con, "ipums_processed")
 
+# TODO: eventually write a function in dataduck that when buckets are created,
+# the code automatically writes a list of vectors containing factor
+# labels. For now, I'm just generating factor labels directly from the lookup
+# table here, but this code is more brittle since it relies on me remembering
+# which lookup table I used.
+age_factor_levels <- extract_factor_label(
+  lookup_table = read_csv("lookup_tables/age/age_buckets01.csv"),
+  colname = "bucket_name"
+)
 crosstab_2000 <- crosstab_mean(
   data = ipums_db |> filter(YEAR == 2000),
   value = "NUMPREC",
@@ -36,7 +45,9 @@ crosstab_2000 <- crosstab_mean(
   repwts = paste0("REPWTP", sprintf("%d", 1:80)),
   every_combo = TRUE
 ) |> 
-  arrange(RACE_ETH_bucket, AGE_bucket)
+  arrange(RACE_ETH_bucket, AGE_bucket) |> 
+  mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels))
+
 
 crosstab_2020 <- crosstab_mean(
   data = ipums_db |> filter(YEAR == 2020),
@@ -46,7 +57,8 @@ crosstab_2020 <- crosstab_mean(
   repwts = paste0("REPWTP", sprintf("%d", 1:80)),
   every_combo = TRUE
 ) |> 
-  arrange(RACE_ETH_bucket, AGE_bucket)
+  arrange(RACE_ETH_bucket, AGE_bucket) |> 
+  mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels))
 
 
 crosstab_2000_2020 <- full_join(
