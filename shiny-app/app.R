@@ -76,15 +76,16 @@ server <- function(input, output) {
       ),
       rownames = FALSE,
       colnames = c(
-        "Race/Ethnicity" = "RACE_ETH_bucket",
+        "Race / Ethnicity" = "RACE_ETH_bucket",
         "Age Group" = "AGE_bucket",
-        "Weighted Count 2000" = "weighted_count_2000",
-        "Count 2000" = "count_2000",
-        "Weighted Mean 2000" = "weighted_mean_2000",
-        "Weighted Count 2020" = "weighted_count_2020",
-        "Count 2020" = "count_2020",
-        "Weighted Mean 2020" = "weighted_mean_2020",
-        "Difference (2020 - 2000)" = "diff",
+        "% of 2020 Pop." = "percent_2020",
+        "Num. Surveyed 2000" = "count_2000",
+        "Num. Surveyed 2020" = "count_2020",
+        "Pop. 2000" = "weighted_count_2000",
+        "Pop. 2020" = "weighted_count_2020",
+        "HH Size 2000" = "weighted_mean_2000",
+        "HH Size 2020" = "weighted_mean_2020",
+        "HH Size Difference (2020 - 2000)" = "diff",
         "P-value" = "pval",
         "Significant (p ≤ 0.05)" = "sig",
         "Bonferroni Sig. (p ≤ 0.05/n)" = "sig_bonferroni"
@@ -157,4 +158,9 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
+# # HHsize in 2020
+# (crosstab_2000_2020$percent_2020/100 * crosstab_2000_2020$weighted_mean_2020) |> sum()
+# # counterfactual 2020 HH size if means were at 2000 levels
+# (crosstab_2000_2020$percent_2020/100 * crosstab_2000_2020$weighted_mean_2000) |> sum()
 
