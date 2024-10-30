@@ -36,7 +36,7 @@ data_long <- crosstab_2005_2022 |>
 
 # Consolidated configuration for the data table
 table_options <- list(
-  pageLength = -1,  # Show all rows by default
+  pageLength = 18,  # Show 18 rows by default
   scrollX = TRUE,   # Enable horizontal scrolling
   searching = TRUE, # Enable column filtering
   orderClasses = TRUE,  # Enable column sorting
@@ -71,11 +71,19 @@ ui <- fluidPage(
   
   titlePanel("Household Size Summary (2005 vs. 2022)"),
   
-  # Data table at the top
+  # Placeholder text before the data table
   fluidRow(
     column(width = 12,
+           p("This table provides a summary of household sizes for different age and race/ethnicity groups in the years 2005 and 2022."),
            # Data table output
            DTOutput("data_table")
+    )
+  ),
+  
+  # Placeholder text before the graph
+  fluidRow(
+    column(width = 12,
+           p("The graph below shows the trends in average household size across different age groups and years. Use the options to customize the view.")
     )
   ),
   
@@ -136,10 +144,9 @@ server <- function(input, output) {
     data <- plot_data()
     
     if (input$plot_type == "household_size") {
-      # Plot household size by age bucket
+      # Plot household size by age bucket using horizontal lines
       ggplot(data, aes(x = AGE_bucket, y = weighted_mean, color = year, group = year)) +
-        geom_point(alpha = 0.8, size = 3) +
-        geom_line(alpha = 0.8) +
+        geom_linerange(aes(x = AGE_bucket, ymin = weighted_mean - 0.05, ymax = weighted_mean + 0.05), size = 2, alpha = 0.8) +
         # Add error bars with series-specific standard error
         { if (input$show_error_bars) 
           geom_errorbar(aes(
@@ -148,6 +155,7 @@ server <- function(input, output) {
           ), width = 0.2) 
         } +
         scale_color_manual(values = c("2005" = "#577590", "2022" = "#F94144")) +
+        ylim(1.5, 5.5) +
         labs(
           title = paste("Average Household Size by Age for", input$race_eth_bucket),
           x = "Age Group",
@@ -165,6 +173,7 @@ server <- function(input, output) {
       ggplot(crosstab_2005_2022 |> filter(RACE_ETH_bucket == input$race_eth_bucket), aes(x = AGE_bucket, y = diff)) +
         geom_bar(stat = "identity", fill = "#F94144", alpha = 0.8) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+        ylim(-0.7, 0.7) +
         labs(
           title = paste("Difference in Household Size (2022 - 2005) by Age for", input$race_eth_bucket),
           x = "Age Group",
@@ -180,10 +189,4 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
-
-# # HHsize in 2022
-# (crosstab_2005_2022$percent_2022/100 * crosstab_2005_2022$weighted_mean_2022) |> sum()
-# # counterfactual 2022 HH size if means were at 2005 levels
-# (crosstab_2005_2022$percent_2022/100 * crosstab_2005_2022$weighted_mean_2005) |> sum()
-
 
