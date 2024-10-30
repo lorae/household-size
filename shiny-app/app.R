@@ -5,11 +5,23 @@ library(ggplot2)  # For plotting
 library(tidyr)    # For data manipulation
 
 # Load the data (adjust the path if necessary)
-crosstab_2000_2020 <- readRDS("data/crosstab_2000_2020.rds") %>%
+crosstab_2005_2022 <- readRDS("data/crosstab_2005_2022.rds") |>
   mutate(
-    weighted_mean_2000 = round(weighted_mean_2000, 3),
-    weighted_mean_2020 = round(weighted_mean_2020, 3),
+    weighted_mean_2005 = round(weighted_mean_2005, 3),
+    weighted_mean_2022 = round(weighted_mean_2022, 3),
     diff = round(diff, 3)
+  )
+
+# Create long-formatted data for later graphing
+data_long <- crosstab_2005_2022 |>
+  select(RACE_ETH_bucket, AGE_bucket, weighted_mean_2005, weighted_mean_2022, mean_standard_error_2005, mean_standard_error_2022) |>
+  tidyr::pivot_longer(
+    cols = c("weighted_mean_2005", "weighted_mean_2022", "mean_standard_error_2005", "mean_standard_error_2022"),
+    names_to = c(".value", "year"),
+    names_pattern = "(.*)_(\\d+)"
+  ) |>
+  mutate(
+    year = factor(year, levels = c("2005", "2022"))
   )
 
 # Define the UI
@@ -21,7 +33,7 @@ ui <- fluidPage(
                     table.dataTable { width: 100% !important; }"))
   ),
   
-  titlePanel("Household Size Summary (2000 vs. 2020)"),
+  titlePanel("Household Size Summary (2005 vs. 2022)"),
   
   # Data table at the top
   fluidRow(
@@ -43,8 +55,8 @@ ui <- fluidPage(
            selectInput(
              inputId = "race_eth_bucket",
              label = "Select Race/Ethnicity Group:",
-             choices = unique(crosstab_2000_2020$RACE_ETH_bucket),
-             selected = unique(crosstab_2000_2020$RACE_ETH_bucket)[1]
+             choices = unique(crosstab_2005_2022$RACE_ETH_bucket),
+             selected = unique(crosstab_2005_2022$RACE_ETH_bucket)[1]
            ),
            checkboxInput(
              inputId = "show_error_bars",
@@ -66,7 +78,7 @@ server <- function(input, output) {
   # Render the data table
   output$data_table <- renderDT({
     datatable(
-      crosstab_2000_2020,
+      crosstab_2005_2022,
       options = list(
         pageLength = -1,  # Show all rows by default
         scrollX = TRUE,   # Enable horizontal scrolling
@@ -78,28 +90,28 @@ server <- function(input, output) {
       colnames = c(
         "Race / Ethnicity" = "RACE_ETH_bucket",
         "Age Group" = "AGE_bucket",
-        "% of 2020 Pop." = "percent_2020",
-        "Num. Surveyed 2000" = "count_2000",
-        "Num. Surveyed 2020" = "count_2020",
-        "Pop. 2000" = "weighted_count_2000",
-        "Pop. 2020" = "weighted_count_2020",
-        "HH Size 2000" = "weighted_mean_2000",
-        "HH Size 2020" = "weighted_mean_2020",
-        "HH Size Difference (2020 - 2000)" = "diff",
+        "% of 2022 Pop." = "percent_2022",
+        "Num. Surveyed 2005" = "count_2005",
+        "Num. Surveyed 2022" = "count_2022",
+        "Pop. 2005" = "weighted_count_2005",
+        "Pop. 2022" = "weighted_count_2022",
+        "HH Size 2005" = "weighted_mean_2005",
+        "HH Size 2022" = "weighted_mean_2022",
+        "HH Size Difference (2022 - 2005)" = "diff",
         "P-value" = "pval",
         "Significant (p ≤ 0.05)" = "sig",
         "Bonferroni Sig. (p ≤ 0.05/n)" = "sig_bonferroni"
       )
-    ) %>%
+    ) |>
       formatSignif("P-value", digits = 3)  # Format pval in scientific notation with 3 significant digits
   })
   
-  # Prepare data for plotting based on user input
+  # Prepare filtered data for plotting based on user input
   plot_data <- reactive({
-    # Filter data for the selected RACE_ETH_bucket
-    crosstab_2000_2020 %>%
-      filter(RACE_ETH_bucket == input$race_eth_bucket) %>%
-      # Convert AGE_bucket to a factor with ordered levels
+    # Filter data_long for the selected RACE_ETH_bucket
+    data_long |>
+      filter(RACE_ETH_bucket == input$race_eth_bucket) |>
+      # Convert AGE_bucket to a factor with ordered levels for better plot rendering
       mutate(AGE_bucket = factor(AGE_bucket, levels = unique(AGE_bucket)))
   })
   
@@ -108,25 +120,18 @@ server <- function(input, output) {
     data <- plot_data()
     
     if (input$plot_type == "household_size") {
-      data_long <- data %>%
-        select(AGE_bucket, weighted_mean_2000, weighted_mean_2020) %>%
-        tidyr::pivot_longer(
-          cols = c("weighted_mean_2000", "weighted_mean_2020"),
-          names_to = "Year",
-          values_to = "Weighted_Mean"
-        ) %>%
-        mutate(
-          Year = ifelse(Year == "weighted_mean_2000", "2000", "2020"),
-          Year = factor(Year, levels = c("2000", "2020"))
-        )
-      
-      # Plot household size
-      ggplot(data_long, aes(x = AGE_bucket, y = Weighted_Mean, color = Year, group = Year)) +
+      # Plot household size by age bucket
+      ggplot(data, aes(x = AGE_bucket, y = weighted_mean, color = year, group = year)) +
         geom_point(alpha = 0.8, size = 3) +
         geom_line(alpha = 0.8) +
-        # Add error bars if showing confidence intervals
-        { if (input$show_error_bars) geom_errorbar(aes(ymin = Weighted_Mean - 0.1 * 1.96, ymax = Weighted_Mean + 0.1 * 1.96), width = 0.2) } +
-        scale_color_manual(values = c("2000" = "#577590", "2020" = "#F94144")) +
+        # Add error bars with series-specific standard error
+        { if (input$show_error_bars) 
+          geom_errorbar(aes(
+            ymin = weighted_mean - mean_standard_error * 1.96, 
+            ymax = weighted_mean + mean_standard_error * 1.96
+          ), width = 0.2) 
+        } +
+        scale_color_manual(values = c("2005" = "#577590", "2022" = "#F94144")) +
         labs(
           title = paste("Average Household Size by Age for", input$race_eth_bucket),
           x = "Age Group",
@@ -138,13 +143,14 @@ server <- function(input, output) {
           axis.text.x = element_text(angle = 60, hjust = 1, size = 8),
           legend.position = "bottom"
         )
+      
     } else if (input$plot_type == "difference") {
       # Plot difference
-      ggplot(data, aes(x = AGE_bucket, y = diff)) +
+      ggplot(crosstab_2005_2022 |> filter(RACE_ETH_bucket == input$race_eth_bucket), aes(x = AGE_bucket, y = diff)) +
         geom_bar(stat = "identity", fill = "#F94144", alpha = 0.8) +
         geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
         labs(
-          title = paste("Difference in Household Size (2020 - 2000) by Age for", input$race_eth_bucket),
+          title = paste("Difference in Household Size (2022 - 2005) by Age for", input$race_eth_bucket),
           x = "Age Group",
           y = "Difference in Average Household Size"
         ) +
@@ -159,8 +165,7 @@ server <- function(input, output) {
 # Run the application 
 shinyApp(ui = ui, server = server)
 
-# # HHsize in 2020
-# (crosstab_2000_2020$percent_2020/100 * crosstab_2000_2020$weighted_mean_2020) |> sum()
-# # counterfactual 2020 HH size if means were at 2000 levels
-# (crosstab_2000_2020$percent_2020/100 * crosstab_2000_2020$weighted_mean_2000) |> sum()
-
+# # HHsize in 2022
+# (crosstab_2005_2022$percent_2022/100 * crosstab_2005_2022$weighted_mean_2022) |> sum()
+# # counterfactual 2022 HH size if means were at 2005 levels
+# (crosstab_2005_2022$percent_2022/100 * crosstab_2005_2022$weighted_mean_2005) |> sum()
