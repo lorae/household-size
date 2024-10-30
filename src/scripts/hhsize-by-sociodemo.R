@@ -18,8 +18,8 @@ library("purrr")
 devtools::load_all("../dataduck")
 
 # Function to calculate the p-value from a two-sample t-test with different standard errors
-calc_pval <- function(mean_2000, mean_2020, se_2000, se_2020) {
-  z_score <- (mean_2020 - mean_2000) / sqrt(se_2000^2 + se_2020^2)
+calc_pval <- function(mean_2005, mean_2022, se_2005, se_2022) {
+  z_score <- (mean_2022 - mean_2005) / sqrt(se_2005^2 + se_2022^2)
   pval <- 2 * pnorm(-abs(z_score))
   return(pval)
 }
@@ -38,8 +38,8 @@ age_factor_levels <- extract_factor_label(
   lookup_table = read.csv("lookup_tables/age/age_buckets01.csv"),
   colname = "bucket_name"
 )
-mean2000 <- crosstab_mean(
-  data = ipums_db |> filter(YEAR == 2000),
+mean2005 <- crosstab_mean(
+  data = ipums_db |> filter(YEAR == 2005),
   value = "NUMPREC",
   weight = "PERWT",
   group_by = c("AGE_bucket", "RACE_ETH_bucket"),
@@ -49,8 +49,8 @@ mean2000 <- crosstab_mean(
   mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels)) |>
   arrange(RACE_ETH_bucket, AGE_bucket)
 
-mean2020 <- crosstab_mean(
-  data = ipums_db |> filter(YEAR == 2020),
+mean2022 <- crosstab_mean(
+  data = ipums_db |> filter(YEAR == 2022),
   value = "NUMPREC",
   weight = "PERWT",
   group_by = c("AGE_bucket", "RACE_ETH_bucket"),
@@ -60,8 +60,8 @@ mean2020 <- crosstab_mean(
   mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels)) |>
   arrange(RACE_ETH_bucket, AGE_bucket)
 
-percent2020 <- crosstab_percent(
-  data = ipums_db |> filter(YEAR == 2020),
+percent2022 <- crosstab_percent(
+  data = ipums_db |> filter(YEAR == 2022),
   weight = "PERWT",
   group_by = c("AGE_bucket", "RACE_ETH_bucket"),
   percent_group_by = c(),
@@ -73,32 +73,32 @@ percent2020 <- crosstab_percent(
   select(-weighted_count, -count)
 
 
-crosstab_2000_2020 <- full_join(
-  mean2000 |> rename_with(~paste0(., "_2000"), -c(AGE_bucket, RACE_ETH_bucket)),
-  mean2020 |> rename_with(~paste0(., "_2020"), -c(AGE_bucket, RACE_ETH_bucket)),
+crosstab_2005_2022 <- full_join(
+  mean2005 |> rename_with(~paste0(., "_2005"), -c(AGE_bucket, RACE_ETH_bucket)),
+  mean2022 |> rename_with(~paste0(., "_2022"), -c(AGE_bucket, RACE_ETH_bucket)),
   by = c("AGE_bucket", "RACE_ETH_bucket")
 ) |>
-  # TODO: build in a check that the count, weighted_count from percent2020 equal the 
-  # count, weighted_count from mean2020
+  # TODO: build in a check that the count, weighted_count from percent2022 equal the 
+  # count, weighted_count from mean2022
   full_join(
-    percent2020 |> rename_with(~paste0(., "_2020"), -c(AGE_bucket, RACE_ETH_bucket)),
+    percent2022 |> rename_with(~paste0(., "_2022"), -c(AGE_bucket, RACE_ETH_bucket)),
     by = c("AGE_bucket", "RACE_ETH_bucket")
   )
 
-bonferroni_corrector <- nrow(crosstab_2000_2020)
+bonferroni_corrector <- nrow(crosstab_2005_2022)
 
-crosstab_2000_2020 <- crosstab_2000_2020 |>
+crosstab_2005_2022 <- crosstab_2005_2022 |>
   mutate(
-    # Difference between 2020 and 2000 weighted means
-    diff = weighted_mean_2020 - weighted_mean_2000,
+    # Difference between 2022 and 2005 weighted means
+    diff = weighted_mean_2022 - weighted_mean_2005,
     
     # Calculate the p-value using the function above
     pval = mapply(
       calc_pval,
-      weighted_mean_2000, 
-      weighted_mean_2020, 
-      mean_standard_error_2000, 
-      mean_standard_error_2020
+      weighted_mean_2005, 
+      weighted_mean_2022, 
+      mean_standard_error_2005, 
+      mean_standard_error_2022
     ),
     
     # Significant if pval <= 0.05
@@ -107,22 +107,22 @@ crosstab_2000_2020 <- crosstab_2000_2020 |>
     # Bonferroni correction: Significant if pval <= 0.05 / (number of comparisons made) 
     sig_bonferroni = pval <= 0.05 / bonferroni_corrector,
     
-    # Calculation the acutal contribution toward 2020 household size, the contribution
-    # toward counterfactual household size (had population proporitons been at 2020
-    # levels but weights at 2000 levels), and the difference between the two
-    cont_2020 = percent_2020 * weighted_mean_2020 / 100,
-    cont_2020_cf = percent_2020 * weighted_mean_2000 / 100,
-    contribution_diff = cont_2020 - cont_2020_cf,
+    # Calculation the acutal contribution toward 2022 household size, the contribution
+    # toward counterfactual household size (had population proporitons been at 2022
+    # levels but weights at 2005 levels), and the difference between the two
+    cont_2022 = percent_2022 * weighted_mean_2022 / 100,
+    cont_2022_cf = percent_2022 * weighted_mean_2005 / 100,
+    contribution_diff = cont_2022 - cont_2022_cf,
     
-    mean_2000_95_ci = map2(
-      weighted_mean_2000, 
-      mean_standard_error_2000, 
+    mean_2005_95_ci = map2(
+      weighted_mean_2005, 
+      mean_standard_error_2005, 
       ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
     ),
     
-    mean_2020_95_ci = map2(
-      weighted_mean_2020, 
-      mean_standard_error_2020, 
+    mean_2022_95_ci = map2(
+      weighted_mean_2022, 
+      mean_standard_error_2022, 
       ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
     )
   ) |>
@@ -130,18 +130,18 @@ crosstab_2000_2020 <- crosstab_2000_2020 |>
   select(
     RACE_ETH_bucket,
     AGE_bucket,
-    count_2000,
-    count_2020,
-    weighted_count_2000,
-    weighted_count_2020,
-    percent_2020,
-    percent_standard_error_2020,
-    weighted_mean_2000,
-    weighted_mean_2020,
-    mean_standard_error_2000,
-    mean_standard_error_2020,
-    mean_2000_95_ci,
-    mean_2020_95_ci,
+    count_2005,
+    count_2022,
+    weighted_count_2005,
+    weighted_count_2022,
+    percent_2022,
+    percent_standard_error_2022,
+    weighted_mean_2005,
+    weighted_mean_2022,
+    mean_standard_error_2005,
+    mean_standard_error_2022,
+    mean_2005_95_ci,
+    mean_2022_95_ci,
     diff,
     pval,
     sig,
@@ -151,7 +151,7 @@ crosstab_2000_2020 <- crosstab_2000_2020 |>
 
 # ----- Step 3: Save results and clean up ----- #
 
-saveRDS(crosstab_2000_2020, file = "shiny-app/data/crosstab_2000_2020.rds")
+saveRDS(crosstab_2005_2022, file = "shiny-app/data/crosstab_2005_2022.rds")
 
 DBI::dbDisconnect(con)
 
