@@ -1,0 +1,97 @@
+---
+title: "Contributions"
+author: "Lorae Stojanovic"
+date: "2024-10-31"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+library(DT)
+library(dplyr)
+
+load("shiny-app/data/all_tables.rda")
+```
+
+How has average household size changed over time? In 2005, the average American lived in a household of `r weighted.mean(crosstab_2005_2022$weighted_mean_2005, crosstab_2005_2022$weighted_count_2005) |> round(3)` people. By 2022, average household size shrunk to `r weighted.mean(crosstab_2005_2022$weighted_mean_2022, crosstab_2005_2022$weighted_count_2022) |> round(3)` people. 
+
+Some of this effect may be compositional. The demographic makeup of Americans has changed in the last 17 years. Due to increasing life expectancies, for example, America now has an elevated aged population. Older people, on average, tend to live in smaller households, and this shift toward and older America could explain the reduction in household size. At the same time, a greater proportion of America identifies as Hispanic/Latino, and these individuals tend to live in larger households than average. 
+
+We're interested in understanding how Americans' housing behaviors may or may not be reflective of a housing supply shortage. If insufficient housing stock exists, then Americans may be forced to live in closer conditions than they would otherwise prefer. As suggested by Galster (citation), we calculate a simple counterfactual. We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, geography, and birthplace (American-born or foreign-born). Within each of these buckets, we calculate average household size in both 2005 and 2022. We then calculate a simple counterfactual: *Had average household sizes remained at their 2005 levels, but population demographics shifted to 2022 levels, what would we expect the average American household size to be?*
+
+# Table 1: Theoretical Example
+Table 1 shows a simple theoretical example of population proportions and average household sizes across different demographic groups in 2005 and 2022. We keep things simple with just 3 groups in the population: White Americans, Hispanic Americans, and Asian Americans and Pacific Islanders.
+
+```{r table01, echo = FALSE}
+# Create the example data frame
+example_table <- data.frame(
+  group = c("White", "Hispanic", "AAPI"),
+  perc_2005 = c(60, 25, 15),
+  perc_2022 = c(50, 30, 20),
+  hhsize_2005 = c(4, 5, 3),
+  hhsize_2022 = c(4.6, 4, 2.5)
+) |>
+  mutate(
+    cont_2005 = perc_2005 * hhsize_2005 / 100,
+    cont_2022 = perc_2022 * hhsize_2022 / 100,
+    cont_2022cf = perc_2022 * hhsize_2005 / 100
+  )
+
+# Calculate the sum row for selected columns
+sum_row <- example_table |>
+  summarize(
+    group = "Sum",
+    perc_2005 = sum(perc_2005),
+    perc_2022 = sum(perc_2022),
+    hhsize_2005 = NA,
+    hhsize_2022 = NA,
+    cont_2005 = sum(cont_2005),
+    cont_2022 = sum(cont_2022),
+    cont_2022cf = sum(cont_2022cf)
+  )
+
+# Bind the sum row to the original table
+example_table <- bind_rows(example_table, sum_row)
+
+# Render the example table with custom display names for columns and style the Sum row
+datatable(
+  example_table,
+  options = list(
+    pageLength = 5,
+    autoWidth = TRUE,
+    dom = 't',  # hides the search bar and other options
+    ordering = FALSE
+  ),
+  rownames = FALSE,
+  colnames = c(
+    "Group" = "group",
+    "Percent of 2005 Population" = "perc_2005",
+    "Percent of 2022 Population" = "perc_2022",
+    "Average HH Size (2005)" = "hhsize_2005",
+    "Average HH Size (2022)" = "hhsize_2022",
+    "Contribution (2005)" = "cont_2005",
+    "Contribution (2022)" = "cont_2022",
+    "Contribution (2022 Counterfactual)" = "cont_2022cf"
+  )
+) |>
+  formatStyle(
+    "Group",
+    target = "row",
+    fontWeight = styleEqual("Sum", "bold")
+  )
+
+```
+
+we calculate overall population in 2005 and 2022, as well as mean household size in 2005 and 2022.
+
+Table 1, below, shows a simple example of 126 rows. We categorize every American into a unique race/ethnicity and age bucket. Even after correcting for the presence of multiple T-tests, we can see that many groups show statistically significant increases or decreases in average household size. XX Americans between the ages of XX and YY, for example, had an average household size of ZZ. in 2005. By 2022, this value increased to WW. This difference is highly significant at a P< XXX value.
+
+
+
+
+break down the population into groups by age, sex, race/ethnicity, geography, and birthplace (domestic or international). Within each of these fine-grained categories, we calculate the average household size in 2005. (Footnote: why 2005? Initially, we pulled data for 2000. But 2005 is the first year we can get replication weight standard errors.) Assuming that these household sizes remained fixed, we calculate a counterfactual average household size in 2022 using the 2005 household size numbers. 
+
+That average household size is `r weighted.mean(crosstab_2005_2022$weighted_mean_2005, crosstab_2005_2022$weighted_count_2022) |> round(3)`. In other words, American household sizes in 2022 are *larger* than we would expect due to demographic shifts alone. Within identical demographic groups, living patterns have shifted, on average, to denser conditions: Households today are `r ((weighted.mean(crosstab_2005_2022$weighted_mean_2022, crosstab_2005_2022$weighted_count_2022)/weighted.mean(crosstab_2005_2022$weighted_mean_2005, crosstab_2005_2022$weighted_count_2022) - 1)*100) |> round(2)`% larger than we would expect had 2005 preferences remained constant.
+
+
