@@ -149,9 +149,78 @@ crosstab_2005_2022 <- crosstab_2005_2022 |>
     contribution_diff
     )
 
+contributions <- crosstab_2005_2022 |>
+  select(
+    RACE_ETH_bucket,
+    AGE_bucket,
+    percent_2022,
+    weighted_mean_2005,
+    weighted_mean_2022
+  ) |>
+  mutate(
+    cont_2005 = (percent_2022 / 100) * weighted_mean_2005,
+    cont_2022 = (percent_2022 / 100) * weighted_mean_2022,
+    cont_diff = cont_2022 - cont_2005
+  )
+
+cont.tmp <- contributions |>
+  group_by(RACE_ETH_bucket) %>%
+  summarize(cont_diff_sum = sum(cont_diff, na.rm = TRUE))
+
+# Precompute data for the data table
+data_for_table <- crosstab_2005_2022 %>%
+  mutate(
+    weighted_mean_2005 = round(weighted_mean_2005, 3),
+    weighted_mean_2022 = round(weighted_mean_2022, 3),
+    diff = round(diff, 3),
+    percent_2022 = round(percent_2022, 3)
+  ) %>%
+  select(
+    -mean_2005_95_ci, -mean_2022_95_ci, -percent_standard_error_2022,
+    -mean_standard_error_2005, -mean_standard_error_2022, -contribution_diff
+  )
+
+# Precompute long format data for the household size plot
+data_long <- crosstab_2005_2022 %>%
+  select(
+    RACE_ETH_bucket, AGE_bucket, weighted_mean_2005,
+    weighted_mean_2022, mean_standard_error_2005, mean_standard_error_2022
+  ) %>%
+  pivot_longer(
+    cols = c(
+      "weighted_mean_2005", "weighted_mean_2022",
+      "mean_standard_error_2005", "mean_standard_error_2022"
+    ),
+    names_to = c(".value", "year"),
+    names_pattern = "(.*)_(\\d+)"
+  ) %>%
+  mutate(
+    year = factor(year, levels = c("2005", "2022")),
+    AGE_bucket = factor(AGE_bucket, levels = unique(AGE_bucket))
+  )
+
+
+
+# Precompute summary contributions for the summary waterfall chart
+cont_summary <- contributions %>%
+  group_by(RACE_ETH_bucket) %>%
+  summarize(cont_diff_sum = sum(cont_diff, na.rm = TRUE)) %>%
+  mutate(
+    end_bar = cumsum(cont_diff_sum),
+    start_bar = lag(end_bar, default = 0)
+  )
+
 # ----- Step 3: Save results and clean up ----- #
 
-saveRDS(crosstab_2005_2022, file = "shiny-app/data/crosstab_2005_2022.rds")
+save(
+  crosstab_2005_2022, 
+  contributions, 
+  cont.tmp, 
+  data_for_table, 
+  data_long, 
+  cont_summary, 
+  file = "shiny-app/data/all_tables.rda"
+)
 
 DBI::dbDisconnect(con)
 
