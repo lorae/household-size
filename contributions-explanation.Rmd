@@ -21,11 +21,11 @@ Some of this effect may be compositional. The demographic makeup of Americans ha
 We're interested in understanding how Americans' housing behaviors may or may not be reflective of a housing supply shortage. If insufficient housing stock exists, then Americans may be forced to live in closer quarters than they would otherwise prefer. As suggested by Galster (citation), we calculate a simple counterfactual. We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, geography, and birthplace (American-born or foreign-born). Within each of these buckets, we calculate average household size in both 2005 and 2022. We then calculate a simple counterfactual: *Had average household sizes remained at their 2005 levels, but population demographics shifted to 2022 levels, what would we expect the average American household size to be?* The answer to this question controls reveals the reasons American households are changing in size. We'll refer to changes in average household size that are explained by demographic changes in the underlying population as **compositional** shifts. And we'll refer to changes in average household size that are explaiend by changes within individual demographic groups as **preference** shifts. [footnote: there are some caveats on this characterization, described in Section 3 (write section 3!!!)]. If we find that preference shifts point to increasing average household size, that may suggest that there is a housing supply shortage.
 
 # Table 1: Theoretical Example
-Table 1 shows a simple theoretical example of population proportions and average household sizes across different demographic groups in 2005 and 2022. We keep things simple with just 2 groups in the population: White Americans and Hispanic Americans. From 2005 to 2022 we imagine a hypothetical situation where the White population, as a fraction of the total, decreases by 10 percentage points while the Hispanic population increases commesurately. Average household size in each group changes dramatically over the 17-year period. White households grow in size, lifting up the average, while Hispanic households shrink.
+Table 1 shows a simple theoretical example of population proportions and average household sizes across different demographic groups in 2005 and 2022. We keep things simple with just 2 groups in the population: White Americans and Hispanic Americans. From 2005 to 2022 we imagine a hypothetical situation where the White population, as a fraction of the total, decreases by 10 percentage points while the Hispanic population increases commensurately. Average household size in each group changes dramatically over the 17-year period. White households grow in size, lifting up the average, while Hispanic households shrink.
 
 The `Actual Contribution (2005)` and `Actual Contribution (2022)` columns are derived my multiplying average household size by population percentage. The sum of the entries in each of these columns produces the overall weighted average household size in that year. In our example, average household size increased from 3.8 in 2005 to 4.0 in 2022.
 
-The `Counterfactual Contribution (2022)` column reveals what household size would be, had average household size by demographic group held steady in the 17-year period. According to this calculation, had we been perfect at predicting demographic change in the year 2005, we would have expected that the average American in 2022 would live in a 3.95-person household. The fact that the measured average household size in 2022 does not match this value indicates preference shifts are causing people to bunch together more than we would have expected.
+The `Counterfactual Contribution (2022)` column reveals what household size would be, had average household size by demographic group held steady in the 17-year period. According to this calculation, had we been perfect at predicting demographic change in the year 2005, we would have expected that the average American in 2022 would live in a 3.95-person household. The fact that the measured average household size in 2022 is actually 4.0 indicates that individuals are bunching together more, on average, than they were in 2005.
 
 
 ```{r table01, echo = FALSE}
@@ -94,16 +94,102 @@ datatable(
 
 ```
 
-Where are these preference shifts concentrated? Inspecting changes in the `Average HH Size` columns from 2005 to 2022 provides a helpful indication. But it does not account for the strength of each group's effect on the overall weighted average through its population. A large shift among a small group will have less of an effect on the overall population than a smaller shift in a large group, as we saw in the above eabmle.
+Where are these preference shifts concentrated? Changes in the `Average HH Size` columns from 2005 to 2022 provides a helpful indication. But these differences do not account for the strength of each group's effect on the overall weighted average American aggregate. A large shift among a small group will oftentimes have a more modest effect on the overall population than a smaller shift in a large group.
 
-The `Difference from Counterfactual (2022)` column shows us how much larger (or smaller) a given group's contribution to the overall average household size is from what we expected naively holding preferences constant to 2022 levels. The relatively small difference between our 2022 counterfactual and actual result conceals large preference shifts in each population. The decrease in average size of a Hispanic household, which fell on average by 1 person over the 17-year period, nearly fully cancelled out the increase in average size of a White household. Thus, indicating the large absolute differences in the `Difference from Counterfactual` column can reveal where these changes are most impactful.
+The `Difference from Counterfactual (2022)` column shows us how much larger (or smaller) a given group's contribution to the overall average household size is from what we expected naively holding preferences constant at 2022 levels. The relatively small difference between our 2022 counterfactual and actual result conceals large preference shifts in each population. The decrease in average size of a Hispanic household, which fell on average by 1 person over the 17-year period, nearly fully cancelled out the increase in average size of a White household. Thus, indicating the large absolute differences in the `Difference from Counterfactual` column can reveal where these changes are most impactful on population aggregates.
 
-Table 2: Actual Example - by Race/Ethnicity
+# Table 2: Actual Example - by Race/Ethnicity and Age
 
-Now we move onto an example using actual population values. 
+Now we move onto an example using actual population values. The following table shows actual data for 8 race/ethnicity groups:
 
+- Asian Americans and Pacific Islanders ("AAPI")
+- American Indians and Alaska Natives ("AIAN")
+- Black Americans ("Black")
+- Hispanic Americans ("Hispanic")
+- Multiracial Americans ("Multiracial")
+- White Americans ("White")
+- All other self-identified ("Other")
 
+The table also splits Americans into 18 age buckets, which span every 5 year period from 0 to 84 as well as a bucket for age 85+ Americans. P-values represent the result of a two-tailed test on whether average household sizes differ between 2005 and 2022. P < 0.05 is the naive result on whether the difference is significant at a 5% level. The Bonferroni correction makes the P value threshold significantly more strict, to account for repeated tests. The total probability of at least one false positive result in the 126 tests remains at 5% after the Bonferroni correction is applied. [Source?]
 
+```{r table02, echo = FALSE}
+datatable(
+  data_for_table,
+  options = list(
+    pageLength = 18,
+    scrollX = TRUE,
+    searching = TRUE,
+    orderClasses = TRUE,
+    fixedHeader = TRUE
+  ),
+  rownames = FALSE,
+  colnames = c(
+    "Race / Ethnicity" = "RACE_ETH_bucket",
+    "Age Group" = "AGE_bucket",
+    "% of 2022 Pop." = "percent_2022",
+    "Num. Surveyed 2005" = "count_2005",
+    "Num. Surveyed 2022" = "count_2022",
+    "Pop. 2005" = "weighted_count_2005",
+    "Pop. 2022" = "weighted_count_2022",
+    "HH Size 2005" = "weighted_mean_2005",
+    "HH Size 2022" = "weighted_mean_2022",
+    "HH Size Difference (2022 - 2005)" = "diff",
+    "P-value" = "pval",
+    "Significant (p ≤ 0.05)" = "sig",
+    "Bonferroni Sig. (p ≤ 0.05/n)" = "sig_bonferroni"
+  )
+) |>
+  formatSignif("P-value", digits = 3)
+
+```
+
+There are `r data_for_table$sig_bonferroni |> sum()` significant results out of the `r nrow(data_for_table)` tests run at the P &le; `r (0.05 / nrow(data_for_table)) |> round(4) |> format(scientific = FALSE)` level used in the strict criteria for the Bonferroni test, clearly indicating that there are several preference shifts in the American population over the 17-year observation period, at least as categorized under this scheme.
+
+Let's disambiguate these changes.
+
+```{r table03, echo = FALSE}
+datatable(
+  contributions,
+  options = list(
+    pageLength = 18,
+    scrollX = TRUE,
+    searching = TRUE,
+    orderClasses = TRUE,
+    fixedHeader = TRUE
+  ),
+  rownames = FALSE,
+  colnames = c(
+    "Race / Ethnicity" = "RACE_ETH_bucket",
+    "Age" = "AGE_bucket",
+    "Percent of 2022 Population" = "percent_2022",
+    "Average HH Size (2005)" = "weighted_mean_2005",
+    "Average HH Size (2022)" = "weighted_mean_2022",
+    "Actual Contribution (2005)" = "cont_2005",
+    "Actual Contribution (2022)" = "cont_2022",
+    "Counterfactual Contribution (2022)" = "cont_2022cf",
+    "Difference from Counterfactual (2022)" = "cont_diff",
+    "Percentage of Counterfactual Difference" = "cont_diff_pct"
+  )
+)  |>
+  formatRound(c(
+    "Percent of 2022 Population",
+    "Average HH Size (2005)",
+    "Average HH Size (2022)",
+    "Percentage of Counterfactual Difference"), digits = 2) |>
+  formatSignif(c(
+    "Actual Contribution (2005)",
+    "Actual Contribution (2022)",
+    "Counterfactual Contribution (2022)",
+    "Difference from Counterfactual (2022)"), digits = 3)
+
+```
+
+The total average household size in 2022 is `r (contributions$percent_2022 * contributions$weighted_mean_2022/100) |> sum() |> round(3)`. The counterfactual household size in 2022, holding preferences fixed from 2005, is `r (contributions$percent_2022 * contributions$weighted_mean_2005/100) |> sum() |> round(3)`. In other words, average households are `r ((contributions$percent_2022 * contributions$weighted_mean_2022/100) |> sum()  ) - ((contributions$percent_2022 * contributions$weighted_mean_2005/100) |> sum() ) |> round(3)` larger on average than the counterfactual would estimate.
+
+Sorting the table by `Percentage of Counterfactual Difference`, either ascending or descending, is illuminating. At first glance, the percentages seem impossible: Many are in excess of 10%, and it is hard to imagine how they would add up to 100. But strongly positive and strongly negative numbers contribute to the total sum equalling 100.
+
+[Now it's time for waterfall charts.]
+level out of the in the 
 we calculate overall population in 2005 and 2022, as well as mean household size in 2005 and 2022.
 
 Table 1, below, shows a simple example of 126 rows. We categorize every American into a unique race/ethnicity and age bucket. Even after correcting for the presence of multiple T-tests, we can see that many groups show statistically significant increases or decreases in average household size. XX Americans between the ages of XX and YY, for example, had an average household size of ZZ. in 2005. By 2022, this value increased to WW. This difference is highly significant at a P< XXX value.
