@@ -162,7 +162,7 @@ contributions <- crosstab_2005_2022 |>
     cont_2022 = (percent_2022 / 100) * weighted_mean_2022,
     cont_2022cf = (percent_2022 / 100) * weighted_mean_2005,
     cont_diff = cont_2022 - cont_2022cf,
-    cont_diff_pct = (cont_diff / sum(cont_diff)) * 100
+    cont_diff_pct = cont_diff / sum(cont_diff)
   )
 
 cont.tmp <- contributions |>
