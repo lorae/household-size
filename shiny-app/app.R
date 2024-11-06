@@ -4,6 +4,7 @@ library(shiny)
 library(DT)
 library(dplyr)
 library(scales)
+library(ggplot2)
 
 # Load necessary data
 load("data/all_tables.rda")
