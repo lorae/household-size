@@ -402,8 +402,8 @@ server <- function(input, output, session) {
         p <- p +
           geom_errorbar(
             aes(
-              ymin = weighted_mean - mean_standard_error * 1.96,
-              ymax = weighted_mean + mean_standard_error * 1.96
+              ymin = weighted_mean - se_weighted_mean * 1.96,
+              ymax = weighted_mean + se_weighted_mean * 1.96
             ),
             width = 0.2
           )
