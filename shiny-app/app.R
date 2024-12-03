@@ -91,8 +91,8 @@ ui <- fluidPage(
             tags$li("White Americans (\"White\")"),
             tags$li("All other self-identified (\"Other\")")
           ),
-          p(paste("The table also splits Americans into 18 age buckets, which span every 5",
-                  "year period from 0 to 84 as well as a bucket for age 85+ Americans. P-values",
+          p(paste("The table also splits Americans into 18 age buckets, which span 5 year",
+                  "intervals from ages 0 to 84 as well as a bucket for age 85+ Americans. P-values",
                   "represent the result of a two-tailed test on whether average household sizes",
                   "differ between 2005 and 2022. P < 0.05 is the naive result on whether the",
                   "difference is significant at a 5% level. The Bonferroni correction makes",
