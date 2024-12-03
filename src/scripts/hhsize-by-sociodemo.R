@@ -38,34 +38,46 @@ age_factor_levels <- extract_factor_label(
   lookup_table = read.csv("lookup_tables/age/age_buckets01.csv"),
   colname = "bucket_name"
 )
-mean2005 <- crosstab_mean(
+mean2005 <- estimate_with_bootstrap_se(
   data = ipums_db |> filter(YEAR == 2005),
+  f = crosstab_mean,
   value = "NUMPREC",
-  weight = "PERWT",
+  wt_col = "PERWT",
   group_by = c("AGE_bucket", "RACE_ETH_bucket"),
-  repwts = paste0("REPWTP", sprintf("%d", 1:80)),
+  id_cols = c("AGE_bucket", "RACE_ETH_bucket"),
+  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("weighted_mean"),
   every_combo = TRUE
 ) |> 
   mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels)) |>
   arrange(RACE_ETH_bucket, AGE_bucket)
 
-mean2022 <- crosstab_mean(
+mean2022 <- estimate_with_bootstrap_se(
   data = ipums_db |> filter(YEAR == 2022),
+  f = crosstab_mean,
   value = "NUMPREC",
-  weight = "PERWT",
+  wt_col = "PERWT",
   group_by = c("AGE_bucket", "RACE_ETH_bucket"),
-  repwts = paste0("REPWTP", sprintf("%d", 1:80)),
+  id_cols = c("AGE_bucket", "RACE_ETH_bucket"),
+  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("weighted_mean"),
   every_combo = TRUE
 ) |> 
   mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels)) |>
   arrange(RACE_ETH_bucket, AGE_bucket)
 
-percent2022 <- crosstab_percent(
+percent2022 <- estimate_with_bootstrap_se(
   data = ipums_db |> filter(YEAR == 2022),
-  weight = "PERWT",
+  f = crosstab_percent,
+  wt_col = "PERWT",
   group_by = c("AGE_bucket", "RACE_ETH_bucket"),
   percent_group_by = c(),
-  repwts = paste0("REPWTP", sprintf("%d", 1:80)),
+  id_cols = c("AGE_bucket", "RACE_ETH_bucket"),
+  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("percent"),
   every_combo = TRUE
 ) |> 
   mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels)) |>
@@ -97,8 +109,8 @@ crosstab_2005_2022 <- crosstab_2005_2022 |>
       calc_pval,
       weighted_mean_2005, 
       weighted_mean_2022, 
-      mean_standard_error_2005, 
-      mean_standard_error_2022
+      se_weighted_mean_2005, 
+      se_weighted_mean_2022
     ),
     
     # Significant if pval <= 0.05
@@ -116,17 +128,16 @@ crosstab_2005_2022 <- crosstab_2005_2022 |>
     
     mean_2005_95_ci = map2(
       weighted_mean_2005, 
-      mean_standard_error_2005, 
+      se_weighted_mean_2005, 
       ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
     ),
     
     mean_2022_95_ci = map2(
       weighted_mean_2022, 
-      mean_standard_error_2022, 
+      se_weighted_mean_2022, 
       ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
     )
   ) |>
-  
   select(
     RACE_ETH_bucket,
     AGE_bucket,
@@ -135,11 +146,11 @@ crosstab_2005_2022 <- crosstab_2005_2022 |>
     weighted_count_2005,
     weighted_count_2022,
     percent_2022,
-    percent_standard_error_2022,
+    se_percent_2022,
     weighted_mean_2005,
     weighted_mean_2022,
-    mean_standard_error_2005,
-    mean_standard_error_2022,
+    se_weighted_mean_2005,
+    se_weighted_mean_2022,
     mean_2005_95_ci,
     mean_2022_95_ci,
     diff,
@@ -178,20 +189,20 @@ data_for_table <- crosstab_2005_2022 %>%
     percent_2022 = round(percent_2022, 3)
   ) %>%
   select(
-    -mean_2005_95_ci, -mean_2022_95_ci, -percent_standard_error_2022,
-    -mean_standard_error_2005, -mean_standard_error_2022, -contribution_diff
+    -mean_2005_95_ci, -mean_2022_95_ci, -se_percent_2022,
+    -se_weighted_mean_2005, -se_weighted_mean_2022, -contribution_diff
   )
 
 # Precompute long format data for the household size plot
 data_long <- crosstab_2005_2022 %>%
   select(
     RACE_ETH_bucket, AGE_bucket, weighted_mean_2005,
-    weighted_mean_2022, mean_standard_error_2005, mean_standard_error_2022
+    weighted_mean_2022, se_weighted_mean_2005, se_weighted_mean_2022
   ) %>%
   pivot_longer(
     cols = c(
       "weighted_mean_2005", "weighted_mean_2022",
-      "mean_standard_error_2005", "mean_standard_error_2022"
+      "se_weighted_mean_2005", "se_weighted_mean_2022"
     ),
     names_to = c(".value", "year"),
     names_pattern = "(.*)_(\\d+)"
