@@ -138,6 +138,7 @@ crosstab_2005_2022 <- crosstab_2005_2022 |>
       ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
     )
   ) |>
+  # keep the entries, but reorder more logically
   select(
     RACE_ETH_bucket,
     AGE_bucket,
@@ -175,10 +176,6 @@ contributions <- crosstab_2005_2022 |>
     cont_diff = cont_2022 - cont_2022cf,
     cont_diff_pct = cont_diff / sum(cont_diff)
   )
-
-cont.tmp <- contributions |>
-  group_by(RACE_ETH_bucket) %>%
-  summarize(cont_diff_sum = sum(cont_diff, na.rm = TRUE))
 
 # Precompute data for the data table
 data_for_table <- crosstab_2005_2022 %>%
@@ -228,7 +225,6 @@ cont_summary <- contributions %>%
 save(
   crosstab_2005_2022, 
   contributions, 
-  cont.tmp, 
   data_for_table, 
   data_long, 
   cont_summary, 
