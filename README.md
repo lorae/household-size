@@ -1,5 +1,7 @@
 # Introduction
 
+For the latest project results, please see the Shiny dashboard at: https://stojanovic.shinyapps.io/household-size/
+
 The purpose of this project is to analyze the extent to which demographic changes in the U.S. population can account for changes in average American household size since 2000. The methodology, based upon [Galster (2024)](#galster2024), is to construct a multidimensional matrix, with each cell representing a unique combination of demographic (age, sex, race, etc) and geographic (PUMA) characteristics. The value in each cell represents the average household size among persons with that characteristic in the year 2000. The methodology is then applied to data from the year 2020 to determine which demographic groups have the largest changes.
 
 The project uses American Community Survey (ACS) IPUMS microdata, which are freely available to the public after registering for an API key.
@@ -31,7 +33,16 @@ household-size/
 │       ├── fig02.R
 │       ├── ...
 │       ├── quick-facts.Rmd         # Produces quick statistics from our paper
+│       ├── hhsize-by-sociodemo.R   # Produces aggregation for R Shiny app
 │       └── proof-of-concept-bucketing.R # May be deprecated soon
+│ 
+├── shiny-app/                      # Source code for Shiny app
+│   ├── app.R                       # Main app script (incl. ui, server, etc)
+│   ├── data/                       # Data directory for app
+│   │   ├── all_tables.rda          # ? todo: populate 
+│   │   ├── crosstab_2000_2020.rds  # ? todo: populate 
+│   │   └── crosstab_2005_2022.rds  # ? todo: populate 
+│   └── rsconnect/                  # Auto-generated for app deployment
 │   
 └── tests/                          
     ├── testthat/                   # Unit tests
@@ -47,6 +58,19 @@ household-size/
         └── expected_income_output.csv
 
 ```
+## Current Project Structure
+As of early December 2024, Lorae is working on a granular, demographically-controlled counterfactual for household
+density in 2022. To replicate the project, one needs the following:
+
+- the latest version of the `dataduck` package, which is still under active early development (and may be renamed soon to better match its functionality)
+
+- the `data/ipums-microdata` folder must contain the raw IPUMS files. (todo: write exactly the specifications of the data download)
+
+- these scripts must be run sequentially: `src/scripts/import-ipums.R`, `src/scripts/process-ipums.R`, (potentially?) `src/scripts/generate-cpuma-state-crosswalk.R`, `src/scripts/hhsize-by-sociodemo.R`
+
+- `src/scripts/hhsize-by-sociodemo.R` creates data in `shiny-app/data` that is used in `shiny-app/app.R`. Now you can run the Shiny app.
+
+
 ## Data Flow Diagram
 
 ![](docs/images/dfd.svg)
