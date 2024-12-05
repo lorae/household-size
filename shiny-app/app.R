@@ -383,7 +383,7 @@ server <- function(input, output, session) {
     
     if (input$plot_type == "household_size") {
       p <- ggplot(data, aes(x = AGE_bucket, y = weighted_mean, color = year, group = year)) +
-        geom_line(size = 1, alpha = 0.8) +
+        geom_line(linewidth = 1, alpha = 0.8) +
         scale_color_manual(values = c("2005" = "#577590", "2022" = "#F94144")) +
         ylim(1.5, 5.5) +
         labs(
