@@ -6,6 +6,12 @@ library(dplyr)
 library(scales)
 library(ggplot2)
 
+# Source needed helper functions
+source("../src/utils/graphing-tools.R")
+
+# Read in shapefiles of every CPUMA0010 region in the United States
+sf <- read_sf("../data/ipums-cpuma0010-sf/ipums_cpuma0010.shp")
+
 # Define server
 server <- function(input, output, session) {
   
@@ -253,5 +259,9 @@ server <- function(input, output, session) {
       ) +
       theme_minimal() +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+  
+  output$minnesota <- renderPlot({ 
+    map_geographies(sf |> filter(State == "Minnesota"))
   })
 }

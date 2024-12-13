@@ -201,13 +201,12 @@ ui <- fluidPage(
                     )
                   )
                 ),
-                
               )
         ), # end of tabPanel
         tabPanel("Map",
-          p("Hi I'm a map.")
+          p("Hi I'm a map."),
+          plotOutput("minnesota")
         ) # end of tabPanel
       )
-  )
-))
-)
+  ) # end of mainPanel
+)))
