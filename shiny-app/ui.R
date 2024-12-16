@@ -18,6 +18,9 @@ cf_hhsize_2022 <- (contributions$percent_2022 * contributions$weighted_mean_2005
 # Define UI
 ui <- fluidPage(
   
+  # Enable mathematical notation
+  withMathJax(),
+  
   # Sidebar for potential controls (add inputs here as needed)
   div(class = "scroll-container",
       sidebarLayout(
@@ -205,13 +208,75 @@ ui <- fluidPage(
                       selected = "household_size"
                     )
                   )
-                ),
+                )
               )
         ), # end of tabPanel
         tabPanel("Map",
           p("Hi I'm a map."),
           plotOutput("minnesota")
-        ) # end of tabPanel
+        ), # end of tabPanel
+        tabPanel("Counterfactual",
+          tags$h3("Introduction", id = "introtab3"),
+          p("In this section, we run a detailed calculation to determine how many
+            more (or fewer) housing units we'd need to match the average household 
+            densities in the year 2000."
+            ),
+          p("Prior to producing the results, however, we'll walk through a conceptual
+            outline that explains how the Galster (YYYY) proposed method relates to
+            OLS regression techniques and shift-share analysis."
+            ),
+          tags$h3("1: Conceptual Explanation", id = "section1tab3"),
+          p("Imagine a simple America with a population of 8 individuals
+          in the year 2000 and 2022. For each individual, we have an ID number that
+          uniquely identifies them across both survey years, as well as information
+          about their sex and race - which, we assume - do not change with the passage
+          of time. Table 1 shows a prospective population in the year 2000 and 2022.
+          During the survey period, household sizes may change."),
+          
+          DTOutput("table1tab3"),
+          
+          p("In Galster's formulation, we calculate mean household size within 
+            every possible subgroup in the year 2000."),
+          
+          verbatimTextOutput("codeblock01"),
+          
+          p("We could arrive at the same result in a regression using the following
+          formula:"),
+          
+          p(HTML("\\[\\text{Household Size}_i 
+                 = \\beta_{1}(\\text{Black}_i)(\\text{Female}_i)
+                 + \\beta_{2}(\\text{Black}_i)(\\text{Male}_i)
+                 + \\beta_{3}(\\text{White}_i)(\\text{Female}_i)
+                 + \\beta_{2}(\\text{White}_i)(\\text{Male}_i)
+                 \\]")),
+          
+          p(HTML(
+          "Where indicator variables such as \\(\\text{Black}_i\\) equal 1 if individual 
+          \\(i\\) is Black, and 0 otherwise. In this simple notation, each of the
+          \\(\\beta\\) coefficients represents the average household size within that
+          specific group. Note the lack of a \\(\\beta_0\\) term, fixing the y-intercept
+          at 0: Any nonzero value would produce an overdetermined regression and force
+          one of the \\(\\beta_1\\), \\(\\beta_2\\),\\(\\beta_3\\), or\\(\\beta_4\\) 
+          coefficients to equal 0.
+          
+          A more concise notation for the same 0-intercept regression could be written
+          as follows:")),
+          
+          p(HTML("\\[\\text{Household Size}_i 
+                 = \\beta_{rs}(\\text{Race}_i)(\\text{Sex}_i)
+                 \\]")),
+          p("Where each \\(\\beta_{rs}\\) coefficients represents one of averages 
+            for the four unique combinations of race and sex. Observations are 
+            measured at the person level for each \\(i\\) individual, as in the
+            pevious regression.
+            
+            Here, we run the regression in R again:"),
+          
+          verbatimTextOutput("codeblock02"),
+          
+          p("In summary, this methodology is functionally equivalent to running a
+            0-intercept regression with only interaction terms. We now turn our 
+            attention to actal data.")
       )
   ) # end of mainPanel
-)))
+))))
