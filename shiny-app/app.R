@@ -2,8 +2,8 @@
 
 library(shiny)
 
-# Load necessary data
-load("data/all_tables.rda")
+# Source needed helper functions
+source("../src/utils/graphing-tools.R")
 
 # Load UI and server
 source("ui.R")
