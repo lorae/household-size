@@ -267,4 +267,44 @@ server <- function(input, output, session) {
   output$minnesota <- renderPlot({ 
     map_geographies(sf |> filter(State == "Ohio"))
   })
+  
+  # Table 1, tab 3:
+  table1tab3 <- data.frame(
+    id = 1:8,
+    race = c("Black", "Black", "Black", "Black", "White", "White", "White", "White"),
+    sex = c("Female", "Female", "Male", "Male", "Female", "Female", "Male", "Male"),
+    hhsize_2000 = c(3, 4, 2, 2, 3, 3, 2, 3),
+    hhsize_2022 = c(4, 4, 3, 3, 2, 3, 3, 3)
+  )
+  
+  output$codeblock01 <- renderPrint({
+    binned_avg <- table1tab3 |>
+      group_by(race, sex) |>
+      summarize(mean_hhsize_2000 = mean(hhsize_2000))
+    print(binned_avg)
+  })
+  # Table 1: Render theoretical example table
+  output$table1tab3 <- renderDT({
+    table1tab3 |>
+    select(-hhsize_2022) |> # Exclude this column for now
+    datatable(
+      options = list(
+        pageLength = 8,
+        autoWidth = TRUE,
+        dom = 't',
+        ordering = FALSE
+      ),
+      rownames = FALSE,
+      colnames = c(
+        "Identifier" = "id",
+        "Race" = "race",
+        "Sex" = "sex",
+        "HH Size (2000)" = "hhsize_2000"
+      ))
+  })
+  
+  output$codeblock02 <- renderPrint({
+    model <- lm(hhsize_2000 ~ 0 + race:sex, data = table1tab3)
+    summary(model)
+  })
 }
