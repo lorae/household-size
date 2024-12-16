@@ -6,6 +6,11 @@ library(dplyr)
 library(scales)
 library(ggplot2)
 
+# Load necessary data
+load("data/all_tables.rda")
+# Source needed helper functions
+source("../src/utils/graphing-tools.R")
+
 # Define some constant variables used in the text description of the data
 hhsize_2022 <- (contributions$percent_2022 * contributions$weighted_mean_2022/100) |> sum()
 cf_hhsize_2022 <- (contributions$percent_2022 * contributions$weighted_mean_2005/100) |> sum()

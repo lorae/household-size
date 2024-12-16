@@ -5,7 +5,10 @@ library(DT)
 library(dplyr)
 library(scales)
 library(ggplot2)
+library(sf)
 
+# Load necessary data
+load("data/all_tables.rda")
 # Source needed helper functions
 source("../src/utils/graphing-tools.R")
 
@@ -262,6 +265,6 @@ server <- function(input, output, session) {
   })
   
   output$minnesota <- renderPlot({ 
-    map_geographies(sf |> filter(State == "Minnesota"))
+    map_geographies(sf |> filter(State == "Ohio"))
   })
 }
