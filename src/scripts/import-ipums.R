@@ -14,7 +14,7 @@ library("ipumsr")
 
 # ----- Step 1: Load and process IPUMS data ----- #
 
-ddi <- read_ipums_ddi("data/ipums-microdata/usa_00013.xml")
+ddi <- read_ipums_ddi("data/ipums-microdata/usa_00015.xml")
 ipums_tb <- read_ipums_micro(ddi, var_attrs = c()) 
 
 # ----- Step 2: Save to DuckDB ----- #
