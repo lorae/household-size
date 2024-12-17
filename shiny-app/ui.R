@@ -226,17 +226,25 @@ ui <- fluidPage(
             OLS regression techniques and shift-share analysis."
             ),
           tags$h3("1: Conceptual Explanation", id = "section1tab3"),
-          p("Imagine a simple America with a population of 8 individuals
-          in the year 2000 and 2022. For each individual, we have an ID number that
-          uniquely identifies them across both survey years, as well as information
-          about their sex and race - which, we assume - do not change with the passage
-          of time. Table 1 shows a prospective population in the year 2000 and 2022.
-          During the survey period, household sizes may change."),
+          p("Imagine a simple America with a population of 8 individuals. We have
+          survey information about their sex and race. Table 1 shows a prospective 
+          population in the year 2000."),
           
           DTOutput("table1tab3"),
           
           p("In Galster's formulation, we calculate mean household size within 
-            every possible subgroup in the year 2000."),
+            every possible subgroup in the year 2000. Here, in our simple example,
+            we define subgroups for every unique possible combination of race and 
+            sex. In our later analysis, we'll include other - potentially mutable -
+            characteristics such as income level and educational attainment."),
+          
+          p("[NOTE: * add footnote about how ACS defines race and sex. Sex can only be M 
+            and F. Perhaps for a subgroup of transgender individuals, sex may change
+            (look into this). Race could also possibly change - cite studies on 
+            increasing tendency of Latinos to label themselves as 'other race' or 
+            simply regard Hispanic/Latino as a race instead of identifying as solely
+            White.]
+            "),
           
           verbatimTextOutput("codeblock01"),
           
@@ -276,7 +284,9 @@ ui <- fluidPage(
           
           p("In summary, this methodology is functionally equivalent to running a
             0-intercept regression with only interaction terms. We now turn our 
-            attention to actal data.")
+            attention to actal data."),
+          
+          tags$h3("2: Application", id = "section2tab3"),
       )
   ) # end of mainPanel
 ))))
