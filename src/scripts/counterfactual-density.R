@@ -33,6 +33,8 @@ age_factor_levels <- extract_factor_label(
 )
 
 # Create a table suitable for regression
+ipums_regready <- ipums_db
+
 ipums_regready_2005 <- ipums_db |>
   mutate(
     SEX = case_when(
@@ -54,26 +56,26 @@ ipums_regready_2022 <- ipums_db |>
   ) |>
   filter(YEAR == 2022)
 
-# ----- Step 3: (Proof-of-Concept) Demonstrate regression coefficients equal binned averages ----- #
-model <- lm(
-  NUMPREC ~ 0 + SEX:RACE_ETH_bucket, 
-  weights = PERWT,
-  data = ipums_regready_2005)
-
-hhsize2005 <- estimate_with_bootstrap_se(
-  data = ipums_regready_2005,
-  f = crosstab_mean,
-  value = "NUMPREC",
-  wt_col = "PERWT",
-  group_by = c("SEX", "RACE_ETH_bucket"),
-  id_cols = c("SEX", "RACE_ETH_bucket"),
-  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
-  constant = 4/80,
-  se_cols = c("weighted_mean"),
-  every_combo = TRUE
-)  
-
-# Look! The two models match!
+# # ----- Step 3: (Proof-of-Concept) Demonstrate regression coefficients equal binned averages ----- #
+# model <- lm(
+#   NUMPREC ~ 0 + SEX:RACE_ETH_bucket, 
+#   weights = PERWT,
+#   data = ipums_regready_2005)
+# 
+# hhsize2005 <- estimate_with_bootstrap_se(
+#   data = ipums_regready_2005,
+#   f = crosstab_mean,
+#   value = "NUMPREC",
+#   wt_col = "PERWT",
+#   group_by = c("SEX", "RACE_ETH_bucket"),
+#   id_cols = c("SEX", "RACE_ETH_bucket"),
+#   repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+#   constant = 4/80,
+#   se_cols = c("weighted_mean"),
+#   every_combo = TRUE
+# )  
+# 
+# # Look! The two models match!
 
 # ---- Step 4: Using SEX only, create counterfactual 2022 household count ----- #
 # Produces a table of average household size in 2005 with standard errors
@@ -117,7 +119,7 @@ percount22 <- estimate_with_bootstrap_se(
 
 # Produces a table of number of households in 2022 with standard errors
 hhcount22 <- estimate_with_bootstrap_se(
-  data = ipums_regready_2022,
+  data = ipums_regready_2022 |> filter(PERNUM == 1),
   f = crosstab_count,
   wt_col = "HHWT",
   group_by = c("SEX"),
@@ -134,7 +136,7 @@ hhcount22 <- estimate_with_bootstrap_se(
   )
 
 # Merge the three data frames
-cd_data <- hhsize05 |>
+cf_data <- hhsize05 |>
   left_join(percount22, by = "SEX") |>
   left_join(hhcount22, by = "SEX")
 
