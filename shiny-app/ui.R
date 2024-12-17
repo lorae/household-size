@@ -286,6 +286,7 @@ ui <- fluidPage(
             0-intercept regression with only interaction terms. We now turn our 
             attention to actal data."),
           
+
           tags$h3("2: Application", id = "section2tab3"),
       )
   ) # end of mainPanel

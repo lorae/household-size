@@ -32,18 +32,110 @@ age_factor_levels <- extract_factor_label(
   colname = "bucket_name"
 )
 
-mean2005 <- estimate_with_bootstrap_se(
-  data = ipums_db |> filter(YEAR == 2005),
+# Create a table suitable for regression
+ipums_regready_2005 <- ipums_db |>
+  mutate(
+    SEX = case_when(
+      SEX == 1 ~ "Male",
+      SEX == 2 ~ "Female",
+      TRUE ~ as.character(SEX) # Keep original value if not 1 or 2
+    )
+  ) |>
+  filter(YEAR == 2005)
+
+# Create a table suitable for regression
+ipums_regready_2022 <- ipums_db |>
+  mutate(
+    SEX = case_when(
+      SEX == 1 ~ "Male",
+      SEX == 2 ~ "Female",
+      TRUE ~ as.character(SEX) # Keep original value if not 1 or 2
+    )
+  ) |>
+  filter(YEAR == 2022)
+
+# ----- Step 3: (Proof-of-Concept) Demonstrate regression coefficients equal binned averages ----- #
+model <- lm(
+  NUMPREC ~ 0 + SEX:RACE_ETH_bucket, 
+  weights = PERWT,
+  data = ipums_regready_2005)
+
+hhsize2005 <- estimate_with_bootstrap_se(
+  data = ipums_regready_2005,
   f = crosstab_mean,
   value = "NUMPREC",
   wt_col = "PERWT",
-  group_by = c("CPUMA0010"),
-  id_cols = c("CPUMA0010"),
+  group_by = c("SEX", "RACE_ETH_bucket"),
+  id_cols = c("SEX", "RACE_ETH_bucket"),
   repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
   constant = 4/80,
   se_cols = c("weighted_mean"),
   every_combo = TRUE
 )  
+
+# Look! The two models match!
+
+# ---- Step 4: Using SEX only, create counterfactual 2022 household count ----- #
+# Produces a table of average household size in 2005 with standard errors
+hhsize05 <- estimate_with_bootstrap_se(
+  data = ipums_regready_2005,
+  f = crosstab_mean,
+  value = "NUMPREC",
+  wt_col = "PERWT",
+  group_by = c("SEX"),
+  id_cols = c("SEX"),
+  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("weighted_mean", "weighted_count"),
+  every_combo = TRUE
+) |>
+  select(-count) |>
+  rename(
+    weighted_mean_05 = weighted_mean,
+    se_weighted_mean_05 = se_weighted_mean,
+    weighted_count_05 = weighted_count,
+    se_weighted_count_05 = se_weighted_count
+  )
+
+# Produces a table of number of individuals in 2022 with standard errors
+percount22 <- estimate_with_bootstrap_se(
+  data = ipums_regready_2022,
+  f = crosstab_count,
+  wt_col = "PERWT",
+  group_by = c("SEX"),
+  id_cols = c("SEX"),
+  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("weighted_count"),
+  every_combo = TRUE
+)  |>
+  select(-count) |>
+  rename(
+    weighted_percount_22 = weighted_count,
+    se_weighted_percount_22 = se_weighted_count
+  )
+
+# Produces a table of number of households in 2022 with standard errors
+hhcount22 <- estimate_with_bootstrap_se(
+  data = ipums_regready_2022,
+  f = crosstab_count,
+  wt_col = "HHWT",
+  group_by = c("SEX"),
+  id_cols = c("SEX"),
+  repwt_cols = paste0("REPWT", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("weighted_count"),
+  every_combo = TRUE
+)  |>
+  select(-count) |>
+  rename(
+    weighted_hhcount_22 = weighted_count,
+    se_weighted_hhcount_22 = se_weighted_count
+  )
+
+# Merge the two data frames
+left_join(
+  hhsize2005, percount22, hhcount22, by = "SEX")
 
 # ----- Step X: Clean up ----- #
 DBI::dbDisconnect(con)
