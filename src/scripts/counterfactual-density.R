@@ -133,9 +133,11 @@ hhcount22 <- estimate_with_bootstrap_se(
     se_weighted_hhcount_22 = se_weighted_count
   )
 
-# Merge the two data frames
-left_join(
-  hhsize2005, percount22, hhcount22, by = "SEX")
+# Merge the three data frames
+cd_data <- hhsize05 |>
+  left_join(percount22, by = "SEX") |>
+  left_join(hhcount22, by = "SEX")
+
 
 # ----- Step X: Clean up ----- #
 DBI::dbDisconnect(con)
