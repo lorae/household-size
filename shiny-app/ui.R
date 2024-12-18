@@ -22,23 +22,43 @@ ui <- fluidPage(
   # Enable mathematical notation
   withMathJax(),
   
-  # Sidebar for potential controls (add inputs here as needed)
+  # Sidebar for potential controls (tab-specific)
   div(class = "scroll-container",
       sidebarLayout(
         sidebarPanel(
           width = 3,
-          p(a("Introduction", href = "#intro")),
-          p(a("Table 1: Hypothetical Example", href = "#table1")),
-          p(a("Table 2: 2005-2022 Changes by Race and Age", href = "#table2")),
-          p(a("Table 3: Contributions", href = "#table3"))
+          # Conditional content for "Main" tab
+          conditionalPanel(
+            condition = "input.tabs == 'Main'",
+            p(a("Introduction", href = "#intro")),
+            p(a("Table 1: Hypothetical Example", href = "#table1")),
+            p(a("Table 2: 2005-2022 Changes by Race and Age", href = "#table2")),
+            p(a("Table 3: Contributions", href = "#table3"))
+          ),
+          
+          # Conditional content for "Map" tab
+          conditionalPanel(
+            condition = "input.tabs == 'Map'",
+            p("Map-specific content goes here."),
+            actionButton("refresh_map", "Refresh Map")
+          ),
+          
+          # Conditional content for "Counterfactual" tab
+          conditionalPanel(
+            condition = "input.tabs == 'Counterfactual'",
+            p("Counterfactual-specific sidebar content."),
+            numericInput("num_input", "Example Input:", value = 5, min = 1, max = 10)
+          )
         ),
         
         # Main panel for displaying content
         mainPanel(
           tabsetPanel(
-            tabPanel("Main", tab1_ui), # end of tabPanel
-            tabPanel("Map", tab2_ui), # end of tabPanel
-            tabPanel("Counterfactual", tab3_ui) # end of tabPanel
+            id = "tabs",  # Add ID to track the active tab
+            tabPanel("Main", tab1_ui), 
+            tabPanel("Map", tab2_ui), 
+            tabPanel("Counterfactual", tab3_ui) 
           )
         )
-)))
+      )))
+
