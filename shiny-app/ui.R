@@ -57,7 +57,7 @@ ui <- fluidPage(
             id = "tabs",  # Add ID to track the active tab
             tabPanel("Main", tab1_ui), 
             tabPanel("Map", tab2_ui), 
-            tabPanel("Counterfactual", tab3_ui) 
+            tabPanel("Counterfactual", tab3_ui)
           )
         )
       )))
