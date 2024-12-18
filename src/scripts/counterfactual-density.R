@@ -99,6 +99,29 @@ hhsize05 <- estimate_with_bootstrap_se(
     se_weighted_count_05 = se_weighted_count
   )
 
+# Produces a table of average household size in 2022 with standard errors
+# (We don't actually need this for the counterfactual, but it's helpful context)
+hhsize05 <- estimate_with_bootstrap_se(
+  data = ipums_regready_2022,
+  f = crosstab_mean,
+  value = "NUMPREC",
+  wt_col = "PERWT",
+  group_by = c("SEX"),
+  id_cols = c("SEX"),
+  repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
+  constant = 4/80,
+  se_cols = c("weighted_mean", "weighted_count"),
+  every_combo = TRUE
+) |>
+  select(-count) |>
+  rename(
+    weighted_mean_05 = weighted_mean,
+    se_weighted_mean_05 = se_weighted_mean,
+    weighted_count_05 = weighted_count,
+    se_weighted_count_05 = se_weighted_count
+  )
+
+
 # Produces a table of number of individuals in 2022 with standard errors
 percount22 <- estimate_with_bootstrap_se(
   data = ipums_regready_2022,
@@ -140,6 +163,11 @@ cf_data <- hhsize05 |>
   left_join(percount22, by = "SEX") |>
   left_join(hhcount22, by = "SEX")
 
+# THE FUN STUFF: get the counterfactual number of households in 2022
+cf_data_result <- cf_data |>
+  mutate(
+    cf_hhcount_22 = weighted_percount_22 / weighted_mean_05
+  )
 
 # ----- Step X: Clean up ----- #
 DBI::dbDisconnect(con)
