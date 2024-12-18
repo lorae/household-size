@@ -76,5 +76,24 @@ tab3_ui <- fluidPage(
   p("The following data are actual breakdowns of household size, population, and
     number of households in 2005 and 2022 from the American Community Survey."),
   
-  DTOutput("table1tab4")
+  DTOutput("table1tab4"),
+  
+  p("Our goal is to calculate the size of the housing shortage or surfeit, after
+    controlling for demographic changes between 2005 and 2022. Here, in this simple
+    example, we control for any changes in the size of the male and female population.
+    Calculating the counterfactual 2022 number of households should be easy, right?
+    We'll simply take the population in each group in 2022, divide by the average 
+    household size in 2005, and then compare the numbers we get to the number of 
+    households measured in 2022."),
+  
+  p("Unfortunately, this approach does not work. Dividing the female population of
+    167 million in 2022 by the 2005 average household size of 3.29 gives us a counterfactual
+    population of roughly 51 million households: that's much lower than our measured 67
+    million households with women in them in 2022."),
+  
+  p("wait- what am I even measuring in hh_2022?"),
+  
+  p("Moving on to a different topic..."),
+  
+  plotOutput("plot1tab3")
 )
