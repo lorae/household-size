@@ -9,6 +9,7 @@ library(sf)
 
 # Load necessary data
 load("data/all_tables.rda")
+load("data/sex_2005_2022.rda")
 # Source needed helper functions
 source("../src/utils/graphing-tools.R")
 
@@ -306,5 +307,17 @@ server <- function(input, output, session) {
   output$codeblock02 <- renderPrint({
     model <- lm(hhsize_2000 ~ 0 + race:sex, data = table1tab3)
     summary(model)
+  })
+  
+  output$table1tab4 <- renderDT({
+    sex_2005_2022 |>
+      datatable(
+        colnames = c(
+          "Sex" = "sex",
+          "HH Size (2005)" = "mean_hhsize_2005",
+          "Population (2022)" = "pop_2022",
+          "Num. HHs (2022)" = "hh_2022"
+        )
+      )
   })
 }

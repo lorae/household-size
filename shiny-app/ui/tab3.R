@@ -72,4 +72,9 @@ tab3_ui <- fluidPage(
   
   
   tags$h3("2: Application", id = "section2tab3"),
+  
+  p("The following data are actual breakdowns of household size, population, and
+    number of households in 2005 and 2022 from the American Community Survey."),
+  
+  DTOutput("table1tab4")
 )
