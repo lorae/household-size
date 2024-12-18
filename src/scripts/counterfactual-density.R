@@ -163,11 +163,16 @@ cf_data <- hhsize05 |>
   left_join(percount22, by = "SEX") |>
   left_join(hhcount22, by = "SEX")
 
-# THE FUN STUFF: get the counterfactual number of households in 2022
-cf_data_result <- cf_data |>
-  mutate(
-    cf_hhcount_22 = weighted_percount_22 / weighted_mean_05
+# Save to illustrate in shiny app
+sex_2005_2022 <- cf_data |>
+  select(SEX, weighted_mean_05, weighted_percount_22, weighted_hhcount_22) |>
+  rename(
+    sex = SEX,
+    mean_hhsize_2005 = weighted_mean_05,
+    pop_2022 = weighted_percount_22,
+    hh_2022 = weighted_hhcount_22
   )
+save(sex_2005_2022, file = "shiny-app/data/sex_2005_2022.rda")
 
 # ----- Step X: Clean up ----- #
 DBI::dbDisconnect(con)
