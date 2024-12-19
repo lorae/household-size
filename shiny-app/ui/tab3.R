@@ -95,24 +95,34 @@ tab3_ui <- fluidPage(
   
   p("Above text: to be continued."),
   
+  tags$h3("Mean household size: person-level versus household-level measurement", id = "section3tab3"),
+
   p(HTML(
     "In this project, we conceptualize two methods of measuring household size:
     at the <em>person-level</em> and at the <em>household-level</em>.")),
   p(HTML(
-    "For every 
+    "<strong>Household-level:</strong> For every 
     household \\( i \\) with number of members \\( m_i \\) in households \\( 1 \\) 
     through \\( H \\), the <em>household-level</em> mean household size is a simple
     average across households as individual observations:
-    \\[ \\text{(Mean HH Size)}_{\\text{household}} = \\frac{\\sum_{i = 1}^H m_i}{H} \\]
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{household}} 
+    = \\frac{\\sum_{i = 1}^H m_i}{H} 
+    = \\frac{P}{H}
+    \\]
     ")),
   
   p(HTML(
-    "While the <em>person-level</em> mean household size is a simple average from 
-    the perspective of each person comprising a household. For every 
+    "<strong>Person-level:</strong>  For every 
     person \\( j \\) in a population \\( P \\) living in a household of \\( m_j \\) 
     members \\( 1 \\), the <em>person-level</em> mean household size is a simple
     average across person-level observations:
-    \\[ \\text{(Mean HH Size)}_{\\text{person}} = \\frac{\\sum_{j = 1}^P m_j}{P} \\]
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{person}} 
+    = \\frac{\\sum_{j = 1}^P m_j}{P} 
+    = \\frac{\\sum_{j = 1}^P m_j}{\\sum_{i = 1}^H m_i} 
+    = \\frac{\\sum_{i = 1}^H m_i^2}{\\sum_{i = 1}^H m_i} 
+    \\]
     ")),
   
   p(HTML(
@@ -123,17 +133,33 @@ tab3_ui <- fluidPage(
   ")),
   
   p(
-  "For example, Figure 3.1 depicts a stylized American population comprised of 
-  , the average household-level household size is
+  "Figure 3.1 depicts a stylized American population with of three households, 
+  with four, two and one member each. 
+  "),
+  
+  p(strong("Figure 3.1")),
+  plotOutput("plot1tab3"),
+  
+  p(
+  "The household-level average household size 
+  is:
     \\[ \\frac{4 + 2 + 1}{3} = 2 \\tfrac{1}{3} \\]
-    but the average person-level household size is
-    \\[ \\frac{4 \\cdot 4 + 2 \\cdot 2 + 1 \\cdot 1}{7} = 3 \\]"),
+  
+  but the person-level average household size is:
+    \\[ 
+    \\frac{4+4+4+4 + 2+2 + 1}{4 + 2 + 1} 
+    = \\frac{4^2 + 2^2 + 1^2}{7} 
+    = 3
+    \\]"),
   
   p("In general, the person-level household size can be rewritten as
     \\[ 
-    \\text{(Mean HH Size)}_{\\text{person}} = \\frac{\\sum_{j = 1}^P m_j}{P}
-    = \\frac{\\sum_{i = 1}^H m_i^2}{H} =  
+    \\text{(Mean HH Size)}_{\\text{person}} 
+    = \\frac{\\sum_{j = 1}^P m_j}{P}
+    = \\frac{\\sum_{i = 1}^H m_i^2}{P} 
+    = \\frac{\\sum_{i = 1}^H m_i^2}{\\sum_{i = 1}^H m_i}  
     \\]
+    In other words, the relationship be
     Which is remarkably similar to the formula for variance. The greater dispersion
     in the sizes of households, th
     "),
@@ -143,7 +169,7 @@ tab3_ui <- fluidPage(
   
   p("todo: universally name figures across all tabs."),
   
-  plotOutput("plot1tab3"),
+
   
 
   
