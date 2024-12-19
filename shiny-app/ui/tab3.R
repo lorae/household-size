@@ -71,7 +71,7 @@ tab3_ui <- fluidPage(
             attention to actal data."),
   
   
-  tags$h3("2: Application", id = "section2tab3"),
+  tags$h3("2: Constructing a housing counterfactual", id = "section2tab3"),
   
   p("The following data are actual breakdowns of household size, population, and
     number of households in 2005 and 2022 from the American Community Survey."),
@@ -152,18 +152,68 @@ tab3_ui <- fluidPage(
     = 3
     \\]"),
   
-  p("In general, the person-level household size can be rewritten as
+  p("In general, if we're counting the full population, the person-level household 
+  size can be rewritten as 
     \\[ 
     \\text{(Mean HH Size)}_{\\text{person}} 
     = \\frac{\\sum_{j = 1}^P m_j}{P}
     = \\frac{\\sum_{i = 1}^H m_i^2}{P} 
     = \\frac{\\sum_{i = 1}^H m_i^2}{\\sum_{i = 1}^H m_i}  
     \\]
-    In other words, the relationship be
-    Which is remarkably similar to the formula for variance. The greater dispersion
-    in the sizes of households, th
+    In other words, the person-level household size is the sum of squared household
+    sizes, divided by the total population. The household-level household size is
+    the total population divided by the number of households. And if the household-level
+    and person-level household sizes are multiplied together, the result is very 
+    close to the variance of household sizes:
+    \\[
+    \\text{(Mean HH Size)}_{\\text{person}} \\cdot \\text{(Mean HH Size)}_{\\text{household}}
+    = \\frac{\\sum_{i = 1}^H m_i^2}{P} \\cdot \\frac{P}{H}
+    = \\frac{\\sum_{i = 1}^H m_i^2}{H}
+    \\]
+    Which is the second raw moment of the dataset of household-level household size
+    observations.
     "),
   
+  p(strong("Why use person-level metrics?")),
+  
+  p("Household-level average household sizes are what we're more familiar with:
+    they're what is reported by [source], [source], and [source]. Why, then, use
+    person-level metrics?"),
+  
+  p(HTML(
+  "The problem lies in controlling for demographics. We're interested in how housing
+    supply has surpassed or failed to keep up with the number of people in the country,
+    while acknowledging that demographic shifts alone could account for changes in average
+    household size without a supply shortage needed as an explanation. (For more
+    information, please see the hypothetical example described in the \"Main\"
+    tab of this document.) Hispanic individuals, for example, tend to live in 
+    larger-than-average households, and the United States share of Hispanic individuals
+    has grown in the last 20 years. But what constitutes a \"Hispanic\" household, 
+    and how should we classify households with individuals of varying races, ethnicities,
+    ages, and other potentially explanatory sociodemographic characteristics? Previous
+    work [cite] has responded to this challenge by using the head of household's 
+    characteristics to classify the household. But doing so may misclassify many
+    people. Using the 2022 American Community Survey, 
+    <a href=\"https://www.jchs.harvard.edu/blog/identifying-racial-and-ethnic-diversity-within-us-households\">Airgood-Obrycki and co-authors</a> find that over 10% of households contain at least 
+    two adults of different races or ethnicities. \"Among these multi-race households\",
+    they write, \"nearly half, 6.7 million (5.1 percent of all households), appear 
+    in traditional statistics as white households despite having a person of color 
+    present.\" These multi-race households differentiated themselves from single-race
+    households along many dimensions related to housing: members of multi-race 
+    households are younger, more likely to live with roommates, and more likely to
+    be within a \"prime working age\" range of 25 to 54. And [If there's a source that says this:] 
+    XX and YY show that heads of household are more likely than other adults in 
+    the same residence to have aaa, bb, and ccc characteristics]."
+  )),
+  
+  p("Another argument for using person-level characteristics is the circular thinking
+    that arises from treating households as units. Our analysis does not claim to 
+    be causal - nevertheless, we hope to uncover associations that may give clues
+    into causal mechanisms underlying household formation (like a supply shortage).
+    If we use household-level characteristics to predict subsequent household formation,
+    we're endogenizing our inputs and outputs. Consider the set of households presented
+    in Figure X."),
+
   p("Imagine a prospective U.S. population with 3 households, combined of males
     and females living together in the combination shown in Figure 1, below."),
   
