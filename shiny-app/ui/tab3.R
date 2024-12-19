@@ -93,7 +93,61 @@ tab3_ui <- fluidPage(
   
   p("wait- what am I even measuring in hh_2022?"),
   
-  p("Moving on to a different topic..."),
+  p("Above text: to be continued."),
   
-  plotOutput("plot1tab3")
+  p(HTML(
+    "In this project, we conceptualize two methods of measuring household size:
+    at the <em>person-level</em> and at the <em>household-level</em>.")),
+  p(HTML(
+    "For every 
+    household \\( i \\) with number of members \\( m_i \\) in households \\( 1 \\) 
+    through \\( H \\), the <em>household-level</em> mean household size is a simple
+    average across households as individual observations:
+    \\[ \\text{(Mean HH Size)}_{\\text{household}} = \\frac{\\sum_{i = 1}^H m_i}{H} \\]
+    ")),
+  
+  p(HTML(
+    "While the <em>person-level</em> mean household size is a simple average from 
+    the perspective of each person comprising a household. For every 
+    person \\( j \\) in a population \\( P \\) living in a household of \\( m_j \\) 
+    members \\( 1 \\), the <em>person-level</em> mean household size is a simple
+    average across person-level observations:
+    \\[ \\text{(Mean HH Size)}_{\\text{person}} = \\frac{\\sum_{j = 1}^P m_j}{P} \\]
+    ")),
+  
+  p(HTML(
+  "In other words: The <em>person-level</em> household size is the expected size 
+  of a household a random member of the U.S. population lives in. The 
+  <em>household-level</em> household size is the expected number of members in a 
+  randomly-selected household.
+  ")),
+  
+  p(
+  "For example, Figure 3.1 depicts a stylized American population comprised of 
+  , the average household-level household size is
+    \\[ \\frac{4 + 2 + 1}{3} = 2 \\tfrac{1}{3} \\]
+    but the average person-level household size is
+    \\[ \\frac{4 \\cdot 4 + 2 \\cdot 2 + 1 \\cdot 1}{7} = 3 \\]"),
+  
+  p("In general, the person-level household size can be rewritten as
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{person}} = \\frac{\\sum_{j = 1}^P m_j}{P}
+    = \\frac{\\sum_{i = 1}^H m_i^2}{H} =  
+    \\]
+    Which is remarkably similar to the formula for variance. The greater dispersion
+    in the sizes of households, th
+    "),
+  
+  p("Imagine a prospective U.S. population with 3 households, combined of males
+    and females living together in the combination shown in Figure 1, below."),
+  
+  p("todo: universally name figures across all tabs."),
+  
+  plotOutput("plot1tab3"),
+  
+
+  
+  p("")
+  
+  
 )
