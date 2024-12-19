@@ -214,8 +214,26 @@ tab3_ui <- fluidPage(
     we're endogenizing our inputs and outputs. Consider the set of households presented
     in Figure X."),
 
-  p("Imagine a prospective U.S. population with 3 households, combined of males
-    and females living together in the combination shown in Figure 1, below."),
+  p(strong("Merits of household-level classification")),
+  
+  p("Many of the abovementioned issues [except for the endogeneity? I'll have to
+    think about it] can be allieviated by employing a smart household-level data 
+    design. TAble 3.1 shows a prospective dataset aimed at
+    constructing a 2022 counterfactual using 2005 data."),
+  
+  p("TODO: make a table and put it here"),
+  
+  p(HTML(
+  "Each row of Table 3.1 represents a unique household as observed in 2005 and 
+  identified using a <code>HHID</code>. Rather than indicating a particular race 
+  or ethnicity for the entire household, we instead define an array of indicator 
+  variables <code>contains_AAPI</code>, <code>contains_AIAN</code>, etc which are
+  assigned <code>TRUE</code> if at least one household member belongs to its designated group.
+  Age bucketed variables <code>num_0_4</code>, <code>num_5_9</code> are assigned
+  integers that describe the number of individuals within the household falling within
+  the designated category. Total household income is designated in the <code>hhincome</code>
+  column."
+  )),
   
   p("todo: universally name figures across all tabs."),
   
