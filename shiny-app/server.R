@@ -340,7 +340,7 @@ server <- function(input, output, session) {
         legend.margin = margin(5, 5, 5, 5),
         legend.background = element_rect(),
         legend.key.height = unit(0.5 * plot_height, "cm"),
-        plot.margin = margin(10, 10, 10, 10)
+        plot.margin = margin(1, 1, 1, 1)
       ) +
       facet_wrap(~hh_id, nrow = 1) +
       coord_fixed(ratio = 1) +
