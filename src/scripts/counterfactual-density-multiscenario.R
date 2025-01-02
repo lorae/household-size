@@ -25,7 +25,12 @@ devtools::load_all("../dataduck")
 # ----- Step 2: Import and wrangle data ----- #
 
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
-ipums_db <- tbl(con, "ipums_processed")
+
+# We're adding some simplified/binary variables for counterfactual calculations
+ipums_db <- tbl(con, "ipums_processed") |>
+  mutate(
+    us_born = BPL <= 120 # TRUE if person born in US or US territories
+  )
 
 
 # TODO: eventually write a function in dataduck that when buckets are created,
@@ -170,6 +175,9 @@ calculate_counterfactual <- function(
 calculate_counterfactual(c("RACE_ETH_bucket", "AGE_bucket")) -> x1
 calculate_counterfactual(c("AGE_bucket")) -> x2
 calculate_counterfactual(c("RACE_ETH_bucket")) -> x3
-calculate_counterfactual(c("EDUC")) -> x5
+calculate_counterfactual(c("EDUC")) -> x4
+calculate_counterfactual(c("SEX")) -> x5
+calculate_counterfactual(c("us_born")) -> x6
+# empstat? marst?
 
-# calculate_counterfactual(c("CPUMA0010")) -> x4 # doesn't work b/c no CPUMA0010 data for 2022
+# calculate_counterfactual(c("CPUMA0010")) -> xx # doesn't work b/c no CPUMA0010 data for 2022
