@@ -174,6 +174,27 @@ tab3_ui <- fluidPage(
     observations.
     "),
   
+  p(strong("Why person-level household size and number of households are not 1:1")),
+  
+  p("As shown above, person-level household size is closely related to the distribution
+    variance, and household-level household size is closely related to the distribution 
+    mean. One value does not directly imply the other. This means that if we have person-level
+    household size and number of individuals, it is *not possible* to determine the
+    number of households that is implied."),
+  
+  p("Consider the following hypothetical. There is a population of 6 individuals.
+    The average person-level household size is 3. How many households are there in the population?"),
+  
+  p("The answer is undetermined. Either 2 households {3, 3} or 3 households {1, 1, 4} are
+    consistent with the above facts."),
+  
+  p("What is the intuition behind this? In both populations of 6, households are equally scattered."),
+  
+  p("At this point I could run a computer simulation. Start from low levels of P and show the possible
+    person-level household sizes by running every possible partition of P and calculating its person-level
+    and household-level household size. Perhaps map them on a scatter plot, or something."),
+  
+  
   p(strong("Why use person-level metrics?")),
   
   p("Household-level average household sizes are what we're more familiar with:
