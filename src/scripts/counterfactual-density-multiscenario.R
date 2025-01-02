@@ -39,6 +39,7 @@ age_factor_levels <- extract_factor_label(
 )
 
 # Function to calculate the p-value from a two-sample t-test with different standard errors
+# TODO: Make these names more general
 calc_pval <- function(mean_2005, mean_2022, se_2005, se_2022) {
   z_score <- (mean_2022 - mean_2005) / sqrt(se_2005^2 + se_2022^2)
   pval <- 2 * pnorm(-abs(z_score))
@@ -47,11 +48,21 @@ calc_pval <- function(mean_2005, mean_2022, se_2005, se_2022) {
 # ----- Step 3: Functionalize counterfactual calculation ----- #
 
 calculate_counterfactual <- function(
-  cf_categories = c("AGE_bucket", "RACE_ETH_bucket") # A vector of string names for the group_by variable  
+  cf_categories = c("AGE_bucket", "RACE_ETH_bucket"), # A vector of string names for the group_by variable 
+  p0_data = ipums_db |> filter(YEAR == 2005), # Data for the first (base) period
+  p0_name = "2005", # A string name for period 0
+  p1_data = ipums_db |> filter(YEAR == 2022), # Data for the second (recent) period
+  p1_name = "2022" # A string name for period 1
+  # TODO: P0 and P1 can each probably be simplified into one argument (year)
   ) {
-  print("Calculating 2005 means...")
-  mean2005 <- estimate_with_bootstrap_se(
-    data = ipums_db |> filter(YEAR == 2005),
+  
+  # TODO: add a step that catches errors if the specified data set is empty.
+  # Note that this should be done at this level, but I'm also surprised the crosstab_mean
+  # and crosstab_percent functions aren't producing errors when I do this.
+  
+  print(glue("Calculating {p0_name} means..."))
+  mean_p0 <- estimate_with_bootstrap_se(
+    data = p0_data,
     f = crosstab_mean,
     value = "NUMPREC",
     wt_col = "PERWT",
@@ -62,11 +73,11 @@ calculate_counterfactual <- function(
     se_cols = c("weighted_mean"),
     every_combo = TRUE
   ) 
-  print("2005 means done!")
+  print(glue("{p0_name} means done!"))
 
-  print("Calculating 2022 means...")
-  mean2022 <- estimate_with_bootstrap_se(
-    data = ipums_db |> filter(YEAR == 2022),
+  print(glue("Calculating {p1_name} means..."))
+  mean_p1 <- estimate_with_bootstrap_se(
+    data = p1_data,
     f = crosstab_mean,
     value = "NUMPREC",
     wt_col = "PERWT",
@@ -77,11 +88,11 @@ calculate_counterfactual <- function(
     se_cols = c("weighted_mean"),
     every_combo = TRUE
   )
-  print("2022 means done!")
+  print(glue("{p1_name} means done!"))
 
-  print("Calculating 2022 percents...")
-  percent2022 <- estimate_with_bootstrap_se(
-    data = ipums_db |> filter(YEAR == 2022),
+  print(glue("Calculating {p1_name} percents..."))
+  percent_p1 <- estimate_with_bootstrap_se(
+    data = p1_data,
     f = crosstab_percent,
     wt_col = "PERWT",
     group_by = cf_categories,
@@ -93,78 +104,72 @@ calculate_counterfactual <- function(
     every_combo = TRUE
   ) |> 
     select(-weighted_count, -count)
-  print("2022 percents done!")
+  print(glue("{p1_name} percents done!"))
 
-  crosstab_2005_2022 <- 
-    # Join the three data frames together
+  crosstab_p0_p1 <- 
     full_join(
-      mean2005 |> rename_with(~paste0(., "_2005"), -all_of(cf_categories)),
-      mean2022 |> rename_with(~paste0(., "_2022"), -all_of(cf_categories)),
+      mean_p0 |> rename_with(~paste0(., "_", p0_name), -all_of(cf_categories)),
+      mean_p1 |> rename_with(~paste0(., "_", p1_name), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
-    # TODO: build in a check that the count, weighted_count from percent2022 equal the 
-    # count, weighted_count from mean2022
     full_join(
-      percent2022 |> rename_with(~paste0(., "_2022"), -all_of(cf_categories)),
+      percent_p1 |> rename_with(~paste0(., "_", p1_name), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
-    # Clean up the output
-    #mutate(AGE_bucket = factor(AGE_bucket, levels = age_factor_levels)) |>
     arrange(across(all_of(cf_categories))) |>
-    # Add rows
     mutate(
-      # Difference between 2022 and 2005 weighted means
-      diff = weighted_mean_2022 - weighted_mean_2005,
-      # Calculate the p-value using the function above
+      diff = .data[[paste0("weighted_mean_", p1_name)]] - .data[[paste0("weighted_mean_", p0_name)]],
       pval = mapply(
         calc_pval,
-        weighted_mean_2005, 
-        weighted_mean_2022, 
-        se_weighted_mean_2005, 
-        se_weighted_mean_2022
+        .data[[paste0("weighted_mean_", p0_name)]],
+        .data[[paste0("weighted_mean_", p1_name)]],
+        .data[[paste0("se_weighted_mean_", p0_name)]],
+        .data[[paste0("se_weighted_mean_", p1_name)]]
       ),
-      # Significant if pval <= 0.05
       sig = (pval <= 0.05),
-      # Calculation the actual contribution toward 2022 household size, the contribution
-      # toward counterfactual household size (had population proportions been at 2022
-      # levels but weights at 2005 levels), and the difference between the two
-      cont_2022 = percent_2022 * weighted_mean_2022 / 100,
-      cont_2022_cf = percent_2022 * weighted_mean_2005 / 100,
-      contribution_diff = cont_2022 - cont_2022_cf,
-      # Confidence intervals in parentheses
-      mean_2005_95_ci = map2(
-        weighted_mean_2005, 
-        se_weighted_mean_2005, 
+      cont_p1 = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p1_name)]] / 100,
+      cont_p1_cf = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p0_name)]] / 100,
+      contribution_diff = cont_p1 - cont_p1_cf,
+      mean_p0_95_ci = map2(
+        .data[[paste0("weighted_mean_", p0_name)]],
+        .data[[paste0("se_weighted_mean_", p0_name)]],
         ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
       ),
-      mean_2022_95_ci = map2(
-        weighted_mean_2022, 
-        se_weighted_mean_2022, 
+      mean_p1_95_ci = map2(
+        .data[[paste0("weighted_mean_", p1_name)]],
+        .data[[paste0("se_weighted_mean_", p1_name)]],
         ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
       )
     ) |>
-    # Keep the entries, but reorder more logically
     select(any_of(c(
-      cf_categories, "count_2005", "count_2022", "weighted_count_2005", "weighted_count_2022", 
-      "percent_2022", "se_percent_2022", "weighted_mean_2005", "weighted_mean_2022", 
-      "se_weighted_mean_2005", "se_weighted_mean_2022", "mean_2005_95_ci", "mean_2022_95_ci", 
-      "diff", "pval", "sig", "contribution_diff")))
-  
-  actual_hhsize_2022 <- crosstab_2005_2022 |>
-    summarize(total = sum(weighted_mean_2022 * percent_2022 / 100)) |>
+      cf_categories, 
+      paste0("count_", p0_name), paste0("count_", p1_name),
+      paste0("weighted_count_", p0_name), paste0("weighted_count_", p1_name),
+      paste0("percent_", p1_name), paste0("se_percent_", p1_name),
+      paste0("weighted_mean_", p0_name), paste0("weighted_mean_", p1_name),
+      paste0("se_weighted_mean_", p0_name), paste0("se_weighted_mean_", p1_name),
+      paste0("mean_", p0_name, "_95_ci"), paste0("mean_", p1_name, "_95_ci"),
+      "diff", "pval", "sig", "contribution_diff"
+    )))
+
+  actual_hhsize_p1 <- crosstab_p0_p1 |>
+    summarize(total = sum(.data[[paste0("weighted_mean_", p1_name)]] * .data[[paste0("percent_", p1_name)]] / 100)) |>
     pull(total)
-  cf_hhsize_2022 <- crosstab_2005_2022 |>
-    summarize(total = sum(weighted_mean_2005 * percent_2022 / 100)) |>
+  
+  cf_hhsize_p1 <- crosstab_p0_p1 |>
+    summarize(total = sum(.data[[paste0("weighted_mean_", p0_name)]] * .data[[paste0("percent_", p1_name)]] / 100)) |>
     pull(total)
   
-  print(glue("The actual average household size in 2022 is {actual_hhsize_2022}. The
-             counterfactual in this scenario is {cf_hhsize_2022}."))
+  print(glue("The actual average household size in {p1_name} is {actual_hhsize_p1}. The
+           counterfactual in this scenario is {cf_hhsize_p1}."))
   
-  return(crosstab_2005_2022)
+  return(crosstab_p0_p1)
 }
 
 # Test out the function...
 calculate_counterfactual(c("RACE_ETH_bucket", "AGE_bucket")) -> x1
 calculate_counterfactual(c("AGE_bucket")) -> x2
 calculate_counterfactual(c("RACE_ETH_bucket")) -> x3
-calculate_counterfactual(c("CPUMA0010")) -> x4
+calculate_counterfactual(c("EDUC")) -> x5
+
+# calculate_counterfactual(c("CPUMA0010")) -> x4 # doesn't work b/c no CPUMA0010 data for 2022
