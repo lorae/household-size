@@ -43,13 +43,6 @@ age_factor_levels <- extract_factor_label(
   colname = "bucket_name"
 )
 
-# Function to calculate the p-value from a two-sample t-test with different standard errors
-# TODO: Make these names more general
-calc_pval <- function(mean_2005, mean_2022, se_2005, se_2022) {
-  z_score <- (mean_2022 - mean_2005) / sqrt(se_2005^2 + se_2022^2)
-  pval <- 2 * pnorm(-abs(z_score))
-  return(pval)
-}
 # ----- Step 3: Functionalize counterfactual calculation ----- #
 
 calculate_counterfactual <- function(
@@ -59,6 +52,7 @@ calculate_counterfactual <- function(
   p1_data = ipums_db |> filter(YEAR == 2022), # Data for the second (recent) period
   p1_name = "2022" # A string name for period 1
   # TODO: P0 and P1 can each probably be simplified into one argument (year)
+  # TODO: add back standard errors later. Not needed for now.
   ) {
   
   # TODO: add a step that catches errors if the specified data set is empty.
@@ -66,48 +60,33 @@ calculate_counterfactual <- function(
   # and crosstab_percent functions aren't producing errors when I do this.
   
   print(glue("Calculating {p0_name} means..."))
-  mean_p0 <- estimate_with_bootstrap_se(
+  mean_p0 <- crosstab_mean(
     data = p0_data,
-    f = crosstab_mean,
     value = "NUMPREC",
     wt_col = "PERWT",
     group_by = cf_categories,
-    id_cols = cf_categories,
-    repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
-    constant = 4/80,
-    se_cols = c("weighted_mean"),
     every_combo = TRUE
-  ) 
+  )
   print(glue("{p0_name} means done!"))
 
   print(glue("Calculating {p1_name} means..."))
-  mean_p1 <- estimate_with_bootstrap_se(
+  mean_p1 <- crosstab_mean(
     data = p1_data,
-    f = crosstab_mean,
     value = "NUMPREC",
     wt_col = "PERWT",
     group_by = cf_categories,
-    id_cols = cf_categories,
-    repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
-    constant = 4/80,
-    se_cols = c("weighted_mean"),
     every_combo = TRUE
   )
   print(glue("{p1_name} means done!"))
 
   print(glue("Calculating {p1_name} percents..."))
-  percent_p1 <- estimate_with_bootstrap_se(
+  percent_p1 <- crosstab_percent(
     data = p1_data,
-    f = crosstab_percent,
     wt_col = "PERWT",
     group_by = cf_categories,
     percent_group_by = c(),
-    id_cols = cf_categories,
-    repwt_cols = paste0("REPWTP", sprintf("%d", 1:80)),
-    constant = 4/80,
-    se_cols = c("percent"),
     every_combo = TRUE
-  ) |> 
+  ) |>
     select(-weighted_count, -count)
   print(glue("{p1_name} percents done!"))
 
@@ -124,27 +103,9 @@ calculate_counterfactual <- function(
     arrange(across(all_of(cf_categories))) |>
     mutate(
       diff = .data[[paste0("weighted_mean_", p1_name)]] - .data[[paste0("weighted_mean_", p0_name)]],
-      pval = mapply(
-        calc_pval,
-        .data[[paste0("weighted_mean_", p0_name)]],
-        .data[[paste0("weighted_mean_", p1_name)]],
-        .data[[paste0("se_weighted_mean_", p0_name)]],
-        .data[[paste0("se_weighted_mean_", p1_name)]]
-      ),
-      sig = (pval <= 0.05),
       cont_p1 = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p1_name)]] / 100,
       cont_p1_cf = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p0_name)]] / 100,
       contribution_diff = cont_p1 - cont_p1_cf,
-      mean_p0_95_ci = map2(
-        .data[[paste0("weighted_mean_", p0_name)]],
-        .data[[paste0("se_weighted_mean_", p0_name)]],
-        ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
-      ),
-      mean_p1_95_ci = map2(
-        .data[[paste0("weighted_mean_", p1_name)]],
-        .data[[paste0("se_weighted_mean_", p1_name)]],
-        ~ c(.x - qnorm(0.975) * .y, .x + qnorm(0.975) * .y)
-      )
     ) |>
     select(any_of(c(
       cf_categories, 
@@ -152,9 +113,8 @@ calculate_counterfactual <- function(
       paste0("weighted_count_", p0_name), paste0("weighted_count_", p1_name),
       paste0("percent_", p1_name), paste0("se_percent_", p1_name),
       paste0("weighted_mean_", p0_name), paste0("weighted_mean_", p1_name),
-      paste0("se_weighted_mean_", p0_name), paste0("se_weighted_mean_", p1_name),
-      paste0("mean_", p0_name, "_95_ci"), paste0("mean_", p1_name, "_95_ci"),
-      "diff", "pval", "sig", "contribution_diff"
+      "diff", 
+      "contribution_diff"
     )))
 
   actual_hhsize_p1 <- crosstab_p0_p1 |>
