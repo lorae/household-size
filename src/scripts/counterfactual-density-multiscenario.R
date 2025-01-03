@@ -158,5 +158,8 @@ y2 <- calculate_counterfactual(
   cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), 
   p0 = 2000, p1 = 2019)
 y3 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "CPUMA0010"), 
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX"), 
+  p0 = 2000, p1 = 2019)
+y4 <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "EDUC"), 
   p0 = 2000, p1 = 2019)
