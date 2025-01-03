@@ -92,22 +92,27 @@ calculate_counterfactual <- function(
 
   crosstab_p0_p1 <- 
     full_join(
+      # Join the p0 and p1 mean data frames, appending a _{year} suffix to columns
       mean_p0 |> rename_with(~paste0(., "_", p0_name), -all_of(cf_categories)),
       mean_p1 |> rename_with(~paste0(., "_", p1_name), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
     full_join(
+      # Join the p0 and p1 mean data frames with p1 percent data frame, appending _{year} suffixes
       percent_p1 |> rename_with(~paste0(., "_", p1_name), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
     arrange(across(all_of(cf_categories))) |>
     mutate(
+      # Diff = period 1 household size minus period 0 household size
       diff = .data[[paste0("weighted_mean_", p1_name)]] - .data[[paste0("weighted_mean_", p0_name)]],
+      # Calculate contributions (See Shiny app, main tab, for more explanation on contributions).
       cont_p1 = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p1_name)]] / 100,
       cont_p1_cf = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p0_name)]] / 100,
       contribution_diff = cont_p1 - cont_p1_cf,
     ) |>
     select(any_of(c(
+      # Reorder columns more intuitively
       cf_categories, 
       paste0("count_", p0_name), paste0("count_", p1_name),
       paste0("weighted_count_", p0_name), paste0("weighted_count_", p1_name),
@@ -117,10 +122,12 @@ calculate_counterfactual <- function(
       "contribution_diff"
     )))
 
+  # Actual mean household size in period 1
   actual_hhsize_p1 <- crosstab_p0_p1 |>
     summarize(total = sum(.data[[paste0("weighted_mean_", p1_name)]] * .data[[paste0("percent_", p1_name)]] / 100)) |>
     pull(total)
   
+  # Counterfactual household size in period 1
   cf_hhsize_p1 <- crosstab_p0_p1 |>
     summarize(total = sum(.data[[paste0("weighted_mean_", p0_name)]] * .data[[paste0("percent_", p1_name)]] / 100)) |>
     pull(total)
