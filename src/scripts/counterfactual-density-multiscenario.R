@@ -47,19 +47,20 @@ age_factor_levels <- extract_factor_label(
 
 calculate_counterfactual <- function(
   cf_categories = c("AGE_bucket", "RACE_ETH_bucket"), # A vector of string names for the group_by variable 
-  p0_data = ipums_db |> filter(YEAR == 2005), # Data for the first (base) period
-  p0_name = "2005", # A string name for period 0
-  p1_data = ipums_db |> filter(YEAR == 2022), # Data for the second (recent) period
-  p1_name = "2022" # A string name for period 1
-  # TODO: P0 and P1 can each probably be simplified into one argument (year)
+  p0 = 2005, # An integer for the year of the first (base) period
+  p1 = 2022 # An integer for the year of the second (recent) period
   # TODO: add back standard errors later. Not needed for now.
   ) {
+
+  # Subset the data for each of the years
+  p0_data = ipums_db |> filter(YEAR == p0) # Data for the first (base) period
+  p1_data = ipums_db |> filter(YEAR == p1) # Data for the second (recent) period
   
   # TODO: add a step that catches errors if the specified data set is empty.
   # Note that this should be done at this level, but I'm also surprised the crosstab_mean
   # and crosstab_percent functions aren't producing errors when I do this.
   
-  print(glue("Calculating {p0_name} means..."))
+  print(glue("Calculating {p0} means..."))
   mean_p0 <- crosstab_mean(
     data = p0_data,
     value = "NUMPREC",
@@ -67,9 +68,9 @@ calculate_counterfactual <- function(
     group_by = cf_categories,
     every_combo = TRUE
   )
-  print(glue("{p0_name} means done!"))
+  print(glue("{p0} means done!"))
 
-  print(glue("Calculating {p1_name} means..."))
+  print(glue("Calculating {p1} means..."))
   mean_p1 <- crosstab_mean(
     data = p1_data,
     value = "NUMPREC",
@@ -77,9 +78,9 @@ calculate_counterfactual <- function(
     group_by = cf_categories,
     every_combo = TRUE
   )
-  print(glue("{p1_name} means done!"))
+  print(glue("{p1} means done!"))
 
-  print(glue("Calculating {p1_name} percents..."))
+  print(glue("Calculating {p1} percents..."))
   percent_p1 <- crosstab_percent(
     data = p1_data,
     wt_col = "PERWT",
@@ -88,63 +89,74 @@ calculate_counterfactual <- function(
     every_combo = TRUE
   ) |>
     select(-weighted_count, -count)
-  print(glue("{p1_name} percents done!"))
+  print(glue("{p1} percents done!"))
 
   crosstab_p0_p1 <- 
     full_join(
       # Join the p0 and p1 mean data frames, appending a _{year} suffix to columns
-      mean_p0 |> rename_with(~paste0(., "_", p0_name), -all_of(cf_categories)),
-      mean_p1 |> rename_with(~paste0(., "_", p1_name), -all_of(cf_categories)),
+      mean_p0 |> rename_with(~paste0(., "_", p0), -all_of(cf_categories)),
+      mean_p1 |> rename_with(~paste0(., "_", p1), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
     full_join(
       # Join the p0 and p1 mean data frames with p1 percent data frame, appending _{year} suffixes
-      percent_p1 |> rename_with(~paste0(., "_", p1_name), -all_of(cf_categories)),
+      percent_p1 |> rename_with(~paste0(., "_", p1), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
     arrange(across(all_of(cf_categories))) |>
     mutate(
       # Diff = period 1 household size minus period 0 household size
-      diff = .data[[paste0("weighted_mean_", p1_name)]] - .data[[paste0("weighted_mean_", p0_name)]],
+      diff = .data[[paste0("weighted_mean_", p1)]] - .data[[paste0("weighted_mean_", p0)]],
       # Calculate contributions (See Shiny app, main tab, for more explanation on contributions).
-      cont_p1 = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p1_name)]] / 100,
-      cont_p1_cf = .data[[paste0("percent_", p1_name)]] * .data[[paste0("weighted_mean_", p0_name)]] / 100,
+      cont_p1 = .data[[paste0("percent_", p1)]] * .data[[paste0("weighted_mean_", p1)]] / 100,
+      cont_p1_cf = .data[[paste0("percent_", p1)]] * .data[[paste0("weighted_mean_", p0)]] / 100,
       contribution_diff = cont_p1 - cont_p1_cf,
     ) |>
     select(any_of(c(
       # Reorder columns more intuitively
       cf_categories, 
-      paste0("count_", p0_name), paste0("count_", p1_name),
-      paste0("weighted_count_", p0_name), paste0("weighted_count_", p1_name),
-      paste0("percent_", p1_name), paste0("se_percent_", p1_name),
-      paste0("weighted_mean_", p0_name), paste0("weighted_mean_", p1_name),
+      paste0("count_", p0), paste0("count_", p1),
+      paste0("weighted_count_", p0), paste0("weighted_count_", p1),
+      paste0("percent_", p1), paste0("se_percent_", p1),
+      paste0("weighted_mean_", p0), paste0("weighted_mean_", p1),
       "diff", 
       "contribution_diff"
     )))
 
   # Actual mean household size in period 1
   actual_hhsize_p1 <- crosstab_p0_p1 |>
-    summarize(total = sum(.data[[paste0("weighted_mean_", p1_name)]] * .data[[paste0("percent_", p1_name)]] / 100)) |>
+    summarize(total = sum(.data[[paste0("weighted_mean_", p1)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
   # Counterfactual household size in period 1
   cf_hhsize_p1 <- crosstab_p0_p1 |>
-    summarize(total = sum(.data[[paste0("weighted_mean_", p0_name)]] * .data[[paste0("percent_", p1_name)]] / 100)) |>
+    summarize(total = sum(.data[[paste0("weighted_mean_", p0)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
-  print(glue("The actual average household size in {p1_name} is {actual_hhsize_p1}. The
+  print(glue("The actual average household size in {p1} is {actual_hhsize_p1}. The
            counterfactual in this scenario is {cf_hhsize_p1}."))
   
   return(crosstab_p0_p1)
 }
 
-# Test out the function...
-calculate_counterfactual(c("RACE_ETH_bucket", "AGE_bucket")) -> x1
-calculate_counterfactual(c("AGE_bucket")) -> x2
-calculate_counterfactual(c("RACE_ETH_bucket")) -> x3
-calculate_counterfactual(c("EDUC")) -> x4
-calculate_counterfactual(c("SEX")) -> x5
-calculate_counterfactual(c("us_born")) -> x6
+# Test out the function... 
+x1 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), p0 = 2000, p1 = 2023)
+x2 <- calculate_counterfactual(cf_categories = c("AGE_bucket"), p0 = 2000, p1 = 2023)
+x3 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket"), p0 = 2000, p1 = 2023)
+x4 <- calculate_counterfactual(cf_categories = c("EDUC"), p0 = 2000, p1 = 2023)
+x5 <- calculate_counterfactual(cf_categories = c("SEX"), p0 = 2000, p1 = 2023)
+x6 <- calculate_counterfactual(cf_categories = c("us_born"), p0 = 2000, p1 = 2023)
 # empstat? marst?
 
-# calculate_counterfactual(c("CPUMA0010")) -> xx # doesn't work b/c no CPUMA0010 data for 2022
+calculate_counterfactual(cf_categories = c("CPUMA0010"), p0 = 2000, p1 = 2019)
+
+# Do it incrementally
+y1 <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket"), 
+  p0 = 2000, p1 = 2019)
+y2 <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), 
+  p0 = 2000, p1 = 2019)
+y3 <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "CPUMA0010"), 
+  p0 = 2000, p1 = 2019)
