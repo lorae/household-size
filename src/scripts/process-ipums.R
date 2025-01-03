@@ -15,6 +15,9 @@ library("duckdb")
 library("ipumsr")
 library("readr")
 
+# temp: set working directory
+setwd("/scratch/gpfs/ls4540/household-size")
+
 # ----- Step 1: Source helper functions ----- #
 
 devtools::load_all("../dataduck")
