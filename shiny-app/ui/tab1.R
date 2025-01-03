@@ -57,6 +57,51 @@ tab1_ui <- fluidPage(
           "population, their shrinking average household size more than compensated",
           "for the increasing household sizes among White Americans.")),
   
+  tags$h3("What about missing data?", id = "placeholder"),
+  
+  p("As we construct counterfactual situations that control for more and more factors,
+    we run into the issue of an unbalanced panel dataset. Some combinations of factors -
+    geography, race, age group, etc. - are simply so uncommon that they are not observed
+    at all. This can pose issues in properly calculating a counterfactual, as we show
+    below."),
+  
+  p("We consider a stylized America with 3 groups 
+    of interest - A, B, and C. We assume that membership in group A is sufficiently 
+    unlikely that sometimes our sample
+    does not capture these individuals. There are four possible scenarios in our data collection:"),
+  
+  tags$ol(
+    tags$li("All groups are observed in both period 0 and period 1 data."),
+    tags$li("All groups are observed in period 0, but group A is not observed in period 1."),
+    tags$li("Group A is not observed in period 0, but all groups are observed in period 1."),
+    tags$li("Group A is not observed in either period 0 or period 1.")
+  ),
+  
+  p(strong("Scenario 1: All groups are observed in both period 0 and period 1 data")),
+  p("This scenario is simple. Between 2000 and 2019, all groups increased their average 
+    household size by 0.5. As such, the weighted average household size in 2019 of 4.55
+    is exactly 0.5 higher than the weighted average counterfactual household size in 2019
+    of 4.05, which is what the average would have been had household sizes within each
+    group remained constant between 2000 and 2019."),
+  div(style = "width: 100%;", DTOutput("tab1table2a")),
+  
+  p(strong("Scenario 2: All groups are observed in period 0, but group A is not observed in period 1")),
+  DTOutput("tab1table2b"),
+  
+  p(strong("Scenario 3: Group A is not observed in period 0, but all groups are observed in period 1")),
+  DTOutput("placeholder"),
+  
+  p(strong("Scenario 4: Group A is not observed in either period 0 or period 1")),
+  DTOutput("placeholder"),
+  
+  
+  p("[Side note: what if, later we draw from the 
+    census and it's literally not true that there exists a person in group A in X 
+    year? This is conceptually different from just not observing a person in group 
+    A in X year. A later extension of this write-up can explore this situation, but
+    for now, I'll focus on the simpler one outpined here.] [Note: do income quintile
+    and inflation adjusted income.]"),
+  
   tags$h3("Table 2: Table 2: 2005-2022 Changes by Race and Age", id = "table2"),
   p(paste("Now we move on from an example to using actual data from IPUMS. Table 2",
           "shows actual data for 8 race/ethnicity groups:")),

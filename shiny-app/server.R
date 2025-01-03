@@ -85,6 +85,111 @@ server <- function(input, output, session) {
       formatPercentage(c("Percent of 2005 Population", "Percent of 2022 Population"), digits = 0)
   })
   
+  # Tab 1 Table 2A: Render theoretical example table
+  output$tab1table2a <- renderDT({
+    example_table <- data.frame(
+      group = c("A", "B", "C"),
+      prop_2019 = c(0.15, 0.65, 0.2),
+      hhsize_2000 = c(3.0, 4.0, 5.0),
+      hhsize_2019 = c(3.5, 4.5, 5.5)
+    ) |>
+    mutate(
+      cont_2019 = prop_2019 * hhsize_2019,
+      cf_cont_2019 = prop_2019 * hhsize_2000
+    )
+    
+    sum_row <- example_table |>
+      summarize(
+        group = "Sum",
+        prop_2019 = sum(prop_2019),
+        hhsize_2000 = NA,
+        hhsize_2019 = NA,
+        cont_2019 = sum(cont_2019),
+        cf_cont_2019 = sum(cf_cont_2019)
+      )
+    
+    example_table <- bind_rows(example_table, sum_row)
+      
+      datatable(
+        example_table,
+        options = list(
+          pageLength = 5,
+          autoWidth = TRUE,
+          dom = 't',
+          ordering = FALSE
+        ),
+        rownames = FALSE,
+        colnames = c(
+          "Group" = "group",
+          "Proportion of 2019 Population" = "prop_2019",
+          "Average HH Size (2000)" = "hhsize_2000",
+          "Average HH Size (2019)" = "hhsize_2019",
+          "Contribution (2019)" = "cont_2019",
+          "Counterfactual Contribution (2019)" = "cf_cont_2019"
+        )
+      ) |>
+      formatStyle(
+        "Group",
+        target = "row",
+        fontWeight = styleEqual("Sum", "bold")
+      ) |>
+      formatRound("Contribution (2019)", digits = 2) |>
+      formatRound("Counterfactual Contribution (2019)", digits = 2)
+  })
+  
+  # Tab 1 Table 2B: Render theoretical example table
+  output$tab1table2b <- renderDT({
+    example_table <- data.frame(
+      group = c("A", "B", "C"),
+      prop_2019 = c(0, 0.65, 0.35),
+      hhsize_2000 = c(3.0, 4.0, 5.0),
+      hhsize_2019 = c(NA, 4.5, 5.5)
+    ) |>
+      mutate(
+        cont_2019 = prop_2019 * hhsize_2019,
+        cf_cont_2019 = prop_2019 * hhsize_2000
+      )
+    
+    sum_row <- example_table |>
+      summarize(
+        group = "Sum",
+        prop_2019 = sum(prop_2019),
+        hhsize_2000 = NA,
+        hhsize_2019 = NA,
+        cont_2019 = sum(cont_2019),
+        cf_cont_2019 = sum(cf_cont_2019)
+      )
+    
+    example_table <- bind_rows(example_table, sum_row) |>
+      mutate(across(everything(), ~ ifelse(is.na(.), "NA", .)))  # Replace NA with "NA"
+    
+    datatable(
+      example_table,
+      options = list(
+        pageLength = 5,
+        autoWidth = TRUE,
+        dom = 't',
+        ordering = FALSE
+      ),
+      rownames = FALSE,
+      colnames = c(
+        "Group" = "group",
+        "Proportion of 2019 Population" = "prop_2019",
+        "Average HH Size (2000)" = "hhsize_2000",
+        "Average HH Size (2019)" = "hhsize_2019",
+        "Contribution (2019)" = "cont_2019",
+        "Counterfactual Contribution (2019)" = "cf_cont_2019"
+      )
+    ) |>
+      formatStyle(
+        "Group",
+        target = "row",
+        fontWeight = styleEqual("Sum", "bold")
+      ) |>
+      formatRound("Contribution (2019)", digits = 2) |>
+      formatRound("Counterfactual Contribution (2019)", digits = 2)
+  })
+  
   # Table 2: Render actual data by Race/Ethnicity and Age
   output$table2 <- renderDT({
     datatable(
