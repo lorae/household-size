@@ -103,6 +103,19 @@ calculate_counterfactual <- function(
       percent_p1 |> rename_with(~paste0(., "_", p1), -all_of(cf_categories)),
       by = setNames(cf_categories, cf_categories)
     ) |>
+    mutate(
+      # Apply rules for handling NA values
+      across(
+        all_of(paste0("weighted_mean_", p1)), 
+        ~replace_na(., 0),
+        .names = "{.col}"
+      ),
+      across(
+        all_of(paste0("weighted_mean_", p0)),
+        ~ifelse(is.na(.), .data[[paste0("weighted_mean_", p1)]], .),
+        .names = "{.col}"
+      )
+    ) |>
     arrange(across(all_of(cf_categories))) |>
     mutate(
       # Diff = period 1 household size minus period 0 household size
@@ -133,24 +146,41 @@ calculate_counterfactual <- function(
     summarize(total = sum(.data[[paste0("weighted_mean_", p0)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
+  # Diff
+  diff <- actual_hhsize_p1 - cf_hhsize_p1
+  
   print(glue("The actual average household size in {p1} is {actual_hhsize_p1}. The
-           counterfactual in this scenario is {cf_hhsize_p1}."))
+           counterfactual in this scenario is {cf_hhsize_p1}. Actual - counterfactual = {diff}"))
   
   return(crosstab_p0_p1)
 }
 
 # Test out the function... 
-x1 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), p0 = 2000, p1 = 2023)
-x2 <- calculate_counterfactual(cf_categories = c("AGE_bucket"), p0 = 2000, p1 = 2023)
-x3 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket"), p0 = 2000, p1 = 2023)
-x4 <- calculate_counterfactual(cf_categories = c("EDUC"), p0 = 2000, p1 = 2023)
-x5 <- calculate_counterfactual(cf_categories = c("SEX"), p0 = 2000, p1 = 2023)
-x6 <- calculate_counterfactual(cf_categories = c("us_born"), p0 = 2000, p1 = 2023)
-# empstat? marst?
-
-calculate_counterfactual(cf_categories = c("CPUMA0010"), p0 = 2000, p1 = 2019)
+# x1 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), p0 = 2000, p1 = 2023)
+# x2 <- calculate_counterfactual(cf_categories = c("AGE_bucket"), p0 = 2000, p1 = 2023)
+# x3 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket"), p0 = 2000, p1 = 2023)
+# x4 <- calculate_counterfactual(cf_categories = c("EDUC"), p0 = 2000, p1 = 2023)
+# x5 <- calculate_counterfactual(cf_categories = c("SEX"), p0 = 2000, p1 = 2023)
+# x6 <- calculate_counterfactual(cf_categories = c("us_born"), p0 = 2000, p1 = 2023)
+# # empstat? marst?
+# 
+# calculate_counterfactual(cf_categories = c("CPUMA0010"), p0 = 2000, p1 = 2019)
 
 # Do it incrementally
+
+z1 <- calculate_counterfactual(
+  cf_categories = c("AGE_bucket"), 
+  p0 = 2000, p1 = 2019)
+z2 <- calculate_counterfactual(
+  cf_categories = c("SEX"), 
+  p0 = 2000, p1 = 2019)
+z3 <- calculate_counterfactual(
+  cf_categories = c("EDUC"), 
+  p0 = 2000, p1 = 2019)
+z4 <- calculate_counterfactual(
+  cf_categories = c("CPUMA0010"), 
+  p0 = 2000, p1 = 2019)
+
 y1 <- calculate_counterfactual(
   cf_categories = c("RACE_ETH_bucket"), 
   p0 = 2000, p1 = 2019)
@@ -162,4 +192,7 @@ y3 <- calculate_counterfactual(
   p0 = 2000, p1 = 2019)
 y4 <- calculate_counterfactual(
   cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "EDUC"), 
+  p0 = 2000, p1 = 2019)
+y5 <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "EDUC", "CPUMA0010"), 
   p0 = 2000, p1 = 2019)
