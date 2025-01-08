@@ -1,14 +1,21 @@
 # counterfactual-density-multiscenario.R
 #
-# I hate to have two scripts so similarly named, but I want to build some new counter-
-# factuals without affecting the old ones. This is the newer, updated version of 
-# src/counterfactual-density.R. The purpose of this script is to calculate what -
-# controlling for demographic factors - average person-level household size would be
-# in 2022.
+# The purpose of this script is to calculate what - after controlling for demographic 
+# factors - average person-level household size would be in 2019 compared to 2000 
+# values. This is the newer, updated version of src/counterfactual-density.R. 
 #
 # Rather than using all the demographic features at once, it layers them on one at
 # a time. This allows us to conclude what happens with the introduction of each 
 # individual layer and how robust the results are to various controls.
+#
+# These layered results are saved in .csv files that are placed in the shiny-app/data
+# directory.
+#
+# Inputs:
+#   - data/db/ipums.duckdb
+# Outputs:
+#   - shiny-app/data/something.csv
+#   - shiny-app/data/something-else.csv
 #
 # ----- Step 0: Load required packages ----- #
 library("dplyr")
@@ -28,7 +35,8 @@ devtools::load_all("../dataduck")
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
 
 # ----- Step 2a: Import CPI-U data ----- #
-# EXTRA (transfer to process-ipums.R eventually): import CPI-U series
+# TODO: Transfer this code to process-ipums.R: import CPI-U series (and bucketing,
+# too - see below)
 cpiu <- read_excel(
   path = "data/helpers/CPI-U.xlsx",
   sheet = "BLS Data Series",
@@ -109,15 +117,16 @@ ipums_db <- ipums_db |>
 
 # ----- Step 3: Functionalize counterfactual calculation ----- #
 
+# TODO: This function needs to be modularized and unit-tested.
 calculate_counterfactual <- function(
   cf_categories = c("AGE_bucket", "RACE_ETH_bucket"), # A vector of string names for the group_by variable 
-  p0 = 2005, # An integer for the year of the first (base) period
-  p1 = 2022, # An integer for the year of the second (recent) period
+  p0 = 2000, # An integer for the year of the first (base) period
+  p1 = 2019, # An integer for the year of the second (recent) period
   outcome = "NUMPREC"
   # TODO: add back standard errors later. Not needed for now.
   ) {
 
-  # Subset the data for each of the years
+  # Subset the data
   p0_data = ipums_db |> filter(YEAR == p0) |> filter(GQ %in% c(0,1,2)) # Data for the first (base) period
   p1_data = ipums_db |> filter(YEAR == p1) |> filter(GQ %in% c(0,1,2)) # Data for the second (recent) period
   
@@ -201,116 +210,73 @@ calculate_counterfactual <- function(
       "contribution_diff"
     )))
 
-  # Actual mean household size in period 1
+  # Calculate overall values
   actual_outcome_p1 <- crosstab_p0_p1 |>
     summarize(total = sum(.data[[paste0("weighted_mean_", p1)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
-  # Counterfactual household size in period 1
   cf_outcome_p1 <- crosstab_p0_p1 |>
     summarize(total = sum(.data[[paste0("weighted_mean_", p0)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
-  # Diff
-  diff <- actual_outcome_p1 - cf_outcome_p1
-  
-  print(glue("The actual average {outcome} in {p1} is {actual_outcome_p1}. The
-           counterfactual in this scenario is {cf_outcome_p1}. Actual - counterfactual = {diff}"))
-  
-  return(crosstab_p0_p1)
+  # Return structured data frame
+  tibble(
+    RACE_ETH_bucket = ("RACE_ETH_bucket" %in% cf_categories),
+    AGE_bucket = ("AGE_bucket" %in% cf_categories),
+    SEX = ("SEX" %in% cf_categories),
+    us_born = ("us_born" %in% cf_categories),
+    EDUC = ("EDUC" %in% cf_categories),
+    INCTOT_cpiu_2010_bucket = ("INCTOT_cpiu_2010_bucket" %in% cf_categories),
+    CPUMA0010 = ("CPUMA0010" %in% cf_categories),
+    counterfactual = cf_outcome_p1,
+    actual = actual_outcome_p1,
+    diff = actual_outcome_p1 - cf_outcome_p1
+  )
 }
 
-# Test out the function... 
-# x1 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), p0 = 2000, p1 = 2023)
-# x2 <- calculate_counterfactual(cf_categories = c("AGE_bucket"), p0 = 2000, p1 = 2023)
-# x3 <- calculate_counterfactual(cf_categories = c("RACE_ETH_bucket"), p0 = 2000, p1 = 2023)
-# x4 <- calculate_counterfactual(cf_categories = c("EDUC"), p0 = 2000, p1 = 2023)
-# x5 <- calculate_counterfactual(cf_categories = c("SEX"), p0 = 2000, p1 = 2023)
-# x6 <- calculate_counterfactual(cf_categories = c("us_born"), p0 = 2000, p1 = 2023)
-# # empstat? marst?
-# 
-# calculate_counterfactual(cf_categories = c("CPUMA0010"), p0 = 2000, p1 = 2019)
+# ----- Step 4: Run counterfactuals ----- #
+# List of scenarios
+scenarios <- list(
+  c("AGE_bucket"),
+  c("SEX"),
+  c("us_born"),
+  c("EDUC"),
+  c("INCTOT_cpiu_2010_bucket"),
+  c("CPUMA0010"),
+  c("RACE_ETH_bucket"),
+  c("RACE_ETH_bucket", "AGE_bucket"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010")
+)
 
-# Do it incrementally
+# Generate data for all scenarios
+# Persons per bedroom
+bedroom_cf <- bind_rows(
+  lapply(scenarios, function(cf) calculate_counterfactual(cf_categories = cf, p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom"))
+)
 
-# ----- Step 4: Generate persons per household results ----- #
-z1 <- calculate_counterfactual(
-  cf_categories = c("AGE_bucket"), 
-  p0 = 2000, p1 = 2019)
-z2 <- calculate_counterfactual(
-  cf_categories = c("SEX"), 
-  p0 = 2000, p1 = 2019)
-z5 <- calculate_counterfactual(
-  cf_categories = c("us_born"),
-  p0 = 2000, p1 = 2019)
-z3 <- calculate_counterfactual(
-  cf_categories = c("EDUC"), 
-  p0 = 2000, p1 = 2019)
-z4 <- calculate_counterfactual(
-  cf_categories = c("INCTOT_cpiu_2010_bucket"),
-  p0 = 2000, p1 = 2019)
-z5 <- calculate_counterfactual(
-  cf_categories = c("CPUMA0010"), 
-  p0 = 2000, p1 = 2019)
+# Persons per household
+hhsize_cf <- bind_rows(
+  lapply(scenarios, function(cf) calculate_counterfactual(cf_categories = cf, p0 = 2000, p1 = 2019, outcome = "NUMPREC"))
+)
 
+# Problem: Why do the actuals no equal the values from a weighted mean?
+weighted.mean(
+  ipums_db |> 
+    filter(YEAR == 2019) |> 
+    # filter(GQ %in% c(0,1,2)) |> 
+    pull(NUMPREC), 
+  ipums_db |> 
+    filter(YEAR == 2019) |> 
+    # filter(GQ %in% c(0,1,2)) |> 
+    pull(PERWT))
 
-y1 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket"), 
-  p0 = 2000, p1 = 2019)
-y2 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), 
-  p0 = 2000, p1 = 2019)
-y3 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX"), 
-  p0 = 2000, p1 = 2019)
-y4 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"), 
-  p0 = 2000, p1 = 2019)
-y5 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"), 
-  p0 = 2000, p1 = 2019)
-y6 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"), 
-  p0 = 2000, p1 = 2019)
-y7 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"), 
-  p0 = 2000, p1 = 2019)
-
-# ----- Step 5: Generate persons per bedroom results ----- #
-a1 <- calculate_counterfactual(
-  cf_categories = c("AGE_bucket"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-a2 <- calculate_counterfactual(
-  cf_categories = c("SEX"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-a3 <- calculate_counterfactual(
-  cf_categories = c("EDUC"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-a4 <- calculate_counterfactual(
-  cf_categories = c("INCTOT_cpiu_2010_bucket"),
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-a5 <- calculate_counterfactual(
-  cf_categories = c("CPUMA0010"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-
-b1 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-b2 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-b3 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-b4 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-b5 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-b6 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
-b7 <- calculate_counterfactual(
-  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"), 
-  p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom")
+# ----- Step 5: Save the results ----- #
+save(
+  hhsize_cf, 
+  bedroom_cf,
+  file = "shiny-app/data/counterfactuals.rda"
+)
