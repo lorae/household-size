@@ -122,14 +122,12 @@ calculate_counterfactual <- function(
   cf_categories = c("AGE_bucket", "RACE_ETH_bucket"), # A vector of string names for the group_by variable 
   p0 = 2000, # An integer for the year of the first (base) period
   p1 = 2019, # An integer for the year of the second (recent) period
-  outcome = "NUMPREC"
+  p0_data, # Data for period 0
+  p1_data, # Data for period 1
+  outcome = "NUMPREC" # Name of the outcome variable.
   # TODO: add back standard errors later. Not needed for now.
   ) {
 
-  # Subset the data
-  p0_data = ipums_db |> filter(YEAR == p0) |> filter(GQ %in% c(0,1,2)) # Data for the first (base) period
-  p1_data = ipums_db |> filter(YEAR == p1) |> filter(GQ %in% c(0,1,2)) # Data for the second (recent) period
-  
   # TODO: add a step that catches errors if the specified data set is empty.
   # Note that this should be done at this level, but I'm also surprised the crosstab_mean
   # and crosstab_percent functions aren't producing errors when I do this.
@@ -253,6 +251,9 @@ scenarios <- list(
 )
 
 # Generate data for all scenarios
+p0_data <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2))
+p1_data <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2))
+
 # Persons per bedroom
 bedroom_cf <- bind_rows(
   lapply(scenarios, function(cf) calculate_counterfactual(cf_categories = cf, p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom"))
@@ -260,18 +261,20 @@ bedroom_cf <- bind_rows(
 
 # Persons per household
 hhsize_cf <- bind_rows(
-  lapply(scenarios, function(cf) calculate_counterfactual(cf_categories = cf, p0 = 2000, p1 = 2019, outcome = "NUMPREC"))
+  lapply(scenarios, function(cf) calculate_counterfactual(
+    cf_categories = cf, p0 = 2000, p1 = 2019, p0_data = p0_data, p1_data = p1_data,
+    outcome = "NUMPREC"))
 )
 
 # Problem: Why do the actuals no equal the values from a weighted mean?
 weighted.mean(
-  ipums_db |> 
+  x = ipums_db |> 
     filter(YEAR == 2019) |> 
-    # filter(GQ %in% c(0,1,2)) |> 
+    filter(GQ %in% c(0,1,2)) |> 
     pull(NUMPREC), 
-  ipums_db |> 
+  w = ipums_db |> 
     filter(YEAR == 2019) |> 
-    # filter(GQ %in% c(0,1,2)) |> 
+    filter(GQ %in% c(0,1,2)) |> 
     pull(PERWT))
 
 # ----- Step 5: Save the results ----- #
