@@ -10,6 +10,9 @@ library("rprojroot")
 root <- find_root(is_rstudio_project)
 setwd(root)
 
+# Source helper functions from dataduck library
+devtools::load_all("../dataduck")
+
 # Source the function being tested
 source("src/utils/aggregation-tools.R")
 

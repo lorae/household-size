@@ -14,6 +14,9 @@ library("tidyr")
 root <- find_root(is_rstudio_project)
 setwd(root)
 
+# Load the dataduck package
+devtools::load_all("../dataduck")
+
 # Define the function that is being tested
 # TODO: This function needs to be modularized
 calculate_counterfactual <- function(

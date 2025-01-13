@@ -243,39 +243,55 @@ scenarios <- list(
   c("CPUMA0010"),
   c("RACE_ETH_bucket"),
   c("RACE_ETH_bucket", "AGE_bucket"),
-  c("RACE_ETH_bucket", "AGE_bucket", "SEX"),
-  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"),
-  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"),
-  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"),
-  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010")
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX")#,
+  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"),
+  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"),
+  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"),
+  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010")
 )
 
 # Generate data for all scenarios
-p0_data <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2))
-p1_data <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2))
+nrow_pull <- 10000000
+p0_sample <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2)) |> head(nrow_pull) |> collect()
+p1_sample <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)) |> head(nrow_pull) |> collect()
 
 # Persons per bedroom
 bedroom_cf <- bind_rows(
-  lapply(scenarios, function(cf) calculate_counterfactual(cf_categories = cf, p0 = 2000, p1 = 2019, outcome = "persons_per_bedroom"))
+  lapply(scenarios, function(cf) calculate_counterfactual(
+    cf_categories = cf, 
+    p0 = 2000, 
+    p1 = 2019,
+    p0_data = p0_sample,
+    p1_data = p1_sample,
+    outcome = "persons_per_bedroom"))
 )
 
+# TODO: add a check in the function calculate_counterfactual that tests whether
+# all of the potential categories are populated by data?
+# motivated by my observation that smaller samples (e.g. 10,000) don't capture all
+# CPUMA0010s, resulting in NA estimates.
 # Persons per household
 hhsize_cf <- bind_rows(
   lapply(scenarios, function(cf) calculate_counterfactual(
-    cf_categories = cf, p0 = 2000, p1 = 2019, p0_data = p0_data, p1_data = p1_data,
+    cf_categories = cf, 
+    p0 = 2000, 
+    p1 = 2019, 
+    p0_data = p0_sample, 
+    p1_data = p1_sample,
     outcome = "NUMPREC"))
 )
 
 # Problem: Why do the actuals no equal the values from a weighted mean?
+sample_2019_df <- ipums_db |> 
+  filter(YEAR == 2019) |> 
+  filter(GQ %in% c(0, 1, 2)) |> 
+  select(NUMPREC, PERWT) |> 
+  collect()
+
+# IT WORKS!!!!! yessssssss
 weighted.mean(
-  x = ipums_db |> 
-    filter(YEAR == 2019) |> 
-    filter(GQ %in% c(0,1,2)) |> 
-    pull(NUMPREC), 
-  w = ipums_db |> 
-    filter(YEAR == 2019) |> 
-    filter(GQ %in% c(0,1,2)) |> 
-    pull(PERWT))
+  x = sample_2019_df$NUMPREC, 
+  w = sample_2019_df$PERWT)
 
 # ----- Step 5: Save the results ----- #
 save(
