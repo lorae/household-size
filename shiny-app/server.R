@@ -85,10 +85,45 @@ server <- function(input, output, session) {
       formatPercentage(c("Percent of 2005 Population", "Percent of 2022 Population"), digits = 0)
   })
   
-  # Tab 1 Table 2A: Render theoretical example table
-  output$tab1table2a <- renderDT({
-    
-    example_table <- data.frame(
+  # Tab 1 Tables 2A - 2E
+  # Define function to create and render one of tab 1, tables 2A - 2E using common
+  # format, while allowing the table data to differ
+  render_tab1table2X <- function(table_id, table_data) {
+    output[[table_id]] <- renderDT({
+      table_data$cont_2019 <- gsub("\\*", "&#183;", table_data$cont_2019)
+      table_data$cf_cont_2019 <- gsub("\\*", "&#183;", table_data$cf_cont_2019)
+      
+      datatable(
+        table_data,
+        escape = FALSE,
+        options = list(
+          pageLength = 5,
+          autoWidth = TRUE,
+          dom = 't',
+          ordering = FALSE
+        ),
+        rownames = FALSE,
+        colnames = c(
+          "Group" = "group",
+          "Proportion of 2019 Population" = "prop_2019",
+          "Average HH Size (2000)" = "hhsize_2000",
+          "Average HH Size (2019)" = "hhsize_2019",
+          "Contribution (2019)" = "cont_2019",
+          "Counterfactual Contribution (2019)" = "cf_cont_2019",
+          "Difference from Counterfactual" = "cont_diff"
+        )
+      ) |>
+        formatStyle(
+          "Group",
+          target = "row",
+          fontWeight = styleEqual("Sum", "bold")
+        )
+    })
+  }
+  
+  # Define data for tables 2A - 2E
+  tables_data <- list(
+    tab1table2a = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0.02, 0.70, 0.28, 1),
       hhsize_2000 = c(3.0, 4.0, 5.0, NA),
@@ -96,43 +131,8 @@ server <- function(input, output, session) {
       cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54", "4.76"),
       cf_cont_2019 = c("0.02 * 3 = 0.06", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "4.26"),
       cont_diff = c("0.01", "0.35", "0.14", "0.50")
-    )
-    
-    # Replace `*` with HTML entity for centered dot
-    example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
-    example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-      
-    datatable(
-      example_table,
-      escape = FALSE,
-      options = list(
-        pageLength = 5,
-        autoWidth = TRUE,
-        dom = 't',
-        ordering = FALSE
-      ),
-      rownames = FALSE,
-      colnames = c(
-        "Group" = "group",
-        "Proportion of 2019 Population" = "prop_2019",
-        "Average HH Size (2000)" = "hhsize_2000",
-        "Average HH Size (2019)" = "hhsize_2019",
-        "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019",
-        "Difference from Counterfactual" = "cont_diff"
-      )
-    ) |>
-    formatStyle(
-      "Group",
-      target = "row",
-      fontWeight = styleEqual("Sum", "bold")
-    )
-  })
-  
-  # Tab 1 Table 2B: Render theoretical example table
-  output$tab1table2b <- renderDT({
-    
-    example_table <- data.frame(
+    ),
+    tab1table2b = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0, 0.70, 0.30, 1),
       hhsize_2000 = c(3.0, 4.0, 5.0, NA),
@@ -140,43 +140,8 @@ server <- function(input, output, session) {
       cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65", "4.8"),
       cf_cont_2019 = c("0 * 3 = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.50", "4.3"),
       cont_diff = c("0", "0.35", "0.15", "0.50")
-    )
-    
-    # Replace `*` with HTML entity for centered dot
-    example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
-    example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-
-    datatable(
-      example_table,
-      escape = FALSE,
-      options = list(
-        pageLength = 5,
-        autoWidth = TRUE,
-        dom = 't',
-        ordering = FALSE
-      ),
-      rownames = FALSE,
-      colnames = c(
-        "Group" = "group",
-        "Proportion of 2019 Population" = "prop_2019",
-        "Average HH Size (2000)" = "hhsize_2000",
-        "Average HH Size (2019)" = "hhsize_2019",
-        "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019",
-        "Difference from Counterfactual" = "cont_diff"
-      )
-    ) |>
-      formatStyle(
-        "Group",
-        target = "row",
-        fontWeight = styleEqual("Sum", "bold")
-      )
-  })
-  
-  # Tab 1 Table 2C: Render theoretical example table
-  output$tab1table2c <- renderDT({
-    
-    example_table <- data.frame(
+    ),
+    tab1table2c = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0.02, 0.70, 0.28, 1),
       hhsize_2000 = c("NA", "4.0", "5.0", NA),
@@ -184,43 +149,8 @@ server <- function(input, output, session) {
       cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54", "4.76"),
       cf_cont_2019 = c("0.02 * NA = NA", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "NA"),
       cont_diff = c("NA", "0.35", "0.14", "NA")
-    )
-    
-    # Replace `*` with HTML entity for centered dot
-    example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
-    example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-
-    datatable(
-      example_table,
-      escape = FALSE,
-      options = list(
-        pageLength = 5,
-        autoWidth = TRUE,
-        dom = 't',
-        ordering = FALSE
-      ),
-      rownames = FALSE,
-      colnames = c(
-        "Group" = "group",
-        "Proportion of 2019 Population" = "prop_2019",
-        "Average HH Size (2000)" = "hhsize_2000",
-        "Average HH Size (2019)" = "hhsize_2019",
-        "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019",
-        "Difference from Counterfactual" = "cont_diff"
-      )
-    ) |>
-      formatStyle(
-        "Group",
-        target = "row",
-        fontWeight = styleEqual("Sum", "bold")
-      )
-  })
-  
-  # Tab 1 Table 2D: Render theoretical example table
-  output$tab1table2d <- renderDT({
-    
-    example_table <- data.frame(
+    ),
+    tab1table2d = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0.02, 0.70, 0.28, 1),
       hhsize_2000 = c("3.5", "4.0", "5.0", NA),
@@ -228,43 +158,8 @@ server <- function(input, output, session) {
       cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54", "4.76"),
       cf_cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "4.27"),
       cont_diff = c("0", "0.35", "0.14", "0.49")
-    )
-    
-    # Replace `*` with HTML entity for centered dot
-    example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
-    example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-
-    datatable(
-      example_table,
-      escape = FALSE,
-      options = list(
-        pageLength = 5,
-        autoWidth = TRUE,
-        dom = 't',
-        ordering = FALSE
-      ),
-      rownames = FALSE,
-      colnames = c(
-        "Group" = "group",
-        "Proportion of 2019 Population" = "prop_2019",
-        "Average HH Size (2000)" = "hhsize_2000",
-        "Average HH Size (2019)" = "hhsize_2019",
-        "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019",
-        "Difference from Counterfactual" = "cont_diff"
-      )
-    ) |>
-      formatStyle(
-        "Group",
-        target = "row",
-        fontWeight = styleEqual("Sum", "bold")
-      )
-  })
-  
-  # Tab 1 Table 2E: Render theoretical example table
-  output$tab1table2e <- renderDT({
-    
-    example_table <- data.frame(
+    ),
+    tab1table2e = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0, 0.70, 0.30, 1),
       hhsize_2000 = c("NA", "4.0", "5.0", NA),
@@ -273,37 +168,13 @@ server <- function(input, output, session) {
       cf_cont_2019 = c("0 * NA = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.5", "4.3"),
       cont_diff = c("0", "0.35", "0.15", "0.50")
     )
-    
-    # Replace `*` with HTML entity for centered dot
-    example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
-    example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-    
-    datatable(
-      example_table,
-      escape = FALSE,
-      options = list(
-        pageLength = 5,
-        autoWidth = TRUE,
-        dom = 't',
-        ordering = FALSE
-      ),
-      rownames = FALSE,
-      colnames = c(
-        "Group" = "group",
-        "Proportion of 2019 Population" = "prop_2019",
-        "Average HH Size (2000)" = "hhsize_2000",
-        "Average HH Size (2019)" = "hhsize_2019",
-        "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019",
-        "Difference from Counterfactual" = "cont_diff"
-      )
-    ) |>
-      formatStyle(
-        "Group",
-        target = "row",
-        fontWeight = styleEqual("Sum", "bold")
-      )
+  )
+  
+  # Dynamically create output for each table
+  lapply(names(tables_data), function(id) {
+    render_tab1table2X(id, tables_data[[id]])
   })
+
   
   # Table 2: Render actual data by Race/Ethnicity and Age
   output$table2 <- renderDT({
