@@ -62,78 +62,85 @@ tab1_ui <- fluidPage(
   p("As we construct counterfactual situations that control for more and more factors,
     we run into the issue of an unbalanced panel dataset. Some combinations of factors -
     geography, race, age group, etc. - are simply so uncommon that they are not observed
-    at all. This can pose issues in properly calculating a counterfactual, as we show
-    below."),
+    at all in one or both samples. This can pose issues in properly calculating a counterfactual, 
+    as we show below."),
   
   p("We consider a stylized America with 3 groups 
     of interest - A, B, and C. We assume that membership in group A is sufficiently 
-    unlikely that sometimes our sample
-    does not capture these individuals. There are four possible scenarios in our data collection:"),
+    unlikely that sometimes our survey does not capture these individuals in its
+    random sampling. Under these circumstances, there are four possible scenarios:"),
   
   tags$ol(
-    tags$li("All groups are observed in both period 0 and period 1 data."),
+    tags$li("(Base case) All groups are observed in both period 0 and period 1."),
     tags$li("All groups are observed in period 0, but group A is not observed in period 1."),
     tags$li("Group A is not observed in period 0, but all groups are observed in period 1."),
     tags$li("Group A is not observed in either period 0 or period 1.")
   ),
   
-  tags$h4("Scenario 1: All groups are observed in both period 0 and period 1 data", id = "placeholder"),
+  p("In all four scenarios, we set average household sizes to grow by exactly 0.5 between
+    period 0 (the year 2000) and period 1 (the year 2019).
+    More specifically, group A initially has an average household size of 3 that grows to
+    3.5, group B has an average household size of 4 that grows to 4.5, and group C
+    initially has an average household size of 5 that grows to 5.5."),
+  
+  tags$h4("Scenario 1 (Base case): All groups are observed in both period 0 and period 1", id = "placeholder"),
 
-  p("Between 2000 and 2019, all groups increased their average household size by 0.5. 
-  As such, the weighted average household size in 2019 of 4.76
-    is exactly 0.5 higher than the weighted average counterfactual household size in 2019
-    of 4.26."),
+  p("Because all groups are measured, and within each group, average household size grows
+  by 0.5 persons between 2000 and 2019, our 2019 counterfactual household size of 
+  4.26 is precisely 0.5 persons per household smaller than the actual measured household
+  size of 4.76."),
   
   p(strong("Table 2A")),
   DTOutput("tab1table2a"),
   
   tags$h4("Scenario 2: All groups are observed in period 0, but group A is not observed in period 1", id = "placeholder"),
 
-  p("In 2019, no group A members are surveyed, resulting in a missing estimate of 
-    their average household size. Since the estimated size of group A is also 0,
-    however, the missing measurement has no bearing on the actual versus counterfactual
-    calculation. Group A is simply excluded from observation. The remainder
-    of the data is a balanced panel, so we simply apply the typical procedure to the
-    data."),
+  p("In 2019, no members of group A are surveyed, leaving their average household 
+    size unmeasured. However, because group A's estimated size is 0, this missing 
+    value does not affect the actual or counterfactual measurements, and group A 
+    is simply excluded from observation. The remaining data for groups B and C form 
+    a balanced panel. As in scenario 1, the difference between the counterfactual 
+    household size and actual household size is exactly 0.5. Unlike scenario 1, 
+    however, these measured values are slightly elevated - average household size 
+    is 4.8 instead of 4.76, for example - due to the exclusion of group A."),
   
   p(strong("Table 2B")),
   DTOutput("tab1table2b"),
   
-  p("As in scenario 1, the difference between the actual average household size in 2019 of
-    4.8 and the counterfactual average household size of 4.3 is precisely 0.5 persons
-    per household."),
-  
   tags$h4("Scenario 3: Group A is not observed in period 0, but all groups are observed in period 1", id = "placeholder"),
 
   p("Group A is missing from the baseline survey in 2000. As such, it's impossible
-    to construct a counterfactual contribution, as shown in table 2c."),
+    to construct a counterfactual contribution, since measured averages from 2000 are
+    missing. Table 2C demonstrates the incomplete calculation. To produce a valid 
+    counterfactual, we must construct an assumption about group A's average household
+    size in 2000. The simplest approach is to assume that household size remains unchanged
+    between 2000 and 2019, as is done in table 2D. The advantage of this approach - aside
+    from its simplicity - is that it guarantees actual and counterfactual contributions
+    are equal. This ensures that our data imputation has zero effect on the bottom-line
+    difference between actual and counterfactual household size."),
+  
+  p("However, this form of data interpolation distorts the difference between 2019 actual and 
+    counterfactual average household sizes - in this scenario, the difference is
+    0.49, rather than 0.50. In general, the distortion will be small so long as the
+    proportion of the population represented by group A is also small. This assumption is
+    quite plausible, since it is precisely the smallest subgroups of the population that
+    we're least likely to capture in our random sampling."),
   
   p(strong("Table 2C")),
   DTOutput("tab1table2c"),
   
-  p("The simplest method to arrive at a valid counterfactual is to replace the missing
-    household size measurment in 2000 with the average household size in 2019. Because
-    the two household sizes are equal, they will result in a zero difference in the contribution
-    versus counterfactual, a desirable result for the input of speculative data."),
-  
   p(strong("Table 2D")),
   DTOutput("tab1table2d"),
-  
-  p("This form of data interpolation distorts the difference between 2019 actual and 
-    counterfactual average household sizes - in this scenario, the difference is
-    0.49, rather than 0.50. In general, the distortion will be small so long as the
-    proportion of the population, as measured in 2019, is also small - which is likely,
-    given that the population went unsampled in 2000."),
 
-  p("[Extra, maybe include: Given this limitation, another reasonable option would be to interpolate the average household size in 2000
-    using similar observations as a guide. For example, the average change between 
-    household size from 2000 to 2019 could be calculated, and this change could be
-    subtracted from the 2019 value for group A's average household size to reach
-    and estimate for the 2000 value of group A's average household size. Or, for example,
-    the difference between group B and group A's average household size could be calculated
-    in 2019, and this difference could be subtacted from group B's known average household
-    size in 2000."),
-    
+  p("Given these limitations, another reasonable approach is to interpolate the average 
+    household size in 2000 using nearby observations. For example, we
+    could calculate the average change in household size from 2000 to 2019 and 
+    subtract this change from group A's measured average household size in 2019 to 
+    estimate the 2000 value. Alternatively, we could calculate the the difference in 
+    average household size 
+    between groups A and B in 2019 and subtract that constant from group B's 
+    known value in 2000 to estimate group A's 2000 value."),
+  
   p("Robusteness tests can be used to determine whether the interpolation strategy affects
     results. They are unlikely to, given the fact that only very small populations are
     likely to be sufficiently small to be unsampled in one of the two periods. Thus, their
@@ -150,9 +157,11 @@ tab1_ui <- fluidPage(
   p(strong("Table 2E")),
   DTOutput("tab1table2e"),
   
-  p("As in scenarios 0 and 1, the difference between actual and counterfactual household
-    sized in 2019 is precisely 0.5."),
-  
+  p("This scenario is functionally equivalent to scenario 2, where group A was not 
+    observed in the recent sample. Both scenarios are based upon an observation of
+    no group A members and therefore have identical actual and counterfactual 
+    measurements. This also means that the differences between actual and counterfactual
+    measurements sum to precisely 0.5, the change in average household size."),
   
   p("[Side note: what if, later we draw from the 
     census and it's literally not true that there exists a person in group A in X 
