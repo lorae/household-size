@@ -89,30 +89,18 @@ server <- function(input, output, session) {
   output$tab1table2a <- renderDT({
     
     example_table <- data.frame(
-      group = c("A", "B", "C"),
-      prop_2019 = c(0.02, 0.70, 0.28),
-      hhsize_2000 = c(3.0, 4.0, 5.0),
-      hhsize_2019 = c(3.5, 4.5, 5.5),
-      cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54"),
-      cf_cont_2019 = c("0.02 * 3 = 0.06", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40"),
-      cont_diff = c("0.01", "0.35", "0.14")
+      group = c("A", "B", "C", "Sum"),
+      prop_2019 = c(0.02, 0.70, 0.28, 1),
+      hhsize_2000 = c(3.0, 4.0, 5.0, NA),
+      hhsize_2019 = c(3.5, 4.5, 5.5, NA),
+      cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54", "4.76"),
+      cf_cont_2019 = c("0.02 * 3 = 0.06", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "4.26"),
+      cont_diff = c("0.01", "0.35", "0.14", "0.50")
     )
     
     # Replace `*` with HTML entity for centered dot
     example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
     example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-    
-    sum_row <- data.frame(
-      group = "Sum",
-      prop_2019 = 1,
-      hhsize_2000 = NA,
-      hhsize_2019 = NA,
-      cont_2019 = "4.76",
-      cf_cont_2019 = "4.26",
-      cont_diff = "0.50"
-      )
-    
-    example_table <- bind_rows(example_table, sum_row)
       
     datatable(
       example_table,
@@ -145,31 +133,19 @@ server <- function(input, output, session) {
   output$tab1table2b <- renderDT({
     
     example_table <- data.frame(
-      group = c("A", "B", "C"),
-      prop_2019 = c(0, 0.70, 0.30),
-      hhsize_2000 = c(3.0, 4.0, 5.0),
-      hhsize_2019 = c("NA", "4.5", "5.5"),
-      cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65"),
-      cf_cont_2019 = c("0 * 3 = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.50"),
-      cont_diff = c("0", "0.35", "0.15")
+      group = c("A", "B", "C", "Sum"),
+      prop_2019 = c(0, 0.70, 0.30, 1),
+      hhsize_2000 = c(3.0, 4.0, 5.0, NA),
+      hhsize_2019 = c("NA", "4.5", "5.5", NA),
+      cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65", "4.8"),
+      cf_cont_2019 = c("0 * 3 = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.50", "4.3"),
+      cont_diff = c("0", "0.35", "0.15", "0.50")
     )
     
     # Replace `*` with HTML entity for centered dot
     example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
     example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-    
-    sum_row <- data.frame(
-      group = "Sum",
-      prop_2019 = 1,
-      hhsize_2000 = NA,
-      hhsize_2019 = NA,
-      cont_2019 = "4.8",
-      cf_cont_2019 = "4.3",
-      cont_diff = "0.50"
-    )
-    
-    example_table <- bind_rows(example_table, sum_row)
-    
+
     datatable(
       example_table,
       escape = FALSE,
@@ -201,31 +177,19 @@ server <- function(input, output, session) {
   output$tab1table2c <- renderDT({
     
     example_table <- data.frame(
-      group = c("A", "B", "C"),
-      prop_2019 = c(0.15, 0.65, 0.20),
-      hhsize_2000 = c("NA", "4.0", "5.0"),
-      hhsize_2019 = c("3.5", "4.5", "5.5"),
-      cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54"),
-      cf_cont_2019 = c("0.02 * NA = NA", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40"),
-      cont_diff = c("NA", "0.35", "0.14")
+      group = c("A", "B", "C", "Sum"),
+      prop_2019 = c(0.02, 0.70, 0.28, 1),
+      hhsize_2000 = c("NA", "4.0", "5.0", NA),
+      hhsize_2019 = c("3.5", "4.5", "5.5", NA),
+      cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54", "4.76"),
+      cf_cont_2019 = c("0.02 * NA = NA", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "NA"),
+      cont_diff = c("NA", "0.35", "0.14", "NA")
     )
     
     # Replace `*` with HTML entity for centered dot
     example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
     example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-    
-    sum_row <- data.frame(
-      group = "Sum",
-      prop_2019 = 1,
-      hhsize_2000 = NA,
-      hhsize_2019 = NA,
-      cont_2019 = "4.76",
-      cf_cont_2019 = "NA",
-      cont_diff = "NA"
-    )
-    
-    example_table <- bind_rows(example_table, sum_row)
-    
+
     datatable(
       example_table,
       escape = FALSE,
@@ -257,31 +221,19 @@ server <- function(input, output, session) {
   output$tab1table2d <- renderDT({
     
     example_table <- data.frame(
-      group = c("A", "B", "C"),
-      prop_2019 = c(0.02, 0.65, 0.28),
-      hhsize_2000 = c("3.5", "4.0", "5.0"),
-      hhsize_2019 = c("3.5", "4.5", "5.5"),
-      cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54"),
-      cf_cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40"),
-      cont_diff = c("0", "0.35", "0.14")
+      group = c("A", "B", "C", "Sum"),
+      prop_2019 = c(0.02, 0.70, 0.28, 1),
+      hhsize_2000 = c("3.5", "4.0", "5.0", NA),
+      hhsize_2019 = c("3.5", "4.5", "5.5", NA),
+      cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54", "4.76"),
+      cf_cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "4.27"),
+      cont_diff = c("0", "0.35", "0.14", "0.49")
     )
     
     # Replace `*` with HTML entity for centered dot
     example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
     example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-    
-    sum_row <- data.frame(
-      group = "Sum",
-      prop_2019 = 1,
-      hhsize_2000 = NA,
-      hhsize_2019 = NA,
-      cont_2019 = "4.76",
-      cf_cont_2019 = "4.27",
-      cont_diff = "0.49"
-    )
-    
-    example_table <- bind_rows(example_table, sum_row)
-    
+
     datatable(
       example_table,
       escape = FALSE,
@@ -313,30 +265,18 @@ server <- function(input, output, session) {
   output$tab1table2e <- renderDT({
     
     example_table <- data.frame(
-      group = c("A", "B", "C"),
-      prop_2019 = c(0, 0.65, 0.20),
-      hhsize_2000 = c("NA", "4.0", "5.0"),
-      hhsize_2019 = c("NA", "4.5", "5.5"),
-      cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65"),
-      cf_cont_2019 = c("0 * NA = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.5"),
-      cont_diff = c("0", "0.35", "0.15")
+      group = c("A", "B", "C", "Sum"),
+      prop_2019 = c(0, 0.70, 0.30, 1),
+      hhsize_2000 = c("NA", "4.0", "5.0", NA),
+      hhsize_2019 = c("NA", "4.5", "5.5", NA),
+      cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65", "4.8"),
+      cf_cont_2019 = c("0 * NA = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.5", "4.3"),
+      cont_diff = c("0", "0.35", "0.15", "0.50")
     )
     
     # Replace `*` with HTML entity for centered dot
     example_table$cont_2019 <- gsub("\\*", "&#183;", example_table$cont_2019)
     example_table$cf_cont_2019 <- gsub("\\*", "&#183;", example_table$cf_cont_2019)
-    
-    sum_row <- data.frame(
-      group = "Sum",
-      prop_2019 = 1,
-      hhsize_2000 = NA,
-      hhsize_2019 = NA,
-      cont_2019 = "4.8",
-      cf_cont_2019 = "4.3",
-      cont_diff = "0.5"
-    )
-    
-    example_table <- bind_rows(example_table, sum_row)
     
     datatable(
       example_table,
