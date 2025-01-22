@@ -94,7 +94,8 @@ server <- function(input, output, session) {
       hhsize_2000 = c(3.0, 4.0, 5.0),
       hhsize_2019 = c(3.5, 4.5, 5.5),
       cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54"),
-      cf_cont_2019 = c("0.02 * 3 = 0.06", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40")
+      cf_cont_2019 = c("0.02 * 3 = 0.06", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40"),
+      cont_diff = c("0.01", "0.35", "0.14")
     )
     
     # Replace `*` with HTML entity for centered dot
@@ -107,7 +108,8 @@ server <- function(input, output, session) {
       hhsize_2000 = NA,
       hhsize_2019 = NA,
       cont_2019 = "4.76",
-      cf_cont_2019 = "4.26"
+      cf_cont_2019 = "4.26",
+      cont_diff = "0.50"
       )
     
     example_table <- bind_rows(example_table, sum_row)
@@ -128,7 +130,8 @@ server <- function(input, output, session) {
         "Average HH Size (2000)" = "hhsize_2000",
         "Average HH Size (2019)" = "hhsize_2019",
         "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019"
+        "Counterfactual Contribution (2019)" = "cf_cont_2019",
+        "Difference from Counterfactual" = "cont_diff"
       )
     ) |>
     formatStyle(
@@ -147,7 +150,8 @@ server <- function(input, output, session) {
       hhsize_2000 = c(3.0, 4.0, 5.0),
       hhsize_2019 = c("NA", "4.5", "5.5"),
       cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65"),
-      cf_cont_2019 = c("0 * 3 = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.50")
+      cf_cont_2019 = c("0 * 3 = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.50"),
+      cont_diff = c("0", "0.35", "0.15")
     )
     
     # Replace `*` with HTML entity for centered dot
@@ -160,7 +164,8 @@ server <- function(input, output, session) {
       hhsize_2000 = NA,
       hhsize_2019 = NA,
       cont_2019 = "4.8",
-      cf_cont_2019 = "4.3"
+      cf_cont_2019 = "4.3",
+      cont_diff = "0.50"
     )
     
     example_table <- bind_rows(example_table, sum_row)
@@ -181,7 +186,8 @@ server <- function(input, output, session) {
         "Average HH Size (2000)" = "hhsize_2000",
         "Average HH Size (2019)" = "hhsize_2019",
         "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019"
+        "Counterfactual Contribution (2019)" = "cf_cont_2019",
+        "Difference from Counterfactual" = "cont_diff"
       )
     ) |>
       formatStyle(
@@ -200,7 +206,8 @@ server <- function(input, output, session) {
       hhsize_2000 = c("NA", "4.0", "5.0"),
       hhsize_2019 = c("3.5", "4.5", "5.5"),
       cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54"),
-      cf_cont_2019 = c("0.02 * NA = NA", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40")
+      cf_cont_2019 = c("0.02 * NA = NA", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40"),
+      cont_diff = c("NA", "0.35", "0.14")
     )
     
     # Replace `*` with HTML entity for centered dot
@@ -211,9 +218,10 @@ server <- function(input, output, session) {
       group = "Sum",
       prop_2019 = 1,
       hhsize_2000 = NA,
-      hhsize_2019 = "NA",
+      hhsize_2019 = NA,
       cont_2019 = "4.76",
-      cf_cont_2019 = "NA"
+      cf_cont_2019 = "NA",
+      cont_diff = "NA"
     )
     
     example_table <- bind_rows(example_table, sum_row)
@@ -234,7 +242,8 @@ server <- function(input, output, session) {
         "Average HH Size (2000)" = "hhsize_2000",
         "Average HH Size (2019)" = "hhsize_2019",
         "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019"
+        "Counterfactual Contribution (2019)" = "cf_cont_2019",
+        "Difference from Counterfactual" = "cont_diff"
       )
     ) |>
       formatStyle(
@@ -253,7 +262,8 @@ server <- function(input, output, session) {
       hhsize_2000 = c("3.5", "4.0", "5.0"),
       hhsize_2019 = c("3.5", "4.5", "5.5"),
       cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4.5 = 3.15", "0.28 * 5.5 = 1.54"),
-      cf_cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40")
+      cf_cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40"),
+      cont_diff = c("0", "0.35", "0.14")
     )
     
     # Replace `*` with HTML entity for centered dot
@@ -264,9 +274,10 @@ server <- function(input, output, session) {
       group = "Sum",
       prop_2019 = 1,
       hhsize_2000 = NA,
-      hhsize_2019 = "NA",
+      hhsize_2019 = NA,
       cont_2019 = "4.76",
-      cf_cont_2019 = "4.27"
+      cf_cont_2019 = "4.27",
+      cont_diff = "0.49"
     )
     
     example_table <- bind_rows(example_table, sum_row)
@@ -287,7 +298,8 @@ server <- function(input, output, session) {
         "Average HH Size (2000)" = "hhsize_2000",
         "Average HH Size (2019)" = "hhsize_2019",
         "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019"
+        "Counterfactual Contribution (2019)" = "cf_cont_2019",
+        "Difference from Counterfactual" = "cont_diff"
       )
     ) |>
       formatStyle(
@@ -306,7 +318,8 @@ server <- function(input, output, session) {
       hhsize_2000 = c("NA", "4.0", "5.0"),
       hhsize_2019 = c("NA", "4.5", "5.5"),
       cont_2019 = c("0 * NA = 0", "0.70 * 4.5 = 3.15", "0.3 * 5.5 = 1.65"),
-      cf_cont_2019 = c("0 * NA = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.5")
+      cf_cont_2019 = c("0 * NA = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.5"),
+      cont_diff = c("0", "0.35", "0.15")
     )
     
     # Replace `*` with HTML entity for centered dot
@@ -317,9 +330,10 @@ server <- function(input, output, session) {
       group = "Sum",
       prop_2019 = 1,
       hhsize_2000 = NA,
-      hhsize_2019 = "NA",
+      hhsize_2019 = NA,
       cont_2019 = "4.8",
-      cf_cont_2019 = "4.3"
+      cf_cont_2019 = "4.3",
+      cont_diff = "0.5"
     )
     
     example_table <- bind_rows(example_table, sum_row)
@@ -340,7 +354,8 @@ server <- function(input, output, session) {
         "Average HH Size (2000)" = "hhsize_2000",
         "Average HH Size (2019)" = "hhsize_2019",
         "Contribution (2019)" = "cont_2019",
-        "Counterfactual Contribution (2019)" = "cf_cont_2019"
+        "Counterfactual Contribution (2019)" = "cf_cont_2019",
+        "Difference from Counterfactual" = "cont_diff"
       )
     ) |>
       formatStyle(
