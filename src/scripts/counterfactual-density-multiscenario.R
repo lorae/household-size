@@ -281,17 +281,6 @@ hhsize_cf <- bind_rows(
     outcome = "NUMPREC"))
 )
 
-# Problem: Why do the actuals no equal the values from a weighted mean?
-sample_2019_df <- ipums_db |> 
-  filter(YEAR == 2019) |> 
-  filter(GQ %in% c(0, 1, 2)) |> 
-  select(NUMPREC, PERWT) |> 
-  collect()
-
-# IT WORKS!!!!! yessssssss
-weighted.mean(
-  x = sample_2019_df$NUMPREC, 
-  w = sample_2019_df$PERWT)
 
 # ----- Step 5: Save the results ----- #
 save(
