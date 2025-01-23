@@ -20,7 +20,13 @@ tab1_ui <- fluidPage(
   p("We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, geography, and birthplace (American-born or foreign-born). Within each of these buckets, we calculate average household size in both 2005 and 2022. We then calculate a simple counterfactual: "),
   p(em("Had average household sizes remained at their 2005 levels, but population demographics shifted to 2022 levels, what would we expect the average American household size to be?")),
   
-  tags$h3("Table 1: Hypothetical Example", id = "table1"),
+  tags$h3("Constructing a Counterfactual", id = "table1"),
+  
+  tags$h4("The math"),
+  
+  p("before doign this concrete calculation, provide a section with just the math."),
+  
+  tags$h4("A concrete example"),
   
   p(paste("Table 1 shows a simple theoretical example of population proportions",
           "and average household sizes across different demographic groups in 2005",
@@ -56,6 +62,12 @@ tab1_ui <- fluidPage(
           "in each population. Although Hispanic Americans comprise a minority of the",
           "population, their shrinking average household size more than compensated",
           "for the increasing household sizes among White Americans.")),
+  
+  tags$h3("Getting more granular", id = "placeholder"),
+  
+  p("In this section we'll put specifically how the analysis then uses finer and finer
+    bins of combinations of various variables. This will naturally segue into the missing
+    data section, a problem that only arises when bins are extremely fine."),
   
   tags$h3("What about missing data?", id = "placeholder"),
   
