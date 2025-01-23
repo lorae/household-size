@@ -29,7 +29,7 @@ ui <- fluidPage(
           width = 3,
           # Conditional content for "Main" tab
           conditionalPanel(
-            condition = "input.tabs == 'Main'",
+            condition = "input.tabs == 'Framing'",
             p(a("Introduction", href = "#intro")),
             p(a("Table 1: Hypothetical Example", href = "#table1")),
             p(a("Table 2: 2005-2022 Changes by Race and Age", href = "#table2")),
@@ -55,7 +55,7 @@ ui <- fluidPage(
         mainPanel(
           tabsetPanel(
             id = "tabs",  # Add ID to track the active tab
-            tabPanel("Main", tab1_ui), 
+            tabPanel("Framing", tab1_ui), 
             tabPanel("Map", tab2_ui), 
             tabPanel("Counterfactual", tab3_ui)
           )
