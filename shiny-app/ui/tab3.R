@@ -9,12 +9,18 @@ tab3_ui <- fluidPage(
             outline that explains how the Galster (YYYY) proposed method relates to
             OLS regression techniques and shift-share analysis."
   ),
-  tags$h3("1: Conceptual Explanation", id = "section1tab3"),
-  p("Imagine a simple America with a population of 8 individuals. We have
-          survey information about their sex and race. Table 1 shows a prospective 
-          population in the year 2000."),
+  tags$h3("1: Measuring our Baseline: Similarities to an Interaction Regression", id = "section1tab3"),
+  p("Imagine a simple America in the year 2000. Our census shows a population of 8
+  individuals configured into 3 households, with the details recorded in table 1A."),
   
-  DTOutput("table1tab3"),
+  p(strong("Table 1A: 2000 Census Results")),
+  DTOutput("table1atab3"),
+  
+  p("We then further summarize the information by listing each individual in one
+    row and the size of their household in a separate column."),
+  
+  p(strong("Table 1B: Condensed 2000 Census Results")),
+  DTOutput("table1btab3"),
   
   p("In Galster's formulation, we calculate mean household size within 
             every possible subgroup in the year 2000. Here, in our simple example,
