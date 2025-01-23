@@ -360,43 +360,69 @@ server <- function(input, output, session) {
     map_geographies(sf |> filter(State == "Ohio"))
   })
   
-  # Table 1, tab 3:
-  table1tab3 <- data.frame(
-    id = 1:8,
-    race = c("Black", "Black", "Black", "Black", "White", "White", "White", "White"),
-    sex = c("Female", "Female", "Male", "Male", "Female", "Female", "Male", "Male"),
-    hhsize_2000 = c(3, 4, 2, 2, 3, 3, 2, 3),
-    hhsize_2022 = c(4, 4, 3, 3, 2, 3, 3, 3)
+  # Table 1A, tab 3:
+  # Table showing the census of 8 Americans and their household configurations
+  table1atab3 <- data.frame(
+    hh_id = c("Household 1", NA, NA, NA, NA, "Household 2", NA, NA, NA, "Household 3", NA),
+    pers_id = c(NA, "01", "02", "03", "04", NA, "05", "06", "07", NA, "08"),
+    race = c(NA, "Black", "White", "Black", "Black", NA, "White", "White", "Black", NA, "White"),
+    sex = c(NA, "Male", "Female", "Female", "Female", NA, "Male", "Female", "Female", NA, "Male")
   )
   
+  output$table1atab3 <- renderDT({
+    table1atab3 |>
+      datatable(
+        options = list(
+          pageLength = 20,
+          autoWidth = TRUE,
+          dom = 't',
+          ordering = FALSE
+        ),
+        rownames = FALSE,
+        colnames = c(
+          "Household ID" = "hh_id",
+          "Personal Identifier" = "pers_id",
+          "Race" = "race",
+          "Sex" = "sex"
+        ))
+  })
+  
+  # Table 1B, tab 3:
+  table1btab3 <- table1atab3 |>
+    filter(is.na(hh_id)) |>
+    select(-hh_id) |>
+    mutate(
+      hhsize = c(4,4,4,4,3,3,3,1)
+    )
+  
   output$codeblock01 <- renderPrint({
-    binned_avg <- table1tab3 |>
+    binned_avg <- table1btab3 |>
       group_by(race, sex) |>
-      summarize(mean_hhsize_2000 = mean(hhsize_2000))
+      summarize(mean_hhsize = mean(hhsize))
     print(binned_avg)
   })
+  
   # Table 1: Render theoretical example table
-  output$table1tab3 <- renderDT({
-    table1tab3 |>
-    select(-hhsize_2022) |> # Exclude this column for now
+  output$table1btab3 <- renderDT({
+    table1btab3 |>
     datatable(
       options = list(
-        pageLength = 8,
+        pageLength = 20,
         autoWidth = TRUE,
         dom = 't',
         ordering = FALSE
       ),
       rownames = FALSE,
       colnames = c(
-        "Identifier" = "id",
+        "Personal Identifier" = "pers_id",
         "Race" = "race",
         "Sex" = "sex",
-        "HH Size (2000)" = "hhsize_2000"
+        "Household Size" = "hhsize"
       ))
   })
   
   output$codeblock02 <- renderPrint({
-    model <- lm(hhsize_2000 ~ 0 + race:sex, data = table1tab3)
+    model <- lm(hhsize ~ 0 + race:sex, data = table1btab3)
     summary(model)
   })
   
