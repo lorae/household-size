@@ -6,6 +6,8 @@ library(dplyr)
 library(scales)
 library(ggplot2)
 library(sf)
+library(patchwork)
+library(shinyAce)
 
 # Load necessary data
 load("data/all_tables.rda")
@@ -362,15 +364,16 @@ server <- function(input, output, session) {
   
   # Table 1A, tab 3:
   # Table showing the census of 8 Americans and their household configurations
-  table1atab3 <- data.frame(
-    hh_id = c("Household 1", NA, NA, NA, NA, "Household 2", NA, NA, NA, "Household 3", NA),
-    pers_id = c(NA, "01", "02", "03", "04", NA, "05", "06", "07", NA, "08"),
-    race = c(NA, "Black", "White", "Black", "Black", NA, "White", "White", "Black", NA, "White"),
-    sex = c(NA, "Male", "Female", "Female", "Female", NA, "Male", "Female", "Female", NA, "Male")
+  table1tab3 <- data.frame(
+    hh_id = c("Household 1", NA, NA, NA, "Household 2",  NA, NA, "Household 3"),
+    pers_id = c("01", "02", "03", "04", "05", "06", "07", "08"),
+    race = c("Black", "White", "Black", "Black", "White", "White", "Black", "White"),
+    sex = c("Male", "Female", "Female", "Female", "Male", "Female", "Female", "Male"),
+    hhsize = c(4,4,4,4,3,3,3,1)
   )
   
-  output$table1atab3 <- renderDT({
-    table1atab3 |>
+  output$table1tab3 <- renderDT({
+    table1tab3 |>
       datatable(
         options = list(
           pageLength = 20,
@@ -383,48 +386,38 @@ server <- function(input, output, session) {
           "Household ID" = "hh_id",
           "Personal Identifier" = "pers_id",
           "Race" = "race",
-          "Sex" = "sex"
+          "Sex" = "sex",
+          "Household Size" = "hhsize"
         ))
   })
   
-  # Table 1B, tab 3:
-  table1btab3 <- table1atab3 |>
-    filter(is.na(hh_id)) |>
-    select(-hh_id) |>
-    mutate(
-      hhsize = c(4,4,4,4,3,3,3,1)
-    )
-  
   output$codeblock01 <- renderPrint({
-    binned_avg <- table1btab3 |>
+    binned_avg <- table1tab3 |>
       group_by(race, sex) |>
       summarize(mean_hhsize = mean(hhsize))
     print(binned_avg)
   })
   
-  # Table 1: Render theoretical example table
-  output$table1btab3 <- renderDT({
-    table1btab3 |>
-    datatable(
-      options = list(
-        pageLength = 20,
-        autoWidth = TRUE,
-        dom = 't',
-        ordering = FALSE
-      ),
-      rownames = FALSE,
-      colnames = c(
-        "Personal Identifier" = "pers_id",
-        "Race" = "race",
-        "Sex" = "sex",
-        "Household Size" = "hhsize"
-      ))
-  })
+  updateAceEditor(
+    session,
+    editorId = "codeblock01_code",
+    value = "binned_avg <- table1tab3 |>
+  group_by(race, sex) |>
+  summarize(mean_hhsize = mean(hhsize))
+print(binned_avg)"
+  )
   
   output$codeblock02 <- renderPrint({
-    model <- lm(hhsize ~ 0 + race:sex, data = table1btab3)
+    model <- lm(hhsize ~ 0 + race:sex, data = table1tab3)
     summary(model)
   })
+  
+  updateAceEditor(
+    session,
+    editorId = "codeblock02_code",
+    value = "model <- lm(hhsize ~ 0 + race:sex, data = table1tab3)
+summary(model)"
+  )
   
   output$table1tab4 <- renderDT({
     sex_2005_2022 |>
@@ -463,5 +456,52 @@ server <- function(input, output, session) {
       coord_fixed(ratio = 1) +
       xlim(0, 3) +
       ylim(0, 3)
+  })
+  
+  output$plot2tab3 <- renderPlot({
+    plot_height <- session$clientData$output_plot1tab3_height / 150  # Scale factor
+    
+    # Data for Scenario 1
+    hh_data1 <- data.frame(
+      hh_id = rep(c("Household A", "Household B"), times = c(3, 3)),
+      x = c(1, 2, 1.5, 1, 2, 1.5),
+      y = c(1, 1, 2, 1, 1, 2)
+    )
+    
+    # Data for Scenario 2
+    hh_data2 <- data.frame(
+      hh_id = rep(c("Household A", "Household B", "Household C"), times = c(1, 1, 4)),
+      x = c(1.5, 1.5, 1, 1, 2, 2),
+      y = c(1.5, 1.5, 1, 2, 1, 2)
+    )
+    
+    # Plot for Scenario 1
+    plot1 <- ggplot(hh_data1, aes(x = x, y = y)) +
+      geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
+      theme_void(base_size = 10 * plot_height) +
+      theme(
+        plot.margin = margin(1, 1, 1, 1)
+      ) +
+      facet_wrap(~hh_id, nrow = 1) +
+      coord_fixed(ratio = 1) +
+      xlim(0, 3) +
+      ylim(0, 3) +
+      ggtitle("Scenario 1")
+    
+    # Plot for Scenario 2
+    plot2 <- ggplot(hh_data2, aes(x = x, y = y)) +
+      geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
+      theme_void(base_size = 10 * plot_height) +
+      theme(
+        plot.margin = margin(1, 1, 1, 1)
+      ) +
+      facet_wrap(~hh_id, nrow = 1) +
+      coord_fixed(ratio = 1) +
+      xlim(0, 3) +
+      ylim(0, 3) +
+      ggtitle("Scenario 2")
+    
+    # Combine both plots vertically
+    plot1 / plot2
   })
 }
