@@ -22,34 +22,56 @@ tab1_ui <- fluidPage(
   
   tags$h3("Constructing a Counterfactual", id = "table1"),
   
-  tags$h4("The math"),
+  tags$h4("Conceptual Explanation"),
   
-  p("before doign this concrete calculation, provide a section with just the math."),
+  p("Suppose that we survey the population in two periods: \\(p = 0\\) and \\(p = 1\\).
+    Let \\(\\pi_{i,p}\\) represent the proportion of the total population in period \\(p\\)
+    belonging to population subgroup \\(i \\in \\{1, ..., S\\}\\), where subgroup proportions
+    in each period sum to one ( \\( \\sum_{i = 1}^{S} \\pi_{i,p} = 1 \\) ). Average household
+    size \\(h_{i,p}\\) is measured by population subgroup and period. Our base (reference) 
+    period is \\(p = 0\\). 
+    "),
   
-  tags$h4("A concrete example"),
+  p("Actual population mean household size,
+    as measured in \\(p = 1\\), is
+    \\[
+    H_{\\text{actual},p = 1} = \\sum_{i = 1}^{S} \\pi_{i,1} \\cdot h_{i,1}
+    \\]
+    Counterfactual population mean household size in period 1, holding household sizes
+    fixed at period 0 levels, is
+    \\[
+    H_{\\text{cf},p = 1} = \\sum_{i = 1}^{S} \\pi_{i,1} \\cdot h_{i,0}
+    \\]
+    The difference between these two values represents the unexplained growth (or decline)
+    in household size between periods 0 and 1, and can be broken down into a sum of
+    contributions from individual population subgroups:
+    \\[
+    H_{\\text{actual},1} - H_{\\text{cf},1} = \\sum_{i = 1}^{S} \\pi_{i,1} \\cdot (h_{i,1} - h_{i,0})
+    \\]
+    The next section applies these calculations to a stylized data set.
+    "),
   
-  p(paste("Table 1 shows a simple theoretical example of population proportions",
-          "and average household sizes across different demographic groups in 2005",
-          "and 2022. We keep things simple with just 2 groups in the population: White",
-          "Americans and Hispanic Americans. From 2005 to 2022 we imagine a hypothetical",
-          "situation where the White population, as a fraction of the total, decreases",
-          "by 10 percentage points while the Hispanic population increases commensurately.",
-          "Average household size in each group changes dramatically over the 17-year",
-          "period. White households grow in size from an average of 3.5 to 3.8, while",
-          "Hispanic households shrink from 5 to 4.")),
-  p(paste("The `Actual Contribution (2005)` and `Actual Contribution (2022)`",
-          "columns are derived my multiplying average household size by population",
-          "percentage. The sum of the entries in each of these columns produces the",
-          "overall weighted average household size in that year. In our example,",
-          "average household size increased from 3.8 in 2005 to 3.86 in 2022.")),
-  p(paste("The `Counterfactual Contribution (2022)` column reveals what household",
-          "size would be, had average household size by demographic group held steady",
-          "in the 17-year period. According to this calculation, had we been perfect",
-          "at predicting demographic change in the year 2005, we would have expected",
-          "that the average American in 2022 would live in a 3.95-person household.",
-          "The fact that the measured average household size in 2022 is actually 3.86",
-          "indicates that individuals are spread apart more, on average, than they",
-          "were in 2005.")),
+  tags$h4("Stylized Example"),
+  
+  p("Table 1 presents hypothetical population proportions and average household sizes 
+    across two demographic subgroups - White and Hispanic Americans - between 2005 and 
+    2022. From 2005 to 2022, the proportion of the population that is White decreases 
+    by 0.1 (from 0.8 to 0.7) while the Hispanic population increases commesurately. 
+    Simultaneously, White households grow in size from 3.5 to 3.8, while
+    Hispanic households shrink from 5 to 4."),
+  p(HTML(
+    "The <code>Actual Contribution (2005)</code> and <code>Actual Contribution (2022)</code>
+    columns are derived my multiplying average household size by population proportion. 
+    The sum of the entries in each of these columns produces the overall weighted average 
+    household size in that year. In our example, average household size increased from 3.8 
+    in 2005 to 3.86 in 2022."
+    )),
+  p(HTML("The <code>Counterfactual Contribution (2022)</code> column reveals what household
+    size would be, had average household size by demographic group held steady in the
+    17-year period. According to this calculation, had we been perfect at predicting 
+    demographic change in the year 2005, we would have expected that the average American 
+    in 2022 would live in a 3.95-person household."
+    )),
   
   p(strong("Table 1")),
   DTOutput("table1"),
