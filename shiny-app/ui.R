@@ -6,6 +6,7 @@ library(dplyr)
 library(scales)
 library(ggplot2)
 library(shinyAce)
+library(shinyBS)
 
 # Load necessary data
 load("data/all_tables.rda")
@@ -23,6 +24,15 @@ ui <- fluidPage(
   # Enable mathematical notation
   withMathJax(),
   
+  tags$head(
+    tags$style(HTML("
+      .subentry {
+        font-size: 0.9em; /* Smaller font size */
+        margin-left: 15px; /* Indent to distinguish it visually */
+      }
+    "))
+  ),
+  
   # Sidebar for potential controls (tab-specific)
   div(class = "scroll-container",
       sidebarLayout(
@@ -30,9 +40,13 @@ ui <- fluidPage(
           width = 3,
           # Conditional content for "Main" tab
           conditionalPanel(
-            condition = "input.tabs == 'Framing'",
-            p(a("Introduction", href = "#intro")),
-            p(a("Table 1: Hypothetical Example", href = "#table1")),
+            condition = "input.tabs == 'Methodology'",
+            p(a("1 Introduction", href = "#01introduction")),
+            p(a("2 Defining the Counterfactual", href = "#02counterfactual")),
+            p(a("2.1 Conceptual Explanation", href = "#02.1", class = "subentry")),
+            p(a("2.2 Stylized Example", href = "#02.2", class = "subentry")),
+            p(a("2.3 Population Subgroups", href = "#02.3", class = "subentry")),
+            p(a("2.4 Missing Data", href = "#02.4", class = "subentry")),
             p(a("Table 2: 2005-2022 Changes by Race and Age", href = "#table2")),
             p(a("Table 3: Contributions", href = "#table3"))
           ),
@@ -56,11 +70,11 @@ ui <- fluidPage(
         mainPanel(
           tabsetPanel(
             id = "tabs",  # Add ID to track the active tab
-            tabPanel("Framing", tab1_ui), 
+            tabPanel("Methodology", tab1_ui), 
             tabPanel("Map", tab2_ui), 
             tabPanel("Counterfactual", tab3_ui),
             tabPanel("Old Results", tab4_ui)
           )
         )
-      )))
-
+      ))
+)
