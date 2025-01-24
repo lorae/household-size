@@ -12,10 +12,10 @@ load("data/all_tables.rda")
 # Source needed helper functions
 source("../src/utils/graphing-tools.R")
 
-source("ui/tab1.R")
-source("ui/tab2.R")
-source("ui/tab3.R")
-source("ui/tab4.R")
+source("ui/tab1_ui.R")
+source("ui/tab2_ui.R")
+source("ui/tab3_ui.R")
+source("ui/tab4_ui.R")
 
 # Define UI
 ui <- fluidPage(
@@ -58,7 +58,8 @@ ui <- fluidPage(
             id = "tabs",  # Add ID to track the active tab
             tabPanel("Framing", tab1_ui), 
             tabPanel("Map", tab2_ui), 
-            tabPanel("Counterfactual", tab3_ui)
+            tabPanel("Counterfactual", tab3_ui),
+            tabPanel("Old Results", tab4_ui)
           )
         )
       )))

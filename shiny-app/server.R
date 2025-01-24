@@ -22,8 +22,9 @@ sf <- read_sf("../data/ipums-cpuma0010-sf/ipums_cpuma0010.shp")
 server <- function(input, output, session) {
   
   # Table 1.1: Render theoretical example table
-  output$table1tab1 <- renderDT({
-    example_table <- data.frame(
+  output$tab1.1 <- renderDT({
+    
+    tab1.1 <- data.frame(
       group = c("White", "Hispanic"),
       prop_2005 = c(0.80, 0.20),
       prop_2022 = c(0.70, 0.30),
@@ -37,7 +38,7 @@ server <- function(input, output, session) {
         cont_diff = cont_2022 - cont_2022cf
       )
     
-    sum_row <- example_table |>
+    sum_row <- tab1.1 |>
       summarize(
         group = "Sum",
         prop_2005 = sum(prop_2005),
@@ -50,26 +51,25 @@ server <- function(input, output, session) {
         cont_diff = sum(cont_diff)
       )
     
-    example_table <- datatable(
-        example_table,
-        options = list(
-          pageLength = 5,
-          autoWidth = TRUE,
-          dom = 't',
-          ordering = FALSE
-        ),
-        rownames = FALSE,
-        colnames = c(
-          "Group" = "group",
-          "Proportion of 2005 Population" = "prop_2005",
-          "Proportion of 2022 Population" = "prop_2022",
-          "Average HH Size (2005)" = "hhsize_2005",
-          "Average HH Size (2022)" = "hhsize_2022",
-          "Actual Contribution (2005)" = "cont_2005",
-          "Actual Contribution (2022)" = "cont_2022",
-          "Counterfactual Contribution (2022)" = "cont_2022cf",
-          "Difference from Counterfactual (2022)" = "cont_diff"
-        )
+    tab1.1 <- datatable(
+      tab1.1,
+      options = list(
+        pageLength = 5,
+        autoWidth = TRUE,
+        dom = 't',
+        ordering = FALSE
+      ),
+      rownames = FALSE,
+      colnames = c(
+        "Group" = "group",
+        "Proportion of 2005 Population" = "prop_2005",
+        "Proportion of 2022 Population" = "prop_2022",
+        "Average HH Size (2005)" = "hhsize_2005",
+        "Average HH Size (2022)" = "hhsize_2022",
+        "Actual Contribution (2005)" = "cont_2005",
+        "Actual Contribution (2022)" = "cont_2022",
+        "Counterfactual Contribution (2022)" = "cont_2022cf",
+        "Difference from Counterfactual (2022)" = "cont_diff")
       ) |>
       formatStyle(
         "Group",
@@ -79,10 +79,10 @@ server <- function(input, output, session) {
       formatRound("Difference from Counterfactual (2022)", digits = 2)
   })
   
-  # Tab 1 Tables 2A - 2E
-  # Define function to create and render one of tab 1, tables 2A - 2E using common
+  # Tables 1.2A - 1.2E
+  # Define function to create and render one of tables 1.2A - 1.2E using common
   # format, while allowing the table data to differ
-  render_tab1table2X <- function(table_id, table_data) {
+  render_tab1.2X <- function(table_id, table_data) {
     output[[table_id]] <- renderDT({
       table_data$cont_2019 <- gsub("\\*", "&#183;", table_data$cont_2019)
       table_data$cf_cont_2019 <- gsub("\\*", "&#183;", table_data$cf_cont_2019)
@@ -117,7 +117,7 @@ server <- function(input, output, session) {
   
   # Define data for tables 2A - 2E
   tables_data <- list(
-    tab1table2a = data.frame(
+    tab1.2a = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0.02, 0.70, 0.28, 1),
       hhsize_2000 = c(3.0, 4.0, 5.0, NA),
@@ -126,7 +126,7 @@ server <- function(input, output, session) {
       cf_cont_2019 = c("0.02 * 3 = 0.06", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "4.26"),
       cont_diff = c("0.01", "0.35", "0.14", "0.50")
     ),
-    tab1table2b = data.frame(
+    tab1.2b = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0, 0.70, 0.30, 1),
       hhsize_2000 = c(3.0, 4.0, 5.0, NA),
@@ -135,7 +135,7 @@ server <- function(input, output, session) {
       cf_cont_2019 = c("0 * 3 = 0", "0.70 * 4 = 2.80", "0.3 * 5 = 1.50", "4.3"),
       cont_diff = c("0", "0.35", "0.15", "0.50")
     ),
-    tab1table2c = data.frame(
+    tab1.2c = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0.02, 0.70, 0.28, 1),
       hhsize_2000 = c("NA", "4.0", "5.0", NA),
@@ -144,7 +144,7 @@ server <- function(input, output, session) {
       cf_cont_2019 = c("0.02 * NA = NA", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "NA"),
       cont_diff = c("NA", "0.35", "0.14", "NA")
     ),
-    tab1table2d = data.frame(
+    tab1.2d = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0.02, 0.70, 0.28, 1),
       hhsize_2000 = c("3.5", "4.0", "5.0", NA),
@@ -153,7 +153,7 @@ server <- function(input, output, session) {
       cf_cont_2019 = c("0.02 * 3.5 = 0.07", "0.70 * 4 = 2.80", "0.28 * 5 = 1.40", "4.27"),
       cont_diff = c("0", "0.35", "0.14", "0.49")
     ),
-    tab1table2e = data.frame(
+    tab1.2e = data.frame(
       group = c("A", "B", "C", "Sum"),
       prop_2019 = c(0, 0.70, 0.30, 1),
       hhsize_2000 = c("NA", "4.0", "5.0", NA),
@@ -166,7 +166,7 @@ server <- function(input, output, session) {
   
   # Dynamically create output for each table
   lapply(names(tables_data), function(id) {
-    render_tab1table2X(id, tables_data[[id]])
+    render_tab1.2X(id, tables_data[[id]])
   })
 
   
