@@ -10,14 +10,18 @@ tab3_ui <- fluidPage(
             OLS regression techniques and shift-share analysis."
   ),
   tags$h3("1: Measuring our Baseline: Similarities to an Interaction Regression", id = "section1tab3"),
-  p("Imagine a simple America in the year 2000. Our census shows a population of 8
-  individuals configured into 3 households, with the details recorded in table 1A."),
+  p("Imagine a simplified America in the year 2000. Census data records a population 
+    of 8 individuals organized into 3 households, as shown in Table 1A."),
   
   p(strong("Table 1A: 2000 Census Results")),
-  DTOutput("table1atab3"),
+  DTOutput("table1tab3"),
   
-  p("We then further summarize the information by listing each individual in one
-    row and the size of their household in a separate column."),
+  p("Our objective is to calculate baseline person-level household sizes within each 
+    population subgroup of interest. In this stylized example, we calculate average 
+    household sizes among Black men, Black women, White men, and White women."),
+  
+  aceEditor("codeblock01_code", mode = "r", theme = "chrome", readOnly = TRUE, height = "150px"),
+  verbatimTextOutput("codeblock01"),
   
   p(strong("Table 1B: Condensed 2000 Census Results")),
   DTOutput("table1btab3"),
@@ -36,8 +40,7 @@ tab3_ui <- fluidPage(
             White.]
             "),
   
-  verbatimTextOutput("codeblock01"),
-  
+
   p("We could arrive at the same result in a regression using the following
           formula:"),
   
@@ -70,6 +73,7 @@ tab3_ui <- fluidPage(
             
             Here, we run the regression in R again:"),
   
+  aceEditor("codeblock02_code", mode = "r", theme = "chrome", readOnly = TRUE, height = "150px"),
   verbatimTextOutput("codeblock02"),
   
   p("In summary, this methodology is functionally equivalent to running a
@@ -182,23 +186,70 @@ tab3_ui <- fluidPage(
   
   p(strong("Why person-level household size and number of households are not 1:1")),
   
-  p("As shown above, person-level household size is closely related to the distribution
+  p(HTML("As shown above, person-level household size is closely related to the distribution
     variance, and household-level household size is closely related to the distribution 
     mean. One value does not directly imply the other. This means that if we have person-level
-    household size and number of individuals, it is *not possible* to determine the
-    number of households that is implied."),
+    household size and number of individuals, it is <em>not possible</em> to determine the
+    number of households that is implied.")),
   
-  p("Consider the following hypothetical. There is a population of 6 individuals.
+  p("Given an average person-level household size and a population, the nubmer of households
+    is not deterministic. Consider the following counterexample. There is a population of 6 individuals.
     The average person-level household size is 3. How many households are there in the population?"),
   
-  p("The answer is undetermined. Either 2 households {3, 3} or 3 households {1, 1, 4} are
-    consistent with the above facts."),
+  p(strong("Figure 3.2")),
+  plotOutput("plot2tab3"),
   
-  p("What is the intuition behind this? In both populations of 6, households are equally scattered."),
+  p("Figure 3.2 shows two hypothetical Americas consistent with the summary statistics. 
+  In scenario 1, average person-level household size is
+    \\[ 
+    \\frac{3+3+3 + 3+3+3}{6} = 3
+    \\]
+    While in scenario 2, average person-level household size is
+    \\[ 
+    \\frac{1 + 1 + 4+4+4+4}{6} = 3
+    \\]
+    "),
+
+  p("How, then, with multiple household configurations, can we determine the size of a 
+    housing shortage using actual and counterfactual measures of person-level household
+    size? There are certain properties of the summary statistic we can exploit. For example,
+    the most compact configuration consistent with a set of summary statistics is one
+    where each household has as close to as many of the same members as possible. The
+    least compact configuration is one where there are some number of 1-person households
+    and one very large household with the rest of the population. Both can be consistent
+    with a set of summary statistics, while the truth lies somewhere in the middle."),
+  
+  p("I've actually come up with some proofs of these properties, which I may later add
+    to this."),
   
   p("At this point I could run a computer simulation. Start from low levels of P and show the possible
     person-level household sizes by running every possible partition of P and calculating its person-level
     and household-level household size. Perhaps map them on a scatter plot, or something."),
+  
+  p("Do not despair! Our aggregates can tell us something very interesting about total
+  households in the United States! I have a postulate. I'll start by outlining it for 
+    a simple case where the integers work, and then we'll go into a more complex, realistic
+    case."),
+  
+  p("assertion: for every pairing of aggregate household size alpha and number of people N,
+    there is a minimum number of households possible in the population that is bounded
+    by N/alpha. In the case where alpha is a whole number and N is divisible by alpha,
+    the valid configuration with the minimum number of households is one with exactly
+    N/alpha households and each household has exactly alpha members."),
+  
+  p("Why does this matter? It matters SO much! Using this information, we can come up with
+    a MINIMUM estimate on hte size of the housing shortage. This tells us, even in the most
+    efficiently packed population matching these household characteristics, we would have
+    had to build a minimum of X million homes. The number could be larger than that, but it
+    cannot be smaller."),
+  
+  p("Let me give a numerical example. Suppose, as before, you have N = 6 total members in the 
+    population with an average person level household size of alpha = 3. I assert that there 
+    is no possible way you can configure the 6 people into fewer than 2 households, preserving
+    that alpha = 3 (and is no greater)."),
+  
+  p("Let's suppose you have the configuration {1, 1, 4}. We measure our provisional alpha, which
+    we'll call a. a = 1^2 + 1^2 + 4^2 / 6 = 18 / 6 = 3."),
   
   
   p(strong("Why use person-level metrics?")),
