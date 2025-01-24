@@ -9,7 +9,7 @@ cf_hhsize_2022 <- (contributions$percent_2022 * contributions$weighted_mean_2005
 tab1_ui <- fluidPage(
   titlePanel("Changes in American Household Size: 2005 to 2022"),
   
-  tags$h3("Introduction", id = "intro"),
+  tags$h2("Introduction", id = "intro"),
   p("In 2005, the average American lived in a household of", 
     round(weighted.mean(crosstab_2005_2022$weighted_mean_2005, crosstab_2005_2022$weighted_count_2005), 3),
     "people. By 2022, average household size shrunk to",
@@ -20,9 +20,9 @@ tab1_ui <- fluidPage(
   p("We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, geography, and birthplace (American-born or foreign-born). Within each of these buckets, we calculate average household size in both 2005 and 2022. We then calculate a simple counterfactual: "),
   p(em("Had average household sizes remained at their 2005 levels, but population demographics shifted to 2022 levels, what would we expect the average American household size to be?")),
   
-  tags$h3("Constructing a Counterfactual", id = "table1"),
+  tags$h2("Constructing a Counterfactual", id = "table1"),
   
-  tags$h4("Conceptual Explanation"),
+  tags$h3("Conceptual Explanation"),
   
   p("Suppose that we survey the population in two periods: \\(p = 0\\) and \\(p = 1\\).
     Let \\(\\pi_{i,p}\\) represent the proportion of the total population in period \\(p\\)
@@ -51,7 +51,7 @@ tab1_ui <- fluidPage(
     The next section applies these calculations to a stylized data set.
     "),
   
-  tags$h4("Stylized Example"),
+  tags$h3("Stylized Example"),
   
   p("Table 1 presents hypothetical population proportions and average household sizes 
     across two demographic subgroups - White and Hispanic Americans - between 2005 and 
@@ -68,22 +68,22 @@ tab1_ui <- fluidPage(
     )),
   p(HTML("The <code>Counterfactual Contribution (2022)</code> column reveals what household
     size would be, had average household size by demographic group held steady in the
-    17-year period. According to this calculation, had we been perfect at predicting 
+    17-year period. According to this calculation, had we been perfect at forecasting 
     demographic change in the year 2005, we would have expected that the average American 
     in 2022 would live in a 3.95-person household."
     )),
   
   p(strong("Table 1")),
-  DTOutput("table1"),
+  DTOutput("table1tab1"),
   
-  p(paste("The `Difference from Counterfactual (2022)`",
-          "column shows us how much larger or smaller a given group's contribution",
-          "to the overall average household size is from what we expected",
-          "holding preferences constant at 2022 levels. The relatively small difference",
-          "between our 2022 counterfactual and actual result conceals large shifts",
-          "in each population. Although Hispanic Americans comprise a minority of the",
-          "population, their shrinking average household size more than compensated",
-          "for the increasing household sizes among White Americans.")),
+  p(HTML(
+    "The <code>Difference from Counterfactual (2022)</code> column shows how much 
+    each subgroup's contribution to the overall average household size deviates from the 
+    expected value under the counterfactual scenario, where preferences remain constant at 
+    2022 levels. The relatively small bottom-line difference between the 2022 counterfactual 
+    and actual result belies large shifts in each population. Although Hispanic Americans 
+    comprise a minority of the population, their shrinking average household size 
+    more than compensated for the increasing household sizes among White Americans.")),
   
   tags$h3("Getting more granular", id = "placeholder"),
   
