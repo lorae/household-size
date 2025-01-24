@@ -20,6 +20,90 @@ tab1_ui <- fluidPage(
   p("We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, geography, and birthplace (American-born or foreign-born). Within each of these buckets, we calculate average household size in both 2005 and 2022. We then calculate a simple counterfactual: "),
   p(em("Had average household sizes remained at their 2005 levels, but population demographics shifted to 2022 levels, what would we expect the average American household size to be?")),
   
+  p("From this framing, we have 3 research questions:"),
+  
+  tags$ol(
+    tags$li(
+      strong("After adjusting for sociodemographic changes in the U.S. population, are households 
+      today larger or smaller than they were in the year 2000?"),
+      
+      p("Preliminary answer: Households today are marginally larger, on the order 
+      of about 3.37 persons per household, versus the 3.35 expected value. This 
+      answer is sensitive to which controls are used, and more sensitivity testing 
+      is needed to see to determine whether the result is robust to alternative
+      bucketing of the data (e.g. categorizing income by quintile instead of chaining
+      using CPI-U, bucketing age into 10-year, rather than 5-year groups, alternative
+      methods of categorizing race and ethnicity).")
+    ),
+    tags$li(
+      strong(
+      "Do Americans today live in more or less crowded conditions than they did in 2000, 
+      as measured by average persons per bedroom?"),
+      p("Consistent with prior research, we find a strong result that American households
+      live in increasingly spacious conditions. Extrapolating from 2000 trends, we expect 
+      the typical American to live in a household with a density of 0.9 persons
+      per bedroom. Instead, Americans today live in households with a density of roughly
+      0.8 persons per bedroom [TODO: fact check these exact #s, I know they're close.]. 
+      This large gap is quite robust to alternative specifications and would imply a 
+      substantial adjustment in Americans' living situationss.")
+    ),
+    tags$li(
+      strong("What are the primary sociodemographic factors driving changes in household 
+      size and living conditions?"),
+      p("So far, we find that population aging has been pulling household size averages
+      down, as older Americans are more likely to live alone. An increase in the 
+      Hispanic population of the U.S. has been working in the opposite direction,
+      pulling averages up. Notably, however, Latino Americans today live in substantially
+      smaller households than they did 20 years ago - that said, they still exceed 
+      the U.S. average."),
+      p("We also observe in our data signs consistent with the idea that Americans are
+      having children later - the peak number of co-occupants for adults now occurs 
+      around the age of 35, as opposed to the age of 30 two decades ago. This timing
+      shift in fertility, however, doesn't appear to have strong effects on overall aggregates"),
+      p("We're still in the process of examining other trends by education level, birthplace,
+      income, and sex.")
+    ),
+    tags$li(
+      strong("What do the findings on residential density - persons per household and
+      persons per bedroom - imply about a housing surfeit or surplus in the United
+      States?"),
+      p("Our preliminary findings on the number of people per household suggest that 
+        the U.S. would have needed to build at least half a million additional homes 
+        between 2000 and 2019 to maintain the same average household size. This is 
+        a lower-bound estimate; using alternative data heuristics (see Section X.X 
+        of the methodology document), the true figure is likely closer to 750,000. 
+        However, even this estimate is low compared to other studies, such as XXX by 
+        [CITE], YYY by [CITE], and ZZZ by [CITE]."),
+      p("However, our findings on average persons per bedroom indicate that there may 
+        still be significant mismatches in the types of homes available versus the types 
+        demanded. Although the number of persons per home is similar to expectations, 
+        the lower-than-expected number of persons per bedroom suggests that Americans 
+        today live in more spacious accommodations than they did in 2000. This is 
+        consistent with other research showing that square footage per American has 
+        risen over the same period [fact check and cite]."),
+      p("Combined with the observation that - outside of the Great Recession - home prices
+      have grown rapidly over the past 20 years, this raises the hypothesis that the 
+      supply of homes in the United States has not been able to keep up with shifting
+      consumer tastes for larger homes with more bedrooms."),
+      p(" Expand more on this. Because homes have gotten bigger, so clearly some of that
+        demand is 'quenched'. But apparently aggresive housing market dynmaics and rapidly
+        rising prices, to me, suggest that the rate of homebuilding still has not matched 
+        changing preferences. Or, another explanation is that "),
+      p("TODO: come up with HYPOTHESES and tests for this!!1"),
+      p("A possible next direction we could take this analysis is to examine the baseline 
+        characteristics of homes in the U.S. and calculate how many additional homes 
+        would need to be built to align with current accommodation preferences. It 
+        is possible that this value would significantly exceed the 750,000 estimate 
+        and align more closely with higher estimates from other researchers.")
+    ),
+    tags$li(
+      strong("What is the geographic profile of these findings? Where have households
+      and occupancy density grown or shrunk the most compared to counterfactual predictions,
+      and what does this imply about housing supply in specific areas of the U.S.?"),
+      p("Answer TBD - Lorae is putting together some chloropleth maps.")
+    )
+  ),
+  
   tags$h2("2 Defining the Counterfactual", id = "02counterfactual"),
   
   tags$h3("2.1 Conceptual Explanation", id = "02.1"),
@@ -230,6 +314,8 @@ tab1_ui <- fluidPage(
     A in X year. A later extension of this write-up can explore this situation, but
     for now, I'll focus on the simpler one outpined here.] [Note: do income quintile
     and inflation adjusted income.]")
-  )
+  ),
+  
+  
 
 )
