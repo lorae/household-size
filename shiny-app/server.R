@@ -12,6 +12,9 @@ library(shinyAce)
 # Load necessary data
 load("data/all_tables.rda")
 load("data/sex_2005_2022.rda")
+hhresults <- read.csv("data/hh_results.csv")
+bedresults <- read.csv("data/bedroom_results.csv")
+
 # Source needed helper functions
 source("../src/utils/graphing-tools.R")
 
@@ -496,4 +499,31 @@ summary(model)"
     # Combine both plots vertically
     plot1 / plot2
   })
+  
+  output$fig3.1 <- renderDT({
+    hhresults |>
+      datatable(
+        options = list(
+          pageLength = 20,
+          autoWidth = TRUE,
+          dom = 't',
+          ordering = FALSE
+        ),
+        rownames = FALSE
+        )
+  })
+  
+  output$fig3.2 <- renderDT({
+    bedresults |>
+      datatable(
+        options = list(
+          pageLength = 20,
+          autoWidth = TRUE,
+          dom = 't',
+          ordering = FALSE
+        ),
+        rownames = FALSE
+      )
+  })
+
 }
