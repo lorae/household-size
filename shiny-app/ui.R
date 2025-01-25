@@ -58,10 +58,10 @@ ui <- fluidPage(
             actionButton("refresh_map", "Refresh Map")
           ),
           
-          # Conditional content for "Counterfactual" tab
+          # Conditional content for "New Results" tab
           conditionalPanel(
-            condition = "input.tabs == 'Counterfactual'",
-            p("Counterfactual-specific sidebar content."),
+            condition = "input.tabs == 'New Results'",
+            p("This sidebar will eventually contain content."),
             numericInput("num_input", "Example Input:", value = 5, min = 1, max = 10)
           )
         ),
@@ -72,7 +72,7 @@ ui <- fluidPage(
             id = "tabs",  # Add ID to track the active tab
             tabPanel("Methodology", tab1_ui), 
             tabPanel("Map", tab2_ui), 
-            tabPanel("Counterfactual", tab3_ui),
+            tabPanel("New Results", tab3_ui),
             tabPanel("Old Results", tab4_ui)
           )
         )
