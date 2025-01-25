@@ -10,6 +10,14 @@ tab1_ui <- fluidPage(
   titlePanel("Methodology"),
   
   tags$h2("1 Introduction", id = "01introduction"),
+  
+  p(strong("Note on years used: throughout this document we list different base and
+           reference years (2000 vs 2019, 2000 vs 2023, 2005 vs 2022, etc). For a variety of
+           idiosyncratic reasons, like standard error estimation and geographic comparability,
+           the years covered differ. The eventual goal is to focus the analysis on the
+           base year 2000 and current year 2023, using the year 2019 in limited contexts 
+           where geographic comparisons are otherwise not possible.")),
+  
   p("In 2005, the average American lived in a household of", 
     round(weighted.mean(crosstab_2005_2022$weighted_mean_2005, crosstab_2005_2022$weighted_count_2005), 3),
     "people. By 2022, average household size shrunk to",
@@ -28,24 +36,18 @@ tab1_ui <- fluidPage(
       today larger or smaller than they were in the year 2000?"),
       
       p("Preliminary answer: Households today are marginally larger, on the order 
-      of about 3.37 persons per household, versus the 3.35 expected value. This 
-      answer is sensitive to which controls are used, and more sensitivity testing 
-      is needed to see to determine whether the result is robust to alternative
-      bucketing of the data (e.g. categorizing income by quintile instead of chaining
-      using CPI-U, bucketing age into 10-year, rather than 5-year groups, alternative
-      methods of categorizing race and ethnicity).")
+      of about 3.37 persons per household, versus the 3.36 expected value. This 
+      answer is sensitive to which controls are used, however.")
     ),
     tags$li(
       strong(
       "Do Americans today live in more or less crowded conditions than they did in 2000, 
       as measured by average persons per bedroom?"),
-      p("Consistent with prior research, we find a strong result that American households
+      p("Consistent with prior research [TODO: fact check and cite], we find a strong result that American households
       live in increasingly spacious conditions. Extrapolating from 2000 trends, we expect 
-      the typical American to live in a household with a density of 0.9 persons
+      the typical American in 2019 to live in a household with a density of 0.94 persons
       per bedroom. Instead, Americans today live in households with a density of roughly
-      0.8 persons per bedroom [TODO: fact check these exact #s, I know they're close.]. 
-      This large gap is quite robust to alternative specifications and would imply a 
-      substantial adjustment in Americans' living situationss.")
+      0.87 persons per bedroom. This gap is robust to alternative specifications.")
     ),
     tags$li(
       strong("What are the primary sociodemographic factors driving changes in household 
@@ -56,12 +58,14 @@ tab1_ui <- fluidPage(
       pulling averages up. Notably, however, Latino Americans today live in substantially
       smaller households than they did 20 years ago - that said, they still exceed 
       the U.S. average."),
-      p("We also observe in our data signs consistent with the idea that Americans are
-      having children later - the peak number of co-occupants for adults now occurs 
-      around the age of 35, as opposed to the age of 30 two decades ago. This timing
-      shift in fertility, however, doesn't appear to have strong effects on overall aggregates"),
       p("We're still in the process of examining other trends by education level, birthplace,
-      income, and sex.")
+      income, geography, and sex.")
+    ),
+    tags$li(
+      strong("What is the geographic profile of these findings? Where have households
+      and occupancy density grown or shrunk the most compared to counterfactual predictions,
+      and what does this imply about housing supply in specific areas of the U.S.?"),
+      p("Answer TBD - Lorae is putting together some chloropleth maps.")
     ),
     tags$li(
       strong("What do the findings on residential density - persons per household and
@@ -74,33 +78,16 @@ tab1_ui <- fluidPage(
         of the methodology document), the true figure is likely closer to 750,000. 
         However, even this estimate is low compared to other studies, such as XXX by 
         [CITE], YYY by [CITE], and ZZZ by [CITE]."),
-      p("However, our findings on average persons per bedroom indicate that there may 
-        still be significant mismatches in the types of homes available versus the types 
-        demanded. Although the number of persons per home is similar to expectations, 
+      p("Although the number of persons per home is similar to expectations, 
         the lower-than-expected number of persons per bedroom suggests that Americans 
         today live in more spacious accommodations than they did in 2000. This is 
         consistent with other research showing that square footage per American has 
-        risen over the same period [fact check and cite]."),
-      p("Combined with the observation that - outside of the Great Recession - home prices
-      have grown rapidly over the past 20 years, this raises the hypothesis that the 
-      supply of homes in the United States has not been able to keep up with shifting
-      consumer tastes for larger homes with more bedrooms."),
-      p(" Expand more on this. Because homes have gotten bigger, so clearly some of that
-        demand is 'quenched'. But apparently aggresive housing market dynmaics and rapidly
-        rising prices, to me, suggest that the rate of homebuilding still has not matched 
-        changing preferences. Or, another explanation is that "),
-      p("TODO: come up with HYPOTHESES and tests for this!!1"),
+        risen over the same period [TODO fact check and cite]."),
       p("A possible next direction we could take this analysis is to examine the baseline 
         characteristics of homes in the U.S. and calculate how many additional homes 
         would need to be built to align with current accommodation preferences. It 
         is possible that this value would significantly exceed the 750,000 estimate 
         and align more closely with higher estimates from other researchers.")
-    ),
-    tags$li(
-      strong("What is the geographic profile of these findings? Where have households
-      and occupancy density grown or shrunk the most compared to counterfactual predictions,
-      and what does this imply about housing supply in specific areas of the U.S.?"),
-      p("Answer TBD - Lorae is putting together some chloropleth maps.")
     )
   ),
   
@@ -317,10 +304,7 @@ tab1_ui <- fluidPage(
   ),
   
   tags$h2("3: Group-Level Averages as Regression Coefficients", id = "03regression"),
-  
-  p(strong("Note: this section is a slight aside - for a high-level picture of methodology,
-           skip to section 4, below.")),
-  
+
   p("Calculating group-level averages for household size is mathematically equivalent 
     to running a regression with interaction terms and no intercept, as demonstrated
     below. This connection provides flexibility for future analyses, such as estimating 
@@ -405,5 +389,131 @@ tab1_ui <- fluidPage(
   certain population subgroups of interest.")
 
   ),
+  
+  tags$h2("4: 'Person-level' Versus 'Household-level' Averages", id = "04averages"),
+  
+  p(HTML(
+    "In this project, we conceptualize two methods of measuring household size:
+    at the <em>person-level</em> and at the <em>household-level</em>.")),
+  p(HTML(
+    "<strong>Household-level:</strong> For every 
+    household \\( i \\) with number of members \\( m_i \\) in households \\( 1 \\) 
+    through \\( H \\), the <em>household-level</em> mean household size is a simple
+    average across households as individual observations:
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{household}} 
+    = \\frac{\\sum_{i = 1}^H m_i}{H} 
+    = \\frac{P}{H}
+    \\]
+    ")),
+  
+  p(HTML(
+    "<strong>Person-level:</strong>  For every 
+    person \\( j \\) in a population \\( P \\) living in a household of \\( m_j \\) 
+    members \\( 1 \\), the <em>person-level</em> mean household size is a simple
+    average across person-level observations:
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{person}} 
+    = \\frac{\\sum_{j = 1}^P m_j}{\\sum_{i = 1}^H m_i} 
+    = \\frac{\\sum_{j = 1}^P m_j}{P} 
+    \\]
+    ")),
+  
+  p(HTML(
+    "In other words: The <em>person-level</em> household size is the expected size 
+  of a household a random member of the U.S. population lives in. The 
+  <em>household-level</em> household size is the expected number of members in a 
+  randomly-selected household.
+  ")),
+  
+  p(
+    "Figure 3.1 depicts a stylized American population with of three households, 
+  with four, two and one member each. 
+  "),
+  
+  p(strong("Figure 3.1")),
+  plotOutput("plot1tab3"),
+  
+  p(
+    "The household-level average household size 
+  is:
+    \\[ \\frac{4 + 2 + 1}{3} = 2 \\tfrac{1}{3} \\]
+  
+  but the person-level average household size is:
+    \\[ 
+    \\frac{4+4+4+4 + 2+2 + 1}{4 + 2 + 1} 
+    = \\frac{4^2 + 2^2 + 1^2}{7} 
+    = 3
+    \\]"),
+  
+  p(strong("Why person-level household size and number of households are not 1:1")),
+  
+  p(HTML("It would be helpful to be able to draw conclusions about the actual and counterfactual
+  number of households in the United States using the actual and counterfactual person-
+  level household sizes that we generated in sections 1 and 2 of this document. Unfortunately,
+  as we show below, person-level average household size does not have a one-to-one 
+  relationship with number of households in the population.")),
+  
+  p("Consider the following counterexample. There is a population of 6 individuals.
+    The average person-level household size is 3. How many households are there in the population?"),
+  
+  p(strong("Figure 3.2")),
+  plotOutput("plot2tab3"),
+  
+  p("Figure 3.2 shows two hypothetical Americas consistent with the summary statistics. 
+  In scenario 1, average person-level household size is
+    \\[ 
+    \\frac{3+3+3 + 3+3+3}{6} = 3
+    \\]
+    While in scenario 2, average person-level household size is
+    \\[ 
+    \\frac{1 + 1 + 4+4+4+4}{6} = 3
+    \\]
+    "),
+  
+  p("How, then, with multiple household configurations, can we determine the size of a 
+    housing shortage using actual and counterfactual measures of person-level household
+    size? There are certain properties of the summary statistic we can exploit. For example,
+    configuration consistent with the fewest number of households is one where every household
+    is the exact same size. The configuration consistent with the largest number of households
+    is one where each household has one member except for one household with a very large
+    number of members."),
+  p("Both of these configurations are unrealistic. However, the most compact configuration
+  can be used to calculate a lower bound on the size of the housing shortage. And the
+  ratio between the average person-level household size and household-level household size
+  can be used to roughly estimate the actual housing shortage."),
+  p(strong("Note: Lorae has a mathematical proof relevant to this")),
+  
+  p(strong("Why use person-level metrics?")),
+  
+  p("Household-level average household sizes are what we're more familiar with:
+    they're what is reported by [source], [source], and [source]. Why, then, use
+    person-level metrics?"),
+  
+  p(HTML(
+    "The problem lies in controlling for demographics. We're interested in how housing
+    supply has surpassed or failed to keep up with the number of people in the country,
+    while acknowledging that demographic shifts alone could account for changes in average
+    household size without a supply shortage needed as an explanation. (For more
+    information, please see the hypothetical example described in the \"Main\"
+    tab of this document.) Hispanic individuals, for example, tend to live in 
+    larger-than-average households, and the United States share of Hispanic individuals
+    has grown in the last 20 years. But what constitutes a \"Hispanic\" household, 
+    and how should we classify households with individuals of varying races, ethnicities,
+    ages, and other potentially explanatory sociodemographic characteristics? Previous
+    work [cite] has responded to this challenge by using the head of household's 
+    characteristics to classify the household. But doing so may misclassify many
+    people. Using the 2022 American Community Survey, 
+    <a href=\"https://www.jchs.harvard.edu/blog/identifying-racial-and-ethnic-diversity-within-us-households\">Airgood-Obrycki and co-authors</a> find that over 10% of households contain at least 
+    two adults of different races or ethnicities. \"Among these multi-race households\",
+    they write, \"nearly half, 6.7 million (5.1 percent of all households), appear 
+    in traditional statistics as white households despite having a person of color 
+    present.\" These multi-race households differentiated themselves from single-race
+    households along many dimensions related to housing: members of multi-race 
+    households are younger, more likely to live with roommates, and more likely to
+    be within a \"prime working age\" range of 25 to 54. And [If there's a source that says this:] 
+    XX and YY show that heads of household are more likely than other adults in 
+    the same residence to have aaa, bb, and ccc characteristics]."
+  )),
 
 )
