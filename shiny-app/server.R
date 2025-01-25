@@ -354,9 +354,9 @@ server <- function(input, output, session) {
     map_geographies(sf |> filter(State == "Ohio"))
   })
   
-  # Table 1A, tab 3:
+  # Table 1.3
   # Table showing the census of 8 Americans and their household configurations
-  table1tab3 <- data.frame(
+  tab1.3 <- data.frame(
     hh_id = c("Household 1", NA, NA, NA, "Household 2",  NA, NA, "Household 3"),
     pers_id = c("01", "02", "03", "04", "05", "06", "07", "08"),
     race = c("Black", "White", "Black", "Black", "White", "White", "Black", "White"),
@@ -364,8 +364,8 @@ server <- function(input, output, session) {
     hhsize = c(4,4,4,4,3,3,3,1)
   )
   
-  output$table1tab3 <- renderDT({
-    table1tab3 |>
+  output$tab1.3 <- renderDT({
+    tab1.3 |>
       datatable(
         options = list(
           pageLength = 20,
@@ -384,7 +384,7 @@ server <- function(input, output, session) {
   })
   
   output$codeblock01 <- renderPrint({
-    binned_avg <- table1tab3 |>
+    binned_avg <- tab1.3 |>
       group_by(race, sex) |>
       summarize(mean_hhsize = mean(hhsize))
     print(binned_avg)
@@ -393,21 +393,21 @@ server <- function(input, output, session) {
   updateAceEditor(
     session,
     editorId = "codeblock01_code",
-    value = "binned_avg <- table1tab3 |>
+    value = "binned_avg <- tab1.3 |>
   group_by(race, sex) |>
   summarize(mean_hhsize = mean(hhsize))
 print(binned_avg)"
   )
   
   output$codeblock02 <- renderPrint({
-    model <- lm(hhsize ~ 0 + race:sex, data = table1tab3)
+    model <- lm(hhsize ~ 0 + race:sex, data = tab1.3)
     summary(model)
   })
   
   updateAceEditor(
     session,
     editorId = "codeblock02_code",
-    value = "model <- lm(hhsize ~ 0 + race:sex, data = table1tab3)
+    value = "model <- lm(hhsize ~ 0 + race:sex, data = tab1.3)
 summary(model)"
   )
   

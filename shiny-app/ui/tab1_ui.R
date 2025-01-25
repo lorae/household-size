@@ -181,7 +181,7 @@ tab1_ui <- fluidPage(
     ways they are encoded."),
   
   bsCollapsePanel(
-    title = "Detailed Variable Encoding",
+    title = "Variable Encoding",
     style = "info",
     p("The population is divided into categories based on the following variables:"),
     tags$ul(
@@ -220,7 +220,7 @@ tab1_ui <- fluidPage(
     explanation of how each case is handled is provided in the expandable section below."),
   
   bsCollapsePanel(
-    title = "Detailed Missing Data Scenarios",
+    title = "Missing Data Scenarios",
     style = "info",
     p("In all four scenarios, we set average household sizes to grow by exactly 0.5 between
     period 0 (the year 2000) and period 1 (the year 2019).
@@ -316,6 +316,94 @@ tab1_ui <- fluidPage(
     and inflation adjusted income.]")
   ),
   
+  tags$h2("3: Group-Level Averages as Regression Coefficients", id = "03regression"),
   
+  p(strong("Note: this section is a slight aside - for a high-level picture of methodology,
+           skip to section 4, below.")),
+  
+  p("Calculating group-level averages for household size is mathematically equivalent 
+    to running a regression with interaction terms and no intercept, as demonstrated
+    below. This connection provides flexibility for future analyses, such as estimating 
+    broader trends by subgroup or testing national-level coefficients."),
+  
+  bsCollapsePanel(
+    title = "Detailed Explanation",
+    style = "info",
+    
+    p("Imagine a simplified America in the year 2000. Census data records a population 
+    of 8 individuals organized into 3 households, as shown in Table 1.3."),
+    
+    p(strong("Table 1.3: 2000 Census Results")),
+    DTOutput("tab1.3"),
+    
+    p("Our objective is to calculate baseline person-level household sizes within each 
+    population subgroup of interest. In this stylized example, we calculate average 
+    household sizes among Black men, Black women, White men, and White women."),
+    
+    aceEditor("codeblock01_code", mode = "r", theme = "chrome", readOnly = TRUE, height = "150px"),
+    verbatimTextOutput("codeblock01"),
+    
+    p(strong("Table 1B: Condensed 2000 Census Results")),
+    DTOutput("table1btab3"),
+    
+    p("In Galster's formulation, we calculate mean household size within 
+            every possible subgroup in the year 2000. Here, in our simple example,
+            we define subgroups for every unique possible combination of race and 
+            sex. In our later analysis, we'll include other - potentially mutable -
+            characteristics such as income level and educational attainment."),
+    
+    p("[NOTE: * add footnote about how ACS defines race and sex. Sex can only be M 
+            and F. Perhaps for a subgroup of transgender individuals, sex may change
+            (look into this). Race could also possibly change - cite studies on 
+            increasing tendency of Latinos to label themselves as 'other race' or 
+            simply regard Hispanic/Latino as a race instead of identifying as solely
+            White.]
+            "),
+    
+    
+    p("We could arrive at the same result in a regression using the following
+          formula:"),
+    
+    p(HTML("\\[\\text{Household Size}_i 
+                 = \\beta_{1}(\\text{Black}_i)(\\text{Female}_i)
+                 + \\beta_{2}(\\text{Black}_i)(\\text{Male}_i)
+                 + \\beta_{3}(\\text{White}_i)(\\text{Female}_i)
+                 + \\beta_{2}(\\text{White}_i)(\\text{Male}_i)
+                 \\]")),
+    
+    p(HTML(
+      "Where indicator variables such as \\(\\text{Black}_i\\) equal 1 if individual 
+          \\(i\\) is Black, and 0 otherwise. In this simple notation, each of the
+          \\(\\beta\\) coefficients represents the average household size within that
+          specific group. Note the lack of a \\(\\beta_0\\) term, fixing the y-intercept
+          at 0: Any nonzero value would produce an overdetermined regression and force
+          one of the \\(\\beta_1\\), \\(\\beta_2\\),\\(\\beta_3\\), or\\(\\beta_4\\) 
+          coefficients to equal 0.
+          
+          A more concise notation for the same 0-intercept regression could be written
+          as follows:")),
+    
+    p(HTML("\\[\\text{Household Size}_i 
+                 = \\beta_{rs}(\\text{Race}_i)(\\text{Sex}_i)
+                 \\]")),
+    p("Where each \\(\\beta_{rs}\\) coefficients represents one of averages 
+            for the four unique combinations of race and sex. Observations are 
+            measured at the person level for each \\(i\\) individual, as in the
+            previous regression.
+            
+            Here, we run the regression in R again:"),
+    
+    aceEditor("codeblock02_code", mode = "r", theme = "chrome", readOnly = TRUE, height = "150px"),
+    verbatimTextOutput("codeblock02"),
+    
+    p("In summary, group-level averages can be found by running a regression with
+  interaction terms only and a 0-intercept. Knowledge of the relationship between
+  this two apporaches could be useful in the future, if - for example - we decide to
+  run a population-wide regression with a non-interacted term on an attribute such
+  as race or age, for example. The coefficients on these universal terms may allow us
+  to draw more general insights on the direction of change in household size within 
+  certain population subgroups of interest.")
+
+  ),
 
 )
