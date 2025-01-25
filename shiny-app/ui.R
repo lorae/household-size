@@ -47,7 +47,7 @@ ui <- fluidPage(
             p(a("2.2 Stylized Example", href = "#02.2", class = "subentry")),
             p(a("2.3 Population Subgroups", href = "#02.3", class = "subentry")),
             p(a("2.4 Missing Data", href = "#02.4", class = "subentry")),
-            p(a("Table 2: 2005-2022 Changes by Race and Age", href = "#table2")),
+            p(a("3: Group-Level Averages as Regression Coefficients", href = "#03regression")),
             p(a("Table 3: Contributions", href = "#table3"))
           ),
           
