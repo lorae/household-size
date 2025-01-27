@@ -16,10 +16,10 @@ hhresults <- read.csv("data/hh_results.csv")
 bedresults <- read.csv("data/bedroom_results.csv")
 
 # Source needed helper functions
-source("../src/utils/graphing-tools.R")
+source("graphing-tools.R")
 
 # Read in shapefiles of every CPUMA0010 region in the United States
-sf <- read_sf("../data/ipums-cpuma0010-sf/ipums_cpuma0010.shp")
+#sf <- read_sf("data/ipums_cpuma0010.shp")
 
 # Define server
 server <- function(input, output, session) {
@@ -353,9 +353,9 @@ server <- function(input, output, session) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
   })
   
-  output$minnesota <- renderPlot({ 
-    map_geographies(sf |> filter(State == "Ohio"))
-  })
+  # output$minnesota <- renderPlot({ 
+  #   map_geographies(sf |> filter(State == "Ohio"))
+  # })
   
   # Table 1.3
   # Table showing the census of 8 Americans and their household configurations

@@ -23,10 +23,23 @@ tab1_ui <- fluidPage(
     "people. By 2022, average household size shrunk to",
     round(weighted.mean(crosstab_2005_2022$weighted_mean_2022, crosstab_2005_2022$weighted_count_2022), 3), "people."
   ),
-  p("Some of this effect may be compositional. The demographic makeup of Americans has changed in the last 17 years. Older people, on average, tend to live in smaller households, and this shift toward an older America could explain the reduction in household size. At the same time, there are countervailing forces: the population of Hispanic and Latino Americans has grown, and those individuals tend to live in larger households than average."),
-  p("We're interested in understanding how Americans' housing behaviors may or may not reflect a housing supply shortage. If insufficient housing stock exists, then Americans may be forced to live in closer quarters than they would otherwise prefer. As suggested by Galster (citation), we calculate a simple counterfactual."),
-  p("We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, geography, and birthplace (American-born or foreign-born). Within each of these buckets, we calculate average household size in both 2005 and 2022. We then calculate a simple counterfactual: "),
-  p(em("Had average household sizes remained at their 2005 levels, but population demographics shifted to 2022 levels, what would we expect the average American household size to be?")),
+  p("Some of this effect may be compositional. The demographic makeup of Americans 
+    has changed in the last 17 years. Older people, on average, tend to live in smaller 
+    households, and this shift toward an older America could explain the reduction in 
+    household size. At the same time, there are countervailing forces: the population of 
+    Hispanic and Latino Americans has grown, and those individuals tend to live in larger 
+    households than average."),
+  p("We're interested in understanding how Americans' housing behaviors may or may 
+    not reflect a housing supply shortage. If insufficient housing stock exists, then 
+    Americans may be forced to live in closer quarters than they would otherwise prefer. 
+    As suggested by Galster (citation), we calculate a simple counterfactual."),
+  p("We divide Americans into fine-grained buckets based on their age, sex, race/ethnicity, 
+    geography, education, and birthplace (American-born or foreign-born). Within each 
+    of these buckets, we calculate average household size in both 2005 and 2022. We 
+    then calculate a simple counterfactual: "),
+  p(em("Had average household sizes remained at their 2005 levels, but population 
+       demographics shifted to 2022 levels, what would we expect the average American 
+       household size to be?")),
   
   p("From this framing, we have 3 research questions:"),
   
@@ -82,13 +95,7 @@ tab1_ui <- fluidPage(
         the lower-than-expected number of persons per bedroom suggests that Americans 
         today live in more spacious accommodations than they did in 2000. This is 
         consistent with other research showing that square footage per American has 
-        risen over the same period [TODO fact check and cite]."),
-      p("A possible next direction we could take this analysis is to examine the baseline 
-        characteristics of homes in the U.S. and calculate how many additional homes 
-        would need to be built to align with current accommodation preferences. It 
-        is possible that this value would significantly exceed the 750,000 estimate 
-        and align more closely with higher estimates from other researchers.")
-    )
+        risen over the same period [TODO fact check and cite].")
   ),
   
   tags$h2("2 Defining the Counterfactual", id = "02counterfactual"),
@@ -456,10 +463,7 @@ tab1_ui <- fluidPage(
   
   p("Consider the following counterexample. There is a population of 6 individuals.
     The average person-level household size is 3. How many households are there in the population?"),
-  
-  p(strong("Figure 3.2")),
-  plotOutput("plot2tab3"),
-  
+
   p("Figure 3.2 shows two hypothetical Americas consistent with the summary statistics. 
   In scenario 1, average person-level household size is
     \\[ 
@@ -470,6 +474,9 @@ tab1_ui <- fluidPage(
     \\frac{1 + 1 + 4+4+4+4}{6} = 3
     \\]
     "),
+  
+  p(strong("Figure 3.2")),
+  plotOutput("plot2tab3"),
   
   p("How, then, with multiple household configurations, can we determine the size of a 
     housing shortage using actual and counterfactual measures of person-level household
@@ -485,21 +492,11 @@ tab1_ui <- fluidPage(
   p(strong("Note: Lorae has a mathematical proof relevant to this")),
   
   p(strong("Why use person-level metrics?")),
-  
-  p("Household-level average household sizes are what we're more familiar with:
-    they're what is reported by [source], [source], and [source]. Why, then, use
-    person-level metrics?"),
-  
+
   p(HTML(
-    "The problem lies in controlling for demographics. We're interested in how housing
-    supply has surpassed or failed to keep up with the number of people in the country,
-    while acknowledging that demographic shifts alone could account for changes in average
-    household size without a supply shortage needed as an explanation. (For more
-    information, please see the hypothetical example described in the \"Main\"
-    tab of this document.) Hispanic individuals, for example, tend to live in 
-    larger-than-average households, and the United States share of Hispanic individuals
-    has grown in the last 20 years. But what constitutes a \"Hispanic\" household, 
-    and how should we classify households with individuals of varying races, ethnicities,
+    "Person-level metrics provide flexibility when controlling for
+    characteristics that differ between members of a household. How, for example,
+    should we classify households with individuals of varying races, ethnicities,
     ages, and other potentially explanatory sociodemographic characteristics? Previous
     work [cite] has responded to this challenge by using the head of household's 
     characteristics to classify the household. But doing so may misclassify many
@@ -515,5 +512,11 @@ tab1_ui <- fluidPage(
     XX and YY show that heads of household are more likely than other adults in 
     the same residence to have aaa, bb, and ccc characteristics]."
   )),
+  
+  p(HTML("Figure 3.1 provides an example of this concept in practice. Households A and 
+         B contain males and females; houshold C contains one female only. How large is the
+         average \"male\" household? This question is poorly defined when we view
+         each household as a single observation. Household A has one woman, but he only
+         comprises one quarter of the members. Household "))
 
-)
+))

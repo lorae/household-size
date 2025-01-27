@@ -11,7 +11,7 @@ library(shinyBS)
 # Load necessary data
 load("data/all_tables.rda")
 # Source needed helper functions
-source("../src/utils/graphing-tools.R")
+source("graphing-tools.R")
 
 source("ui/tab1_ui.R")
 source("ui/tab2_ui.R")

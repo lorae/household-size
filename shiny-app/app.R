@@ -3,7 +3,7 @@
 library(shiny)
 
 # Source needed helper functions
-source("../src/utils/graphing-tools.R")
+source("graphing-tools.R")
 
 # Load UI and server
 source("ui.R")
