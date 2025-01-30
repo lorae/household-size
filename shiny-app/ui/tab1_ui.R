@@ -434,12 +434,12 @@ tab1_ui <- fluidPage(
   ")),
   
   p(
-    "Figure 3.1 depicts a stylized American population with of three households, 
+    "Figure 1.1 depicts a stylized American population with of three households, 
   with four, two and one member each. 
   "),
   
-  p(strong("Figure 3.1")),
-  plotOutput("plot1tab3"),
+  p(strong("Figure 1.1")),
+  plotOutput("fig1.1"),
   
   p(
     "The household-level average household size 
@@ -464,7 +464,7 @@ tab1_ui <- fluidPage(
   p("Consider the following counterexample. There is a population of 6 individuals.
     The average person-level household size is 3. How many households are there in the population?"),
 
-  p("Figure 3.2 shows two hypothetical Americas consistent with the summary statistics. 
+  p("Figure 1.2 shows two hypothetical Americas consistent with the summary statistics. 
   In scenario 1, average person-level household size is
     \\[ 
     \\frac{3+3+3 + 3+3+3}{6} = 3
@@ -475,8 +475,8 @@ tab1_ui <- fluidPage(
     \\]
     "),
   
-  p(strong("Figure 3.2")),
-  plotOutput("plot2tab3"),
+  p(strong("Figure 1.2")),
+  plotOutput("fig1.2"),
   
   p("How, then, with multiple household configurations, can we determine the size of a 
     housing shortage using actual and counterfactual measures of person-level household
@@ -513,10 +513,24 @@ tab1_ui <- fluidPage(
     the same residence to have aaa, bb, and ccc characteristics]."
   )),
   
-  p(HTML("Figure 3.1 provides an example of this concept in practice. Households A and 
-         B contain males and females; houshold C contains one female only. How large is the
-         average \"male\" household? This question is poorly defined when we view
-         each household as a single observation. Household A has one woman, but he only
-         comprises one quarter of the members. Household "))
+  p(HTML("Figure 1.1 provides an example of this concept in practice. Households A and 
+         B contain Hispanic and non-Hispanics members; houshold C contains one non-Hispanic
+         member only only. What is the average (household-level) size of a \"Hispanic\" household? 
+         This question is poorly defined when we view each household as a single observation. 
+         We may be forced to create an arbitary rule for averaging, such as including
+         every household with at least one Hispanic member or only including households
+         where at least half of the members are Hispanic. Person-level metrics 
+         simplify the question: they ask what the average number of housemates is that
+         a Hispanic person lives with. Using our person-level metrics, we compute:
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{Hispanic}} 
+    = \\frac{4 + 2}{1} = 3
+    \\]
+    \\[ 
+    \\text{(Mean HH Size)}_{\\text{non-Hispanic}} 
+    = \\frac{4 + 4 + 4 + 2 + 1}{5} = 3
+    \\]
+         
+         "))
 
 ))
