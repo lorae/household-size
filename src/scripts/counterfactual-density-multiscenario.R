@@ -243,11 +243,11 @@ scenarios <- list(
   c("CPUMA0010"),
   c("RACE_ETH_bucket"),
   c("RACE_ETH_bucket", "AGE_bucket"),
-  c("RACE_ETH_bucket", "AGE_bucket", "SEX")#,
-  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"),
-  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"),
-  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"),
-  # c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010")
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket"),
+  c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010")
 )
 
 # Generate data for all scenarios
