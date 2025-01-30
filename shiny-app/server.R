@@ -426,19 +426,19 @@ summary(model)"
       )
   })
   
-  output$plot1tab3 <- renderPlot({
-    plot_height <- session$clientData$output_plot1tab3_height / 150  # Scale factor
+  output$fig1.1 <- renderPlot({
+    plot_height <- session$clientData$output_fig1.1_height / 150  # Scale factor
 
     hh_data <- data.frame(
       hh_id = rep(c("Household A", "Household B", "Household C"), times = c(4, 2, 1)),
       x = c(1, 1, 2, 2, 1, 2, 1.5),
       y = c(1, 2, 1, 2, 1.5, 1.5, 1.5),
-      gender = c("Female", "Female", "Female", "Male", "Male", "Female", "Female")
+      gender = c("Non-Hispanic", "Non-Hispanic", "Non-Hispanic", "Hispanic", "Hispanic", "Non-Hispanic", "Non-Hispanic")
     )
     
     ggplot(hh_data, aes(x = x, y = y, fill = gender)) +
       geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
-      scale_fill_manual(values = c("Female" = "white", "Male" = "black")) +
+      scale_fill_manual(values = c("Hispanic" = "white", "Non-Hispanic" = "black")) +
       theme_void(base_size = 10 * plot_height) +
       theme(
         legend.title = element_blank(),
@@ -453,8 +453,8 @@ summary(model)"
       ylim(0, 3)
   })
   
-  output$plot2tab3 <- renderPlot({
-    plot_height <- session$clientData$output_plot1tab3_height / 150  # Scale factor
+  output$fig1.2 <- renderPlot({
+    plot_height <- session$clientData$output_fig1.2_height / 150  # Scale factor
     
     # Data for Scenario 1
     hh_data1 <- data.frame(
