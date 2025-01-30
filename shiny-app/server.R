@@ -9,11 +9,16 @@ library(sf)
 library(patchwork)
 library(shinyAce)
 
-# Load necessary data
+# Load necessary data/results
+# TODO: Add a description of contents of this file (and in what script the results
+# were produced)
 load("data/all_tables.rda")
+# TODO: Add a description of contents of this file (and in what script the results
+# were produced)
 load("data/sex_2005_2022.rda")
-hhresults <- read.csv("data/hh_results.csv")
-bedresults <- read.csv("data/bedroom_results.csv")
+# Loads bedroom_cf and hhsize_cf summary of counterfactual simulations. Produced in
+# ~/src/counterfactual-density-multiscenario.R
+load("data/counterfactuals.rda") 
 
 # Source needed helper functions
 source("graphing-tools.R")
@@ -501,7 +506,7 @@ summary(model)"
   })
   
   output$fig3.1 <- renderDT({
-    hhresults |>
+    hhsize_cf |>
       datatable(
         options = list(
           pageLength = 20,
@@ -514,7 +519,7 @@ summary(model)"
   })
   
   output$fig3.2 <- renderDT({
-    bedresults |>
+    bedroom_cf |>
       datatable(
         options = list(
           pageLength = 20,
