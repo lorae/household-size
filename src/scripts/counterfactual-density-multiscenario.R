@@ -116,6 +116,11 @@ ipums_db <- ipums_db |>
   )
 
 # ----- Step 3: Functionalize counterfactual calculation ----- #
+# This function takes data and metadata about desired counterfactual simulations
+# as an input. As an output, it produces a list with two elements. The first output
+# is a tibble with a single row summarizing the variables controlled for, the 
+# counterfactual output, and the actual output. The second output is a crosstab 
+# table that shows the exact contribution from each component into the summary statistics.
 
 # TODO: This function needs to be modularized and unit-tested.
 calculate_counterfactual <- function(
@@ -132,6 +137,7 @@ calculate_counterfactual <- function(
   # Note that this should be done at this level, but I'm also surprised the crosstab_mean
   # and crosstab_percent functions aren't producing errors when I do this.
   
+  # Calculate the mean outcome in periods 0 and 1 of the data
   print(glue("Calculating {p0} means..."))
   mean_p0 <- crosstab_mean(
     data = p0_data,
@@ -152,6 +158,7 @@ calculate_counterfactual <- function(
   )
   print(glue("{p1} means done!"))
 
+  # Calculate the population composition in period 1
   print(glue("Calculating {p1} percents..."))
   percent_p1 <- crosstab_percent(
     data = p1_data,
@@ -163,6 +170,7 @@ calculate_counterfactual <- function(
     select(-weighted_count, -count)
   print(glue("{p1} percents done!"))
 
+  # Combine means from periods 0 and 1 with population composition from period 1
   crosstab_p0_p1 <- 
     full_join(
       # Join the p0 and p1 mean data frames, appending a _{year} suffix to columns
@@ -217,19 +225,21 @@ calculate_counterfactual <- function(
     summarize(total = sum(.data[[paste0("weighted_mean_", p0)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
-  # Return structured data frame
-  tibble(
-    RACE_ETH_bucket = ("RACE_ETH_bucket" %in% cf_categories),
-    AGE_bucket = ("AGE_bucket" %in% cf_categories),
-    SEX = ("SEX" %in% cf_categories),
-    us_born = ("us_born" %in% cf_categories),
-    EDUC = ("EDUC" %in% cf_categories),
-    INCTOT_cpiu_2010_bucket = ("INCTOT_cpiu_2010_bucket" %in% cf_categories),
-    CPUMA0010 = ("CPUMA0010" %in% cf_categories),
-    counterfactual = cf_outcome_p1,
-    actual = actual_outcome_p1,
-    diff = actual_outcome_p1 - cf_outcome_p1
-  )
+  return(list(
+    summary = tibble(
+      RACE_ETH_bucket = ("RACE_ETH_bucket" %in% cf_categories),
+      AGE_bucket = ("AGE_bucket" %in% cf_categories),
+      SEX = ("SEX" %in% cf_categories),
+      us_born = ("us_born" %in% cf_categories),
+      EDUC = ("EDUC" %in% cf_categories),
+      INCTOT_cpiu_2010_bucket = ("INCTOT_cpiu_2010_bucket" %in% cf_categories),
+      CPUMA0010 = ("CPUMA0010" %in% cf_categories),
+      counterfactual = cf_outcome_p1,
+      actual = actual_outcome_p1,
+      diff = actual_outcome_p1 - cf_outcome_p1
+    ),
+    contributions = crosstab_p0_p1
+    ))
 }
 
 # ----- Step 4: Run counterfactuals ----- #
@@ -252,8 +262,8 @@ scenarios <- list(
 
 # Generate data for all scenarios
 nrow_pull <- 10000000
-p0_sample <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2)) |> head(nrow_pull) |> collect()
-p1_sample <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)) |> head(nrow_pull) |> collect()
+p0_sample <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2)) # |> head(nrow_pull) |> collect()
+p1_sample <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)) # |> head(nrow_pull) |> collect()
 
 # Persons per bedroom
 bedroom_cf <- bind_rows(
@@ -263,7 +273,9 @@ bedroom_cf <- bind_rows(
     p1 = 2019,
     p0_data = p0_sample,
     p1_data = p1_sample,
-    outcome = "persons_per_bedroom"))
+    outcome = "persons_per_bedroom"
+    )$summary # Extract only the summary tibble
+  )
 )
 
 # TODO: add a check in the function calculate_counterfactual that tests whether
@@ -278,9 +290,10 @@ hhsize_cf <- bind_rows(
     p1 = 2019, 
     p0_data = p0_sample, 
     p1_data = p1_sample,
-    outcome = "NUMPREC"))
+    outcome = "NUMPREC"
+    )$summary # Extract only the summary tibble
+  )
 )
-
 
 # ----- Step 5: Save the results ----- #
 save(
