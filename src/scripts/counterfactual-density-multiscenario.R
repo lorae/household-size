@@ -358,37 +358,45 @@ is.na(bedroom_contributions_state$State) |> sum() # No NA values! Great!
 state <- "New Jersey"
 data = hhsize_contributions_state
 #data = bedroom_contributions_state
-boxplot_data <- subset(data, State == state)
 
-# calculate median, weighted median, and weighted mean
-median <- boxplot_data |>
-  pull(diff) |> 
-  median()
-weighted_median <- rep(boxplot_data$diff, times = boxplot_data$pop_2019) |>
-  median()
-weighted_mean <- weighted.mean(boxplot_data$diff, w = boxplot_data$pop_2019)
+# A function that produces a dotplot by state
+dotplot_by_state <- function(
+  state = "New Jersey",
+  data = hhsize_contributions_state
+) {
+  # Subset the data to just that state
+  boxplot_data <- subset(data, State == state)
+  
+  # Calculate median, weighted median, and weighted mean
+  median <- boxplot_data |>
+    pull(diff) |> 
+    median()
+  weighted_median <- rep(boxplot_data$diff, times = boxplot_data$pop_2019) |>
+    median()
+  weighted_mean <- weighted.mean(boxplot_data$diff, w = boxplot_data$pop_2019)
+  
+  # Create the horizontal boxplot with overlaid points
+  output_plot <- ggplot(boxplot_data, aes(x = diff, y = "")) +
+    geom_dotplot(stackdir = "center", dotsize = 0.5, alpha = 0.6, binwidth = 0.05) +
+    theme_minimal() +
+    labs(title = glue("{state}"),
+         x = "Difference (diff)",
+         y = "") +
+    theme(legend.position = "none") +
+    annotate("segment", x = median, xend = median, y = 0.8, yend = 1.2, 
+             linetype = "dotted", color = "black", size = 0.5) +
+    annotate("segment", x = weighted_median, xend = weighted_median, y = 0.8, yend = 1.2, 
+             linetype = "dotted", color = "blue", size = 0.5) +
+    annotate("segment", x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2, 
+             linetype = "dotted", color = "red", size = 0.5) +
+    geom_vline(xintercept = 0, linetype = "solid", color = "black", size = 1) +
+    xlim(-0.8, 0.6)
+    
+      
+      return(output_plot)
+}
 
-# Create the horizontal boxplot with overlaid points
-ggplot(boxplot_data, aes(x = diff, y = "")) +
-  # geom_boxplot(
-  #   outliers = FALSE, # Outlier points are shown anyway in `geom_jitter` below.
-  #   fill = "lightblue", 
-  #   alpha = 0.5, 
-  #   width = 0.3,
-  #   notch = FALSE) +  
-  geom_dotplot(stackdir = "center", dotsize = 0.5, alpha = 0.6) +
-  #geom_jitter(width = 0, height = 0.2, alpha = 0.6, size = 2) + 
-  theme_minimal() +
-  labs(title = glue("{state}"),
-       x = "Difference (diff)",
-       y = "") +
-  theme(legend.position = "none") +
-  geom_segment(aes(x = median, xend = median, y = 0.8, yend = 1.2), 
-               linetype = "dotted", color = "black", size = 0.5) +
-  geom_segment(aes(x = weighted_median, xend = weighted_median, y = 0.8, yend = 1.2), 
-               linetype = "dotted", color = "blue", size = 0.5) +
-  geom_segment(aes(x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2), 
-               linetype = "dotted", color = "red", size = 0.5)
+
 
 #### Sample of unweighted vs weighted histogram
 binwidth = 0.1 # thickness of bars
