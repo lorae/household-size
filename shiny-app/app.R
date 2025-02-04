@@ -1,6 +1,7 @@
 # app.R
 
 library(shiny)
+library(reactable)
 
 # Source needed helper functions
 source("graphing-tools.R")

@@ -8,6 +8,7 @@ library(ggplot2)
 library(sf)
 library(patchwork)
 library(shinyAce)
+library(reactable)
 
 # Load necessary data/results
 # TODO: Add a description of contents of this file (and in what script the results
@@ -19,6 +20,9 @@ load("data/sex_2005_2022.rda")
 # Loads bedroom_cf and hhsize_cf summary of counterfactual simulations. Produced in
 # ~/src/counterfactual-density-multiscenario.R
 load("data/counterfactuals.rda") 
+# Loads aggregated diffs by cpuma0010 and state. loads hhsize_contributions_state,
+# bedroom_contributions_state, state_summary, and list_of_states
+load("data/diffs-by-geography.rda")
 
 # Source needed helper functions
 source("graphing-tools.R")
@@ -529,6 +533,17 @@ summary(model)"
         ),
         rownames = FALSE
       )
+  })
+  
+  output$tab3.1 <- renderReactable({
+    
+    
+    reactable(state_summary, 
+              resizable = TRUE, 
+              showPageSizeOptions = FALSE,
+              onClick = "expand",
+              highlight = TRUE, 
+              height = "auto")
   })
 
 }

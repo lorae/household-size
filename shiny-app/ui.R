@@ -7,6 +7,7 @@ library(scales)
 library(ggplot2)
 library(shinyAce)
 library(shinyBS)
+library(reactable)
 
 # Load necessary data
 load("data/all_tables.rda")
