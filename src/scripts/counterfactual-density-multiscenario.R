@@ -355,7 +355,7 @@ is.na(bedroom_contributions_state$State) |> sum() # No NA values! Great!
 
 #### Sample data viz
 # Filter for New York (STATEFIP = 36)
-state <- "Ohio"
+state <- "New Jersey"
 data = hhsize_contributions_state
 #data = bedroom_contributions_state
 boxplot_data <- subset(data, State == state)
@@ -383,10 +383,13 @@ ggplot(boxplot_data, aes(x = diff, y = "")) +
        x = "Difference (diff)",
        y = "") +
   theme(legend.position = "none") +
-  geom_vline(xintercept = median, linetype = "dotted", color = "black", size = 0.5) +
-  geom_vline(xintercept = weighted_median, linetype = "dotted", color = "blue", size = 0.5) +
-  geom_vline(xintercept = weighted_mean, linetype = "dotted", color = "red", size = 0.5)
-  
+  geom_segment(aes(x = median, xend = median, y = 0.8, yend = 1.2), 
+               linetype = "dotted", color = "black", size = 0.5) +
+  geom_segment(aes(x = weighted_median, xend = weighted_median, y = 0.8, yend = 1.2), 
+               linetype = "dotted", color = "blue", size = 0.5) +
+  geom_segment(aes(x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2), 
+               linetype = "dotted", color = "red", size = 0.5)
+
 #### Sample of unweighted vs weighted histogram
 binwidth = 0.1 # thickness of bars
 
@@ -415,8 +418,10 @@ save(
   file = "shiny-app/data/counterfactuals.rda"
 )
 
-# # Diff data
-# save(
-#   hhsize_contributions_state,
-#   bedroom_contributions_state,
-# )
+# Diff data
+save(
+  hhsize_contributions_state,
+  bedroom_contributions_state,
+  list_of_states,
+  file = "shiny-app/data/diffs-by-geography.rda"
+)
