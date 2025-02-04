@@ -25,6 +25,7 @@ library("tidyr")
 library("purrr")
 library("glue")
 library("readxl")
+library("ggplot2")
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -295,9 +296,114 @@ hhsize_cf <- bind_rows(
   )
 )
 
+# ----- Step 5: Create mappable diff data by CPUMA0010 ----- #
+# Calculate CPUMA-level fully-controlled diffs and contributions to put into a 
+# box-and-whisker plot.
+hhsize_contributions <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"),
+  p0 = 2000,
+  p1 = 2019,
+  p0_data = p0_sample, 
+  p1_data = p1_sample,
+  outcome = "NUMPREC"
+)$contributions
+
+bedroom_contributions <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"),
+  p0 = 2000,
+  p1 = 2019,
+  p0_data = p0_sample, 
+  p1_data = p1_sample,
+  outcome = "persons_per_bedroom"
+)$contributions
+
+hhsize_contributions_summary <- hhsize_contributions |>
+  group_by(CPUMA0010) |>
+  summarize(contribution_diff = sum(contribution_diff, na.rm = TRUE),
+            prop_2019 = sum(percent_2019) / 100, .groups = "drop",
+            pop_2019 = sum(weighted_count_2019)) |>
+  mutate(diff = contribution_diff / prop_2019)
+
+bedroom_contributions_summary <- bedroom_contributions |>
+  group_by(CPUMA0010) |>
+  summarize(contribution_diff = sum(contribution_diff, na.rm = TRUE),
+            prop_2019 = sum(percent_2019) / 100, .groups = "drop",
+            pop_2019 = sum(weighted_count_2019)) |>
+  mutate(diff = contribution_diff / prop_2019)
+
+# Merge with CPUMA to state matching
+load("data/helpers/cpuma-state-cross.rda")
+# Create a list of states to loop through later
+list_of_states <- cpuma_state_cross |>
+  select(State) |>
+  unique()
+
+hhsize_contributions_state <- merge(
+  cpuma_state_cross,
+  hhsize_contributions_summary,
+  by = "CPUMA0010"
+)
+bedroom_contributions_state <- merge(
+  cpuma_state_cross,
+  bedroom_contributions_summary,
+  by = "CPUMA0010"
+)
+
+# Data validity checks
+is.na(hhsize_contributions_state$State) |> sum() # No NA values! Great!
+is.na(bedroom_contributions_state$State) |> sum() # No NA values! Great!
+
+#### Sample data viz
+# Filter for New York (STATEFIP = 36)
+state <- "New York"
+data = hhsize_contributions_state
+#data = bedroom_contributions_state
+boxplot_data <- subset(data, State == state)
+
+# Create the horizontal boxplot with overlaid points
+ggplot(boxplot_data, aes(x = diff, y = "")) +
+  geom_boxplot(
+    outliers = FALSE, # Outlier points are shown anyway in `geom_jitter` below.
+    fill = "lightblue", 
+    alpha = 0.5, 
+    notch = FALSE) +  
+  geom_jitter(width = 0, height = 0.2, alpha = 0.6, size = 2) +  # Overlayed points
+  theme_minimal() +
+  labs(title = glue("{state}"),
+       x = "Difference (diff)",
+       y = "") +
+  theme(legend.position = "none")
+  
+#### Sample of unweighted vs weighted histogram
+binwidth = 0.1 # thickness of bars
+
+# unweighted histogram
+ggplot(boxplot_data, aes(x = diff)) +
+  geom_histogram(binwidth = binwidth, fill = "blue", color = "black") +
+  labs(title = "UNweighted Histogram of diff",
+       x = "diff",
+       y = "Weighted Count") +
+  theme_minimal()
+
+# weighted histogram
+ggplot(boxplot_data, aes(x = diff, weight = pop_2019)) +
+  geom_histogram(binwidth = binwidth, fill = "blue", color = "black") +
+  labs(title = "Weighted Histogram of diff",
+       x = "diff",
+       y = "Weighted Count") +
+  theme_minimal()
+
 # ----- Step 5: Save the results ----- #
+
+# Counterfactuals
 save(
   hhsize_cf, 
   bedroom_cf,
   file = "shiny-app/data/counterfactuals.rda"
 )
+
+# # Diff data
+# save(
+#   hhsize_contributions_state,
+#   bedroom_contributions_state,
+# )
