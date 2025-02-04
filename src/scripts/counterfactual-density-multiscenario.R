@@ -359,6 +359,15 @@ state <- "New Jersey"
 data = hhsize_contributions_state
 #data = bedroom_contributions_state
 
+state_summary <- hhsize_contributions_state |>
+  group_by(State) |>
+  summarize(
+    median = median(diff, na.rm = TRUE),
+    weighted_median = rep(diff, times = pop_2019) |> median(),
+    weighted_mean = weighted.mean(diff, w = pop_2019, na.rm = TRUE),
+    .groups = "drop"
+  )
+
 # A function that produces a dotplot by state
 dotplot_by_state <- function(
   state = "New Jersey",
@@ -430,6 +439,7 @@ save(
 save(
   hhsize_contributions_state,
   bedroom_contributions_state,
+  state_summary,
   list_of_states,
   file = "shiny-app/data/diffs-by-geography.rda"
 )
