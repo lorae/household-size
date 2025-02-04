@@ -1,5 +1,14 @@
 # Define the UI
 tab3_ui <- fluidPage(
+  
+  # Include custom CSS for styling the cell classes
+  tags$head(tags$style(HTML("
+    .tag { padding: 4px 8px; border-radius: 4px; }
+    .num-high { background-color: #FFB6C1; } /* Light Pink */
+    .num-med { background-color: #FFD700; } /* Gold */
+    .num-low { background-color: #90EE90; } /* Light Green */
+  "))),
+  
   tags$h3("Counterfactuals", id = "results"),
   p("Figure 3.1 shows counterfactual household sizes under a variety of controls.
     A 1 indicates that a control was used in a given counterfactual simulation, and
@@ -13,5 +22,7 @@ tab3_ui <- fluidPage(
   
   tags$h3("State-level box and whiskers", id = "boxwhisker"),
   
-  p("In this section, we'll put 50 box-and-whisker plots: one for each state.")
+  p("In this section, we'll put 50 box-and-whisker plots: one for each state."),
+  
+  reactableOutput("tab3.1")
 )
