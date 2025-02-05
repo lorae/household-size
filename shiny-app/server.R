@@ -11,6 +11,7 @@ library(shinyAce)
 library(reactable)
 library(glue)
 library(base64enc)
+library(ggrepel)
 
 # Load necessary data/results
 # TODO: Add a description of contents of this file (and in what script the results
@@ -740,6 +741,24 @@ summary(model)"
       ),
       defaultPageSize = nrow(bedroom_state_summary)
     )
+  })
+  
+  output$fig3.1 <- renderPlot({
+    # Remove the plot column and merge by State
+    merged_data <- hhsize_state_summary |>
+      select(-plot) |>
+      inner_join(bedroom_state_summary |> select(-plot), by = "State", suffix = c("_hhsize", "_bedroom"))
+    
+    # Scatter plot
+    ggplot(merged_data, aes(x = weighted_mean_hhsize, y = weighted_mean_bedroom, label = State)) +
+      geom_point() +
+      geom_text_repel() +
+      labs(x = "Mean Household Size Change",
+           y = "Mean Bedroom Size Change",
+           title = "") +
+      theme_minimal() +
+      geom_vline(xintercept = 0, linetype = "solid", color = "red", size = 0.5) +
+      geom_hline(yintercept = 0, linetype = "solid", color = "red", size = 0.5)
   })
 
 }
