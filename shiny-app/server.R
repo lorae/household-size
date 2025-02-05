@@ -539,10 +539,11 @@ summary(model)"
   })
   
   output$tab3.3 <- renderReactable({
-    state_summary <- state_summary[, c("State", "plot", setdiff(names(state_summary), c("State", "plot", "median")))]
+    # TODO: Fix this crappy line of code for reordering columns
+    hhsize_state_summary <- hhsize_state_summary[, c("State", "plot", setdiff(names(hhsize_state_summary), c("State", "plot", "median")))]
     
     reactable(
-      state_summary,
+      hhsize_state_summary,
       resizable = TRUE,
       showPageSizeOptions = FALSE,
       onClick = "expand",
@@ -635,7 +636,7 @@ summary(model)"
           )
         )
       ),
-      defaultPageSize = nrow(state_summary)
+      defaultPageSize = nrow(hhsize_state_summary)
     )
   })
   
