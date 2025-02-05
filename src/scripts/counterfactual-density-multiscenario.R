@@ -370,8 +370,8 @@ state_summary <- hhsize_contributions_state |>
 
 # A function that produces a dotplot by state
 dotplot_by_state <- function(
-  state = "New Jersey",
-  data = hhsize_contributions_state
+    state = "New Jersey",
+    data = hhsize_contributions_state
 ) {
   # Subset the data to just that state
   boxplot_data <- subset(data, State == state)
@@ -386,24 +386,45 @@ dotplot_by_state <- function(
   
   # Create the horizontal boxplot with overlaid points
   output_plot <- ggplot(boxplot_data, aes(x = diff, y = "")) +
-    geom_dotplot(stackdir = "center", dotsize = 0.5, alpha = 0.6, binwidth = 0.05) +
+    geom_dotplot(stackdir = "center", dotsize = 0.5, alpha = 0.6, binwidth = 0.02) +
     theme_minimal() +
-    labs(title = glue("{state}"),
-         x = "Difference (diff)",
+    labs(title = "",
+         x = "",
          y = "") +
-    theme(legend.position = "none") +
-    annotate("segment", x = median, xend = median, y = 0.8, yend = 1.2, 
-             linetype = "dotted", color = "black", size = 0.5) +
-    annotate("segment", x = weighted_median, xend = weighted_median, y = 0.8, yend = 1.2, 
-             linetype = "dotted", color = "blue", size = 0.5) +
-    annotate("segment", x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2, 
-             linetype = "dotted", color = "red", size = 0.5) +
+    theme_void() +
+    # annotate("segment", x = median, xend = median, y = 0.8, yend = 1.2, 
+    #          linetype = "dotted", color = "black", size = 0.5) +
+    # annotate("segment", x = weighted_median, xend = weighted_median, y = 0.8, yend = 1.2, 
+    #          linetype = "dotted", color = "blue", size = 0.5) +
+    # annotate("segment", x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2, 
+    #          linetype = "dotted", color = "red", size = 0.5) +
     geom_vline(xintercept = 0, linetype = "solid", color = "black", size = 1) +
-    xlim(-0.8, 0.6)
-    
-      
-      return(output_plot)
+    # annotate("segment", x = 0, xend = 0, y = 0.8, yend = 1.2, 
+    #          linetype = "solid", color = "black", size = 0.5) +
+    xlim(-0.5, 0.5) 
+  
+  
+  return(output_plot)
 }
+  
+  # Function to generate base64-encoded ggplot images
+  dotplot_base64 <- function(state, data) {
+    file_path <- tempfile(fileext = ".png")
+    plot <- dotplot_by_state(state, data)
+    # Save plot as PNG to a temporary file
+    ggsave(file_path, plot = plot, width = 5, height = 1, dpi = 100, units = "in")
+    # Convert to base64
+    base64_img <- base64encode(file_path)
+    # Create an HTML img tag with the base64 string
+    img_tag <- sprintf('<img src="data:image/png;base64,%s" width="500px" height="100px"/>', base64_img)
+    
+    return(img_tag)
+  }
+
+# Generate plots for each state and store as base64 images
+state_summary$plot <- sapply(state_summary$State, function(state) {
+  dotplot_base64(state, hhsize_contributions_state)
+})
 
 
 

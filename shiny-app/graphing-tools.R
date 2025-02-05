@@ -21,3 +21,4 @@ map_data <- function(
     scale_fill_gradient2(low = "#0552f7", mid = "white", high = "#e68f0e", midpoint = 0) +
     theme_void()
 }
+
