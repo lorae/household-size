@@ -640,5 +640,106 @@ summary(model)"
     )
   })
   
+  output$tab3.4 <- renderReactable({
+    # TODO: Fix this crappy line of code for reordering columns
+    bedroom_state_summary <- bedroom_state_summary[, c("State", "plot", setdiff(names(bedroom_state_summary), c("State", "plot", "median")))]
+    
+    reactable(
+      bedroom_state_summary,
+      resizable = TRUE,
+      showPageSizeOptions = FALSE,
+      onClick = "expand",
+      highlight = TRUE,
+      pagination = FALSE,
+      height = "auto",
+      defaultColDef = colDef(
+        style = list(
+          height = "90px",
+          textAlign = "center",
+          display = "flex",
+          justifyContent = "center",
+          alignItems = "center"
+        ),
+        headerStyle = list(
+          textAlign = "center",
+          display = "flex",
+          justifyContent = "center",
+          alignItems = "center"
+        )
+      ),
+      columns = list(
+        State = colDef(
+          name = "State",
+          width = 80,
+          style = list(
+            fontSize = "12px",
+            fontWeight = "bold",
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        ),
+        plot = colDef(
+          html = TRUE,
+          width = 420,
+          name = "",
+          style = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        ),
+        weighted_mean = colDef(
+          name = "Weighted mean",
+          format = colFormat(digits = 3),
+          style = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center",
+            color = "red"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        ),
+        weighted_median = colDef(
+          name = "Weighted median",
+          format = colFormat(digits = 3),
+          style = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center",
+            color = "blue"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        )
+      ),
+      defaultPageSize = nrow(bedroom_state_summary)
+    )
+  })
 
 }
