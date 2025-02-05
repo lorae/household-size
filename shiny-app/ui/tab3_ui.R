@@ -73,7 +73,7 @@ tab3_ui <- fluidPage(
   
   tags$h3("State-level Bedroom and Household Occupancy Comparisons", id = "placeholder"),
   
-  p(strong("Figure 3.1: Correlation between occupancy per household and per bedroom is strong")),
+  p(strong("Figure 3.1: Correlation between change in occupancy per household and per bedroom is strong")),
   
   plotOutput("fig3.1", width = "100%", height = "1000px")
   
