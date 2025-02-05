@@ -67,5 +67,7 @@ tab3_ui <- fluidPage(
   
   p(strong("Table 3.4: Bedroom occupancy counterfactuals, by state and CPUMA0010")),
   
+  p("The dot plot x-axis scales go from -0.9 to +0.1."),
+  
   reactableOutput("tab3.4")
 )
