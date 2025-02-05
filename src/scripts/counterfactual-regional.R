@@ -128,14 +128,20 @@ ipums_db <- ipums_db |>
 
 # ----- Step 3: Create mappable diff data by CPUMA0010 ----- #
 
+# Crosswalks CPUMA0010 to state
+load("data/helpers/cpuma-state-cross.rda")
+
+# Create a list of states to loop through later
+list_of_states <- cpuma_state_cross |>
+  select(State) |>
+  unique()
+
 # Generate data for all scenarios
-nrow_pull <- 10000000
-p0_sample <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2)) # |> head(nrow_pull) |> collect()
-p1_sample <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)) # |> head(nrow_pull) |> collect()
+p0_sample <- ipums_db |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2)) 
+p1_sample <- ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)) 
 
 
-# Calculate CPUMA-level fully-controlled diffs and contributions to put into a 
-# box-and-whisker plot.
+# Calculate CPUMA-level fully-controlled diffs
 hhsize_contributions <- calculate_counterfactual(
   cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"),
   p0 = 2000,
@@ -143,7 +149,12 @@ hhsize_contributions <- calculate_counterfactual(
   p0_data = p0_sample, 
   p1_data = p1_sample,
   outcome = "NUMPREC"
-)$contributions
+)$contributions  |>
+  group_by(CPUMA0010) |>
+  summarize(contribution_diff = sum(contribution_diff, na.rm = TRUE),
+            prop_2019 = sum(percent_2019) / 100, .groups = "drop",
+            pop_2019 = sum(weighted_count_2019)) |>
+  mutate(diff = contribution_diff / prop_2019)
 
 bedroom_contributions <- calculate_counterfactual(
   cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"),
@@ -152,37 +163,22 @@ bedroom_contributions <- calculate_counterfactual(
   p0_data = p0_sample, 
   p1_data = p1_sample,
   outcome = "persons_per_bedroom"
-)$contributions
-
-hhsize_contributions_summary <- hhsize_contributions |>
+)$contributions |>
   group_by(CPUMA0010) |>
   summarize(contribution_diff = sum(contribution_diff, na.rm = TRUE),
             prop_2019 = sum(percent_2019) / 100, .groups = "drop",
             pop_2019 = sum(weighted_count_2019)) |>
   mutate(diff = contribution_diff / prop_2019)
 
-bedroom_contributions_summary <- bedroom_contributions |>
-  group_by(CPUMA0010) |>
-  summarize(contribution_diff = sum(contribution_diff, na.rm = TRUE),
-            prop_2019 = sum(percent_2019) / 100, .groups = "drop",
-            pop_2019 = sum(weighted_count_2019)) |>
-  mutate(diff = contribution_diff / prop_2019)
-
-# Merge with CPUMA to state matching
-load("data/helpers/cpuma-state-cross.rda")
-# Create a list of states to loop through later
-list_of_states <- cpuma_state_cross |>
-  select(State) |>
-  unique()
-
+# Attach row specifying state to the CPUMA-level diffs
 hhsize_contributions_state <- merge(
   cpuma_state_cross,
-  hhsize_contributions_summary,
+  hhsize_contributions,
   by = "CPUMA0010"
 )
 bedroom_contributions_state <- merge(
   cpuma_state_cross,
-  bedroom_contributions_summary,
+  bedroom_contributions,
   by = "CPUMA0010"
 )
 
@@ -190,13 +186,19 @@ bedroom_contributions_state <- merge(
 is.na(hhsize_contributions_state$State) |> sum() # No NA values! Great!
 is.na(bedroom_contributions_state$State) |> sum() # No NA values! Great!
 
-#### Sample data viz
-# Filter for New York (STATEFIP = 36)
-state <- "New Jersey"
-data = hhsize_contributions_state
-#data = bedroom_contributions_state
-
-state_summary <- hhsize_contributions_state |>
+# Create summary tables (each row is one state) showing the median, weighted median,
+# and mean diffs. Used as a scaffolding for Shiny app tables 3.3 and 3.4
+# Table 3.3 (Persons per household)
+hhsize_state_summary <- hhsize_contributions_state |>
+  group_by(State) |>
+  summarize(
+    median = median(diff, na.rm = TRUE),
+    weighted_median = rep(diff, times = pop_2019) |> median(),
+    weighted_mean = weighted.mean(diff, w = pop_2019, na.rm = TRUE),
+    .groups = "drop"
+  )
+# Table 3.4 (Persons per bedroom)
+hhsize_state_summary <- hhsize_contributions_state |>
   group_by(State) |>
   summarize(
     median = median(diff, na.rm = TRUE),
@@ -208,7 +210,9 @@ state_summary <- hhsize_contributions_state |>
 # A function that produces a dotplot by state
 dotplot_by_state <- function(
     state = "New Jersey",
-    data = hhsize_contributions_state
+    data = hhsize_contributions_state, # or bedroom_contributions_state
+    x_min = -0.5, # Lowest x-value on dotplot
+    x_max = 0.5 # Highest x-value on dotplot
 ) {
   # Subset the data to just that state
   boxplot_data <- subset(data, State == state)
@@ -229,18 +233,10 @@ dotplot_by_state <- function(
          x = "",
          y = "") +
     theme_void() +
-    # annotate("segment", x = median, xend = median, y = 0.8, yend = 1.2, 
-    #          linetype = "dotted", color = "black", size = 0.5) +
-    # annotate("segment", x = weighted_median, xend = weighted_median, y = 0.8, yend = 1.2, 
-    #          linetype = "dotted", color = "blue", size = 0.5) +
-    # annotate("segment", x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2, 
-    #          linetype = "dotted", color = "red", size = 0.5) +
     geom_vline(xintercept = weighted_mean, linetype = "dotted", color = "red", size = 0.5) +
     geom_vline(xintercept = weighted_median, linetype = "dotted", color = "blue", size = 0.5) +
     geom_vline(xintercept = 0, linetype = "solid", color = "black", size = 1) +
-    # annotate("segment", x = 0, xend = 0, y = 0.8, yend = 1.2, 
-    #          linetype = "solid", color = "black", size = 0.5) +
-    xlim(-0.5, 0.5) 
+    xlim(x_min, x_max)
   
   
   return(output_plot)
@@ -260,9 +256,17 @@ dotplot_base64 <- function(state, data) {
   return(img_tag)
 }
 
-# Generate plots for each state and store as base64 images
-state_summary$plot <- sapply(state_summary$State, function(state) {
+# Add to tables 3.3 and 3.4: "Plot" column which includes base 64 encoded images of dotplots.
+# Table 3.3 (Persons per household)
+# The warning messages of removal of rows are expected: since our x range is -0.5 to
+# 0.5, we exclude two observations falling outside that range. Small sacrifice to make 
+# the data easier to view.
+hhsize_state_summary$plot <- sapply(hhsize_state_summary$State, function(state) {
   dotplot_base64(state, hhsize_contributions_state)
+})
+# Table 3.4 (Persons per bedroom)
+bedroom_state_summary$plot <- sapply(bedroom_state_summary$State, function(state) {
+  dotplot_base64(state, bedroom_contributions_state)
 })
 
 
@@ -271,8 +275,8 @@ state_summary$plot <- sapply(state_summary$State, function(state) {
 # Diff data
 save(
   hhsize_contributions_state,
+  hhsize_state_summary,
   bedroom_contributions_state,
-  state_summary,
   list_of_states,
   file = "shiny-app/data/diffs-by-geography.rda"
 )
