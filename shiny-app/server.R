@@ -512,7 +512,7 @@ summary(model)"
     plot1 / plot2
   })
   
-  output$fig3.1 <- renderDT({
+  output$tab3.1 <- renderDT({
     hhsize_cf |>
       datatable(
         options = list(
@@ -525,7 +525,7 @@ summary(model)"
         )
   })
   
-  output$fig3.2 <- renderDT({
+  output$tab3.2 <- renderDT({
     bedroom_cf |>
       datatable(
         options = list(
@@ -538,7 +538,7 @@ summary(model)"
       )
   })
   
-  output$tab3.1 <- renderReactable({
+  output$tab3.3 <- renderReactable({
     state_summary <- state_summary[, c("State", "plot", setdiff(names(state_summary), c("State", "plot", "median")))]
     
     reactable(
