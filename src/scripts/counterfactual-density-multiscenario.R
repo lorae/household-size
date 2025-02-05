@@ -398,6 +398,8 @@ dotplot_by_state <- function(
     #          linetype = "dotted", color = "blue", size = 0.5) +
     # annotate("segment", x = weighted_mean, xend = weighted_mean, y = 0.8, yend = 1.2, 
     #          linetype = "dotted", color = "red", size = 0.5) +
+    geom_vline(xintercept = weighted_mean, linetype = "dotted", color = "red", size = 0.5) +
+    geom_vline(xintercept = weighted_median, linetype = "dotted", color = "blue", size = 0.5) +
     geom_vline(xintercept = 0, linetype = "solid", color = "black", size = 1) +
     # annotate("segment", x = 0, xend = 0, y = 0.8, yend = 1.2, 
     #          linetype = "solid", color = "black", size = 0.5) +

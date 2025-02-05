@@ -538,32 +538,107 @@ summary(model)"
       )
   })
   
-  
-  
   output$tab3.1 <- renderReactable({
+    state_summary <- state_summary[, c("State", "plot", setdiff(names(state_summary), c("State", "plot", "median")))]
     
-
-    
-    # Reorder columns: `State` first, then `plot`, then everything else
-    state_summary <- state_summary[, c("State", "plot", setdiff(names(state_summary), c("State", "plot")))]
-    
-    # Create reactable table with plots
     reactable(
       state_summary,
-      resizable = TRUE, 
+      resizable = TRUE,
       showPageSizeOptions = FALSE,
       onClick = "expand",
-      highlight = TRUE, 
+      highlight = TRUE,
       pagination = FALSE,
       height = "auto",
       defaultColDef = colDef(
-        style = list(height = "110px")  # Adjust row height (default is ~35px)
+        style = list(
+          height = "110px",
+          textAlign = "center",
+          display = "flex",
+          justifyContent = "center",
+          alignItems = "center"
+        ),
+        headerStyle = list(
+          textAlign = "center",
+          display = "flex",
+          justifyContent = "center",
+          alignItems = "center"
+        )
       ),
       columns = list(
-        plot = colDef(html = TRUE, width = 520) # Adjust width of plot column
-      )
+        State = colDef(
+          name = "State",
+          width = 200,
+          style = list(
+            fontSize = "18px",
+            fontWeight = "bold",
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        ),
+        plot = colDef(
+          html = TRUE,
+          width = 520,
+          name = "",
+          style = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        ),
+        weighted_mean = colDef(
+          name = "Weighted mean",
+          format = colFormat(digits = 3),
+          style = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center",
+            color = "red"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        ),
+        weighted_median = colDef(
+          name = "Weighted median",
+          format = colFormat(digits = 3),
+          style = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center",
+            color = "blue"
+          ),
+          headerStyle = list(
+            textAlign = "center",
+            display = "flex",
+            justifyContent = "center",
+            alignItems = "center"
+          )
+        )
+      ),
+      defaultPageSize = nrow(state_summary)
     )
   })
+  
   
 
 }
