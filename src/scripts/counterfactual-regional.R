@@ -198,7 +198,7 @@ hhsize_state_summary <- hhsize_contributions_state |>
     .groups = "drop"
   )
 # Table 3.4 (Persons per bedroom)
-hhsize_state_summary <- hhsize_contributions_state |>
+bedroom_state_summary <- bedroom_contributions_state |>
   group_by(State) |>
   summarize(
     median = median(diff, na.rm = TRUE),
@@ -243,9 +243,14 @@ dotplot_by_state <- function(
 }
 
 # Function to generate base64-encoded ggplot images
-dotplot_base64 <- function(state, data) {
+dotplot_base64 <- function(
+    state, 
+    data, 
+    x_min = -0.5, # Lowest x-value on dotplot
+    x_max = 0.5 # Highest x-value on dotplot
+    ) {
   file_path <- tempfile(fileext = ".png")
-  plot <- dotplot_by_state(state, data)
+  plot <- dotplot_by_state(state, data, x_min, x_max)
   # Save plot as PNG to a temporary file
   ggsave(file_path, plot = plot, width = 5, height = 1, dpi = 100, units = "in")
   # Convert to base64
@@ -261,12 +266,24 @@ dotplot_base64 <- function(state, data) {
 # The warning messages of removal of rows are expected: since our x range is -0.5 to
 # 0.5, we exclude two observations falling outside that range. Small sacrifice to make 
 # the data easier to view.
+# TODO: Add warning showing number of excluded observations based on inputted x_min
+# and x_max
 hhsize_state_summary$plot <- sapply(hhsize_state_summary$State, function(state) {
-  dotplot_base64(state, hhsize_contributions_state)
+  dotplot_base64(
+    state = state, 
+    data = hhsize_contributions_state,
+    x_min = -0.5,
+    x_max = 0.5 
+    )
 })
 # Table 3.4 (Persons per bedroom)
 bedroom_state_summary$plot <- sapply(bedroom_state_summary$State, function(state) {
-  dotplot_base64(state, bedroom_contributions_state)
+  dotplot_base64(
+    state = state, 
+    data = bedroom_contributions_state,
+    x_min = -0.9,
+    x_max = 0.1
+  )
 })
 
 
@@ -277,6 +294,7 @@ save(
   hhsize_contributions_state,
   hhsize_state_summary,
   bedroom_contributions_state,
+  bedroom_state_summary,
   list_of_states,
   file = "shiny-app/data/diffs-by-geography.rda"
 )

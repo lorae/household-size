@@ -52,14 +52,20 @@ tab3_ui <- fluidPage(
   
   p("Both tables display all 50 states and the District of Columbia."),
   
-  tags$h4("Household size counterfactuals, by state"),
+  tags$h4("Household occupancy counterfactuals, by state"),
   
-  p(strong("Table 3.3: Household size counterfactuals, by state and CPUMA0010")),
+  p(strong("Table 3.3: Household occupancy counterfactuals, by state and CPUMA0010")),
   
   p("The dot plots are cut off at +0.5 and -0.5. A very limited number of observations (roughly
     3 total) [TODO: get exact amount. Mark these dots as red on the dotplot] of >1000 
     CPUMA0010s [TODO: get exact number] are not displayed because they fall outside the (-0.5, 
     +0.5) range"),
 
-  reactableOutput("tab3.3")
+  reactableOutput("tab3.3"),
+  
+  tags$h4("Bedroom occupancy counterfactuals, by state"),
+  
+  p(strong("Table 3.4: Bedroom occupancy counterfactuals, by state and CPUMA0010")),
+  
+  reactableOutput("tab3.4")
 )
