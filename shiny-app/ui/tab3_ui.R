@@ -20,7 +20,7 @@ tab3_ui <- fluidPage(
 
   DTOutput("tab3.2"),
   
-  tags$h3("State-level Dot Plots", id = "boxwhisker"),
+  tags$h3("State-level Dot Plots", id = "placeholder"),
   
   p("In IPUMS, the smallest geographic unit availabe that is consistent across the
     years we study is the CPUMA0010 region. The designation of a CPUMA0010 region is 
@@ -66,8 +66,15 @@ tab3_ui <- fluidPage(
   tags$h4("Bedroom occupancy counterfactuals, by state"),
   
   p(strong("Table 3.4: Bedroom occupancy counterfactuals, by state and CPUMA0010")),
-  
+
   p("The dot plot x-axis scales go from -0.9 to +0.1."),
   
-  reactableOutput("tab3.4")
+  reactableOutput("tab3.4"),
+  
+  tags$h3("State-level Bedroom and Household Occupancy Comparisons", id = "placeholder"),
+  
+  p(strong("Figure 3.1: Correlation between occupancy per household and per bedroom is strong")),
+  
+  plotOutput("fig3.1", width = "100%", height = "1000px")
+  
 )
