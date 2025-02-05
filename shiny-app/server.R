@@ -9,6 +9,8 @@ library(sf)
 library(patchwork)
 library(shinyAce)
 library(reactable)
+library(glue)
+library(base64enc)
 
 # Load necessary data/results
 # TODO: Add a description of contents of this file (and in what script the results
@@ -26,6 +28,7 @@ load("data/diffs-by-geography.rda")
 
 # Source needed helper functions
 source("graphing-tools.R")
+
 
 # Read in shapefiles of every CPUMA0010 region in the United States
 #sf <- read_sf("data/ipums_cpuma0010.shp")
@@ -535,15 +538,32 @@ summary(model)"
       )
   })
   
+  
+  
   output$tab3.1 <- renderReactable({
     
+
     
-    reactable(state_summary, 
-              resizable = TRUE, 
-              showPageSizeOptions = FALSE,
-              onClick = "expand",
-              highlight = TRUE, 
-              height = "auto")
+    # Reorder columns: `State` first, then `plot`, then everything else
+    state_summary <- state_summary[, c("State", "plot", setdiff(names(state_summary), c("State", "plot")))]
+    
+    # Create reactable table with plots
+    reactable(
+      state_summary,
+      resizable = TRUE, 
+      showPageSizeOptions = FALSE,
+      onClick = "expand",
+      highlight = TRUE, 
+      pagination = FALSE,
+      height = "auto",
+      defaultColDef = colDef(
+        style = list(height = "110px")  # Adjust row height (default is ~35px)
+      ),
+      columns = list(
+        plot = colDef(html = TRUE, width = 520) # Adjust width of plot column
+      )
+    )
   })
+  
 
 }
