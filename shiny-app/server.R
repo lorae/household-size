@@ -551,7 +551,7 @@ summary(model)"
       height = "auto",
       defaultColDef = colDef(
         style = list(
-          height = "110px",
+          height = "90px",
           textAlign = "center",
           display = "flex",
           justifyContent = "center",
@@ -567,9 +567,9 @@ summary(model)"
       columns = list(
         State = colDef(
           name = "State",
-          width = 200,
+          width = 80,
           style = list(
-            fontSize = "18px",
+            fontSize = "12px",
             fontWeight = "bold",
             textAlign = "center",
             display = "flex",
@@ -585,7 +585,7 @@ summary(model)"
         ),
         plot = colDef(
           html = TRUE,
-          width = 520,
+          width = 420,
           name = "",
           style = list(
             textAlign = "center",
@@ -638,7 +638,6 @@ summary(model)"
       defaultPageSize = nrow(state_summary)
     )
   })
-  
   
 
 }

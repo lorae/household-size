@@ -418,7 +418,7 @@ dotplot_by_state <- function(
     # Convert to base64
     base64_img <- base64encode(file_path)
     # Create an HTML img tag with the base64 string
-    img_tag <- sprintf('<img src="data:image/png;base64,%s" width="500px" height="100px"/>', base64_img)
+    img_tag <- sprintf('<img src="data:image/png;base64,%s" width="400px" height="80px"/>', base64_img)
     
     return(img_tag)
   }
