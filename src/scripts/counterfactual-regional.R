@@ -268,6 +268,8 @@ dotplot_base64 <- function(
 # the data easier to view.
 # TODO: Add warning showing number of excluded observations based on inputted x_min
 # and x_max
+# TODO: attach metadata about these x-axis limits to plots themselves and automatically
+# read/display in the server rendering of figures
 hhsize_state_summary$plot <- sapply(hhsize_state_summary$State, function(state) {
   dotplot_base64(
     state = state, 
