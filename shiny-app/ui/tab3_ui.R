@@ -75,6 +75,10 @@ tab3_ui <- fluidPage(
   
   p(strong("Figure 3.1: Correlation between change in occupancy per household and per bedroom is strong")),
   
-  plotOutput("fig3.1", width = "100%", height = "1000px")
+  plotOutput("fig3.1", width = "100%", height = "1000px"),
+  
+  p(strong("Figure 3.2: No correlation between change in occupancy per household and change in population")),
+  
+  plotOutput("fig3.2", width = "100%", height = "1000px")
   
 )

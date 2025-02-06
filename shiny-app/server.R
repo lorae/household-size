@@ -760,5 +760,18 @@ summary(model)"
       geom_vline(xintercept = 0, linetype = "solid", color = "red", size = 0.5) +
       geom_hline(yintercept = 0, linetype = "solid", color = "red", size = 0.5)
   })
+  
+  output$fig3.2 <- renderPlot({
+    # Scatter plot
+    ggplot(fig3.2_tab, aes(x = weighted_mean, y = pop_growth_percent, label = State)) +
+      geom_point() +
+      geom_text_repel() +
+      labs(x = "Mean Household Size Change",
+           y = "Percentage Population Growth",
+           title = "") +
+      theme_minimal() +
+      geom_vline(xintercept = 0, linetype = "solid", color = "red", size = 0.5) +
+      geom_hline(yintercept = 0, linetype = "solid", color = "red", size = 0.5)
+  })
 
 }

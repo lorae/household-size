@@ -288,6 +288,14 @@ bedroom_state_summary$plot <- sapply(bedroom_state_summary$State, function(state
   )
 })
 
+# ----- Step 4: Merge data for scatterplots ----- #
+# Figures 3.1 and 3.2
+
+# Figure 3.1: Scatter household density change with bedroom density change
+
+# Figure 3.2: Scatter household density change with population change
+fig3.2_tab <- hhsize_state_summary |> select(-plot) |>
+  inner_join(state_pop_growth, by = "State")
 
 # ----- Step 5: Save the results ----- #
 
@@ -298,5 +306,6 @@ save(
   bedroom_contributions_state,
   bedroom_state_summary,
   list_of_states,
+  fig_3.2_tab,
   file = "shiny-app/data/diffs-by-geography.rda"
 )
