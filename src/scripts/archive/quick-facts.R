@@ -1,3 +1,6 @@
+# NOTE to self: This script appears deprecated. I am not sure where puma_diff
+# is - the database has been streamlined to only one table. Consider removing.
+
 puma_diff_db <- tbl(con, "puma_diff")
 puma_diff_tb <-puma_diff_db |> collect()
 
