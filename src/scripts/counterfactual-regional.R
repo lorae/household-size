@@ -43,6 +43,7 @@ source("src/utils/counterfactual-tools.R") # Includes function for counterfactua
 
 # ----- Step 2: Import and wrangle data ----- #
 
+load("data/helpers/state-pop-growth.rda") # For Figure 3.2
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
 
 # ----- Step 2a: Import CPI-U data ----- #
