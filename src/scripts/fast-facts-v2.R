@@ -131,9 +131,78 @@ tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "SEX", 
 tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = c())
 
 
-# ----- Step 4: Fast facts! ----- #
+# ----- Step 4a: Fast facts! ----- #
 # Household size in 2000 and 2019
 tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = c())
-   
-   
-   
+  
+# ----- Step 4b: Fast facts! ----- #
+# Household size in 2000 and 2019 by race/ethnicity
+tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "RACE_ETH_bucket")
+
+# Create data for bar plot
+race_summary_2000 <- tabulate_summary(data = ipums_db, year = 2000, group_by = "RACE_ETH_bucket") |> mutate(year = 2000)
+race_summary_2019 <- tabulate_summary(data = ipums_db, year = 2019, group_by = "RACE_ETH_bucket") |> mutate(year = 2019)
+race_summary <- union_all(race_summary_2000, race_summary_2019) # Row bind the tables
+
+# Define a single main color for all bars
+main_color <- "steelblue"
+
+# FIGURE 1: Create the bar plot with side-by-side bars for 2000 and 2019
+fig01 <- ggplot(race_summary, aes(x = subgroup, y = hhsize, fill = factor(year))) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), 
+           width = 0.8, color = "black") +  # Bar border
+  geom_text(aes(label = round(hhsize, 2), group = year), 
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5, size = 3) +  
+  scale_fill_manual(
+    values = c("2000" = alpha(main_color, 0.4), "2019" = alpha(main_color, 0.8)), 
+    name = "") +  # Ensures the legend colors match bar colors
+  labs(y = "People per household") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    legend.position = "bottom",
+    legend.box = "horizontal",
+    axis.title.x = element_blank(),
+    plot.margin = margin(t = 10, r = 10, b = 0, l = 10)
+  )
+
+
+# Household size in 2000 and 2019 by age
+age_summary <- tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "AGE")
+# Ages with the largest household sizes
+age_summary |> slice_max(hhsize_2000, n = 1)
+age_summary |> slice_max(hhsize_2019, n = 1)
+# Graph
+# Filter data to only include ages up to 90
+age_summary_filtered <- age_summary |>
+  mutate(hhsize_diff_2019_2000 = hhsize_2019 - hhsize_2000) |>
+  filter(subgroup <= 90)
+
+# Create the bar plot
+ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_pctchg_2000_2019)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(
+    title = "Percentage Change in Household Size (2000-2019) by Age (≤90)",
+    x = "Age",
+    y = "Percentage Change"
+  ) +
+  scale_x_discrete(breaks = seq(0, 90, by = 5)) +  # Labels only every 5th subgroup
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+# Create the bar plot
+ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_diff_2019_2000)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  labs(
+    title = "Absolute Change in Household Size (2000-2019) by Age (≤90)",
+    x = "Age",
+    y = "Household Size Change (Persons per Household)"
+  ) +
+  scale_x_discrete(breaks = seq(0, 90, by = 5)) +  # Labels only every 5th subgroup
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+
+# Household size in 2000 and 2019 by age bucket
+tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "AGE_bucket")
