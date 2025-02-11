@@ -22,16 +22,14 @@ devtools::load_all("../dataduck")
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
 ipums_db <- tbl(con, "ipums_processed")
 
-# ----- Step 3a: Fast facts! ----- #
-# Overall household size, group quarters excluded, in 2000 and 2019.
-
+# ----- Step 3: Define functions for tabulating summaries ----- #
 # Function to compute weighted household size (or bedroom size) by designated group_by category
 # in designated year
 tabulate_summary <- function(
   data, 
   year = 2000,
   value = "NUMPREC", # could also be `persons_per_bedroom`
-  group_by = "SEX", # For now, only c() or one string (e.g. "SEX") are supported. No multi-string vectors
+  group_by = NULL, # For now, only NULL or one string (e.g. "SEX") are supported. No multi-string vectors
   group_encoding = NULL # Optional encoding of factor labels for group_by variable. E.g. if
   # group_by = "SEX", you may input 1 = "Male", 2 = "Female"
   ){
@@ -40,7 +38,7 @@ tabulate_summary <- function(
 
   result <- crosstab_mean(
     data = data_filtered,
-    value = "NUMPREC",
+    value = value,
     wt_col = "PERWT",
     group_by = group_by,
     every_combo = FALSE
@@ -81,25 +79,61 @@ tabulate_summary <- function(
   return(result)
 }
 
-# Example usage
-tabulate_summary(data = ipums_db, year = 2000, group_by = "RACE_ETH_bucket", group_encoding = NULL)
+# Wrapper function to tabulate summary of 2 years
+tabulate_summary_2year <- function(
+    data, 
+    years = c(2000, 2019),
+    value = "NUMPREC", # could also be `persons_per_bedroom`
+    group_by = NULL, # For now, only NULL or one string (e.g. "SEX") are supported. No multi-string vectors
+    group_encoding = NULL # Optional encoding of factor labels for group_by variable. E.g. if
+    # group_by = "SEX", you may input 1 = "Male", 2 = "Female"
+) {
+  # Extract years dynamically
+  year1 <- years[1]
+  year2 <- years[2]
+  
+  # Compute summaries for both years
+  year1_table <- tabulate_summary(data, year1, value, group_by, group_encoding)
+  year2_table <- tabulate_summary(data, year2, value, group_by, group_encoding)
+  
+  # Merge results using dynamically constructed suffixes
+  combined_table <- merge(year1_table, year2_table, by = "subgroup", suffixes = paste0("_", years))
+  
+  # Find all columns ending in _year1 and _year2 dynamically
+  year1_cols <- grep(paste0("_", year1, "$"), names(combined_table), value = TRUE)
+  year2_cols <- grep(paste0("_", year2, "$"), names(combined_table), value = TRUE)
+  
+  # Ensure matched pairs
+  common_vars <- intersect(gsub(paste0("_", year1), "", year1_cols), gsub(paste0("_", year2), "", year2_cols))
+  
+  # Compute percent changes dynamically
+  for (var in common_vars) {
+    col1 <- paste0(var, "_", year1)
+    col2 <- paste0(var, "_", year2)
+    pct_col <- paste0(var, "_pctchg_", year1, "_", year2)
+    
+    result <- combined_table |> mutate(!!pct_col := (!!sym(col2) - !!sym(col1)) / !!sym(col1) * 100)
+  }
+  
+  return(result)
+}
+
+
+# Example usage of tabulate_summary()
+tabulate_summary(data = ipums_db, year = 2000, group_by = "RACE_ETH_bucket")
 tabulate_summary(data = ipums_db, year = 2000, group_by = "SEX", group_encoding = c("1" = "Male", "2" = "Female"))
 tabulate_summary(data = ipums_db, year = 2000, group_by = c())
+#tabulate_summary(data = ipums_db, year = 2000, value = "persons_per_bedroom", group_by = c())
 
-# Compute household sizes for multiple years
-years <- c(2000, 2019)
-overall_hhsize_results <- tibble(
-  year = years,
-  hhsize = map_dbl(year, ~ get_overall_hhsize(ipums_db, .x))
-)
+# Example usage of tabulate_summary_2year()
+tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "RACE_ETH_bucket")
+tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "SEX", group_encoding = c("1" = "Male", "2" = "Female"))
+tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = c())
 
-hhsize_2000 <- overall_hhsize_results |> filter(year == 2000) |> pull(hhsize)
-hhsize_2019 <- overall_hhsize_results |> filter(year == 2019) |> pull(hhsize)
 
-hhsize_pctchg_2000_2019 <- (hhsize_2019 - hhsize_2000) / hhsize_2000 * 100 # pct change in hhsize from 2000 to 2019
-   
-# ----- Step 3b: Fast facts! ----- #
-# Household size by race/ethnicity, group quarters excluded, in 2000 and 2019.  
+# ----- Step 4: Fast facts! ----- #
+# Household size in 2000 and 2019
+tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = c())
    
    
    
