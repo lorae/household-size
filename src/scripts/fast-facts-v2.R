@@ -234,7 +234,6 @@ ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_diff_2019_2000
 ##############################################
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
 ##############################################
-#### BETA: facet plot with all races together.
 # Define race order (ensuring correct factor levels for consistent ordering)
 race_order <- c("All", "AAPI", "AIAN", "Black", "Hispanic", "White", "Multiracial", "Other")
 age_bucket_summary <- age_bucket_summary %>%
@@ -245,11 +244,13 @@ left_data <- age_bucket_summary %>% filter(RACE_ETH_bucket %in% race_order[1:4])
 right_data <- age_bucket_summary %>% filter(RACE_ETH_bucket %in% race_order[5:8])  # Last 4 races
 
 # Left plot (Facet titles on the LEFT)
-left_plot <- ggplot(left_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+left_plot <- ggplot(left_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019, 
+                                   fill = RACE_ETH_bucket == "All")) +  # Conditional fill
+  geom_bar(stat = "identity") +
   facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
   geom_vline(aes(xintercept = as.numeric(subgroup)), color = "grey80", linetype = "dashed", size = 0.3) +
   geom_hline(yintercept = 0, color = "black", size = 0.6) +
+  scale_fill_manual(values = c("TRUE" = "grey60", "FALSE" = "steelblue"), guide = "none") +  # Define colors
   theme_minimal() +
   theme(
     strip.text.y.left = element_text(angle = 0, hjust = 1, vjust = 0.5, color = "black", size = 10),  # Labels on the left
@@ -273,7 +274,7 @@ left_plot <- ggplot(left_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
   ) +
   scale_y_continuous(
     breaks = seq(-10, 10, by = 5),  # Tick marks every 5%
-    limits = c(-16, 16),
+    limits = c(-15, 15),
     labels = function(x) paste0(x, "%"),  # Add percentage symbol
     sec.axis = dup_axis(name = NULL, labels = function(x) paste0(x, "%"))  # Adds tick marks with percentage on the right
   ) +
@@ -282,16 +283,22 @@ left_plot <- ggplot(left_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
 left_plot
 
 # Right plot (Facet titles on the RIGHT)
-right_plot <- ggplot(right_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
+right_plot <- ggplot(right_data, aes(x = subgroup, 
+                                     y = pmin(hhsize_pctchg_2000_2019, 14))) +  # Cap at 14% (leave room for asterisk at 14.5%)
   geom_bar(stat = "identity", fill = "steelblue") +
   facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed") +
   geom_vline(aes(xintercept = as.numeric(subgroup)), color = "grey80", linetype = "dashed", size = 0.3) +
   geom_hline(yintercept = 0, color = "black", size = 0.6) +
+  
+  # Add an asterisk above the capped bar at a safe y-position (14.5 instead of 16)
+  geom_text(data = right_data %>% filter(RACE_ETH_bucket == "Other", subgroup == "80-84"),
+            aes(x = subgroup, y = 14.5, label = "*"),
+            size = 5, color = "black") +
+  
   theme_minimal() +
   theme(
     strip.text.y = element_text(angle = 0, hjust = 0, vjust = 0.5, color = "black", size = 10),  # Labels on the right
-    strip.placement = "outside",
-    strip.position = "right",
+    strip.placement = "outside",  # Fixing the warning by removing strip.position
     panel.spacing = unit(0.8, "lines"),  # Slightly reduce panel spacing
     panel.spacing.y = unit(0.1, "lines"),  # Reduce vertical spacing
     axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1, size = 6),
@@ -314,19 +321,22 @@ right_plot <- ggplot(right_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019))
   ) +
   scale_y_continuous(
     breaks = seq(-10, 10, by = 5),  # Tick marks every 5%
-    limits = c(-16, 16),
+    limits = c(-15, 15),
     sec.axis = dup_axis(name = NULL)  # Keep tick marks without labels
   ) +
   labs(y = NULL, x = NULL)  # Remove y-axis label
+
 right_plot
 
 # Combine both plots into one, side-by-side
 combined_plot <- left_plot + right_plot + 
   plot_layout(widths = c(1, 1)) + 
-  plot_annotation(title = "Percentage Change in Household Size (2000-2019) by Age and Race")
+  plot_annotation(
+    caption = "*The 80-84 age group's increase in the 'Other' category exceeds the y-axis limits of ±15%."
+    )
 
-# Save the combined plot with correct width
-ggsave("results/fig02_combined.png", plot = combined_plot, width = 6.5, height = 6.5, dpi = 500)
+# Save the combined plot
+ggsave("results/fig02.png", plot = combined_plot, width = 6.5, height = 6.5, dpi = 500)
 
 # Display the combined plot
 print(combined_plot)
