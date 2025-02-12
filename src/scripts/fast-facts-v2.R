@@ -249,20 +249,36 @@ left_plot <- ggplot(left_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
   geom_vline(aes(xintercept = as.numeric(subgroup)), color = "grey80", linetype = "dashed", size = 0.3) +
+  geom_hline(yintercept = 0, color = "black", size = 0.6) +
   theme_minimal() +
   theme(
-    strip.text.y.left = element_text(angle = 0, hjust = 0, vjust = 0.5, color = "red", size = 10),  # Labels on the left
+    strip.text.y.left = element_text(angle = 0, hjust = 1, vjust = 0.5, color = "black", size = 10),  # Labels on the left
     strip.placement = "outside",
     panel.spacing = unit(1, "lines"),
     panel.spacing.y = unit(0.2, "lines"),
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
-    axis.text.y = element_blank(),
-    panel.grid.major.y = element_line(color = "gray", size = 0.5),
+    axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1, size = 6),
+    
+    # Hide left-side axis labels
+    axis.text.y.left = element_blank(),
+    axis.ticks.y.left = element_blank(),
+    
+    # Add subtle tick marks on the right side without grid lines
+    axis.text.y.right = element_text(size = 8, color = "black", hjust = 1),  # Right-align text
+    axis.ticks.y.right = element_line(color = "black", size = 0.3),  # Subtle tick marks
+    
+    # Remove major y-grid lines
+    panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
     panel.grid.major.x = element_blank()
   ) +
-  scale_y_continuous(breaks = c(0), limits = c(-15, 15)) +
-  labs(y = NULL)  # Remove y-axis label
+  scale_y_continuous(
+    breaks = seq(-10, 10, by = 5),  # Tick marks every 5%
+    limits = c(-16, 16),
+    labels = function(x) paste0(x, "%"),  # Add percentage symbol
+    sec.axis = dup_axis(name = NULL, labels = function(x) paste0(x, "%"))  # Adds tick marks with percentage on the right
+  ) +
+  labs(y = NULL, x = NULL)  # Remove y-axis label
+
 left_plot
 
 # Right plot (Facet titles on the RIGHT)
@@ -270,21 +286,38 @@ right_plot <- ggplot(right_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019))
   geom_bar(stat = "identity", fill = "steelblue") +
   facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed") +
   geom_vline(aes(xintercept = as.numeric(subgroup)), color = "grey80", linetype = "dashed", size = 0.3) +
+  geom_hline(yintercept = 0, color = "black", size = 0.6) +
   theme_minimal() +
   theme(
-    strip.text.y = element_text(angle = 0, hjust = 0, vjust = 0.5, color = "red", size = 10),  # Labels on the right
+    strip.text.y = element_text(angle = 0, hjust = 0, vjust = 0.5, color = "black", size = 10),  # Labels on the right
     strip.placement = "outside",
     strip.position = "right",
-    panel.spacing = unit(1, "lines"),
-    panel.spacing.y = unit(0.2, "lines"),
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
-    axis.text.y = element_blank(),
-    panel.grid.major.y = element_line(color = "gray", size = 0.5),
+    panel.spacing = unit(0.8, "lines"),  # Slightly reduce panel spacing
+    panel.spacing.y = unit(0.1, "lines"),  # Reduce vertical spacing
+    axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1, size = 6),
+    
+    # Add subtle tick marks on the LEFT side without labels
+    axis.text.y.left = element_blank(),  # No numeric labels
+    axis.ticks.y.left = element_line(color = "black", size = 0.3),  # Subtle tick marks
+    
+    # Hide right-side axis labels
+    axis.text.y.right = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    
+    # Remove major y-grid lines
+    panel.grid.major.y = element_blank(),
     panel.grid.minor.y = element_blank(),
-    panel.grid.major.x = element_blank()
+    panel.grid.major.x = element_blank(),
+    
+    # Adjust plot margins to reduce left-side empty space
+    plot.margin = margin(5, 5, 5, -10)  # Reduce left margin
   ) +
-  scale_y_continuous(breaks = c(0), limits = c(-15, 15)) +
-  labs(y = NULL)  # Remove y-axis label
+  scale_y_continuous(
+    breaks = seq(-10, 10, by = 5),  # Tick marks every 5%
+    limits = c(-16, 16),
+    sec.axis = dup_axis(name = NULL)  # Keep tick marks without labels
+  ) +
+  labs(y = NULL, x = NULL)  # Remove y-axis label
 right_plot
 
 # Combine both plots into one, side-by-side
