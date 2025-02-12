@@ -42,7 +42,7 @@ tabulate_summary <- function(
     value = value,
     wt_col = "PERWT",
     group_by = group_by,
-    every_combo = FALSE
+    every_combo = TRUE # Necessary to ensure all tables with the same inputs produce the same rows
   ) 
   
   # Add the "subgroup" column
@@ -96,9 +96,9 @@ tabulate_summary_2year <- function(
   year1_table <- tabulate_summary(data, year1, value, group_by, group_encoding)
   year2_table <- tabulate_summary(data, year2, value, group_by, group_encoding)
   
-  # Merge results using dynamically constructed suffixes
-  combined_table <- merge(year1_table, year2_table, by = "subgroup", suffixes = paste0("_", years))
-  
+  # Merge results, add _year suffixes to analogous columns
+  combined_table <- left_join(year1_table, year2_table, by = "subgroup", suffix = paste0("_", years))
+
   # Compute percent changes dynamically
   for (var in intersect(names(year1_table), names(year2_table))) {
     if (var != "subgroup") { # Ensure we don't try to mutate 'subgroup'
@@ -106,7 +106,8 @@ tabulate_summary_2year <- function(
       col2 <- paste0(var, "_", year2)
       pct_col <- paste0(var, "_pctchg_", year1, "_", year2)
       
-      combined_table <- combined_table |> mutate(!!pct_col := (!!sym(col2) - !!sym(col1)) / !!sym(col1) * 100)
+      combined_table <- combined_table |> 
+        mutate(!!pct_col := (!!sym(col2) - !!sym(col1)) / !!sym(col1) * 100)
     }
   }
   
