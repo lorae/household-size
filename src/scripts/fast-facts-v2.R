@@ -178,6 +178,8 @@ age_summary |> slice_max(hhsize_2019, n = 1)
 
 # ----- Step 4d: RESULTS - Household size in 2000 and 2019 by age bucket ----- #
 # Define ordered levels for AGE_bucket
+# Note, this is brittle, since age buckets may change
+# TODO: repo-wide factor dictionary, updated upon initial data ingestion
 age_bucket_levels <- c("0-4", "5-9", "10-14", "15-19", "20-24", 
                        "25-29", "30-34", "35-39", "40-44", "45-49", 
                        "50-54", "55-59", "60-64", "65-69", "70-74", 
@@ -188,11 +190,64 @@ group_encoding_age_bucket <- setNames(age_bucket_levels, age_bucket_levels)
 
 # Use `tabulate_summary_2year()` with group_encoding to enforce natural order of age
 # buckets and generate data for figure 2
-age_bucket_summary <- tabulate_summary_2year(
+age_bucket_all <- tabulate_summary_2year(
   data = ipums_db, 
   years = c(2000, 2019), 
   group_by = "AGE_bucket", 
   group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "All")
+age_bucket_aapi <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "AAPI"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "AAPI")
+age_bucket_aian <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "AIAN"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "AIAN")
+age_bucket_black <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "Black"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "Black")
+age_bucket_hispan <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "Hispanic"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "Hispanic")
+age_bucket_white <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "White"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "White")
+age_bucket_multi <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "Multiracial"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "Multiracial")
+age_bucket_other <- tabulate_summary_2year(
+  data = ipums_db |> filter(RACE_ETH_bucket == "Other"), 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+) |> mutate(RACE_ETH_bucket = "Other")
+
+age_bucket_summary <- bind_rows(
+  age_bucket_all,
+  age_bucket_aapi,
+  age_bucket_aian,
+  age_bucket_black,
+  age_bucket_hispan,
+  age_bucket_white,
+  age_bucket_multi,
+  age_bucket_other
 )
 
 ### # FIGURE 2: Bar plot with percentage differences between 2000 and 2019 by age;
