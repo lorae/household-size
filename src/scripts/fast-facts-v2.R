@@ -26,16 +26,16 @@ ipums_db <- tbl(con, "ipums_processed")
 # Function to compute weighted household size (or bedroom size) by designated group_by category
 # in designated year
 tabulate_summary <- function(
-  data, 
-  year = 2000,
-  value = "NUMPREC", # could also be `persons_per_bedroom`
-  group_by = NULL, # For now, only NULL or one string (e.g. "SEX") are supported. No multi-string vectors
-  group_encoding = NULL # Optional encoding of factor labels for group_by variable. E.g. if
-  # group_by = "SEX", you may input 1 = "Male", 2 = "Female"
-  ){
+    data, 
+    year = 2000,
+    value = "NUMPREC", # Could also be `persons_per_bedroom`
+    group_by = NULL,  # Supports only NULL or a single string (e.g., "SEX")
+    group_encoding = NULL # Optional: a named vector for mapping values (e.g., c("1" = "Male", "2" = "Female"))
+) {
+  # Filter data for the specified year and not living in group quarters
+  data_filtered <- data |> filter(YEAR == year, GQ %in% c(0,1,2))
   
-  data_filtered <- data |> filter(YEAR == year) |> filter(GQ %in% c(0,1,2))
-
+  # Compute weighted mean household size by the specified group
   result <- crosstab_mean(
     data = data_filtered,
     value = value,
@@ -44,22 +44,22 @@ tabulate_summary <- function(
     every_combo = FALSE
   ) 
   
-  # Add the "subgroup" column.
-  if (length(group_by) == 0) { 
-    # only one entry, "overall", if no group_by string is given
+  # Add the "subgroup" column
+  if (is.null(group_by)) { 
+    # If no group_by string is given, add a column called "subgroup" and title the one
+    # row entry "overall"
     result <- result |> mutate(subgroup = "overall")
   } else {
-    # rename the output column called `group_by` with the more generic "subgroup" name
-    result <- result |> rename(subgroup= all_of(group_by))
+    # If group_by string is given, rename the output column with a more generic name of
+    # "subgroup"
+    result <- result |> rename(subgroup = all_of(group_by))
     
     # Apply factor encoding if provided
     if (!is.null(group_encoding)) {
-      # Ensure that group_encoding is a named vector and map values
-      if (is.factor(result$subgroup)) {
-        result <- result |> mutate(subgroup = fct_recode(subgroup, !!!group_encoding))
-      } else {
-        result <- result |> mutate(subgroup = recode(subgroup, !!!group_encoding))
-      }
+      result <- result |> 
+        mutate(subgroup = recode(subgroup, !!!group_encoding)) |>  # Rename values
+        mutate(subgroup = factor(subgroup, levels = group_encoding)) |> # Ensure correct order
+        arrange(subgroup)
     }
   }
   
@@ -73,8 +73,7 @@ tabulate_summary <- function(
   }
   
   # Keep only needed columns, drop the rest
-  result <- result |>
-    select(any_of(c("subgroup", "hhsize", "ppbedroom")))
+  result <- result |> select(any_of(c("subgroup", "hhsize", "ppbedroom")))
   
   return(result)
 }
@@ -179,6 +178,24 @@ age_summary <- tabulate_summary_2year(data = ipums_db, years = c(2000,2019), gro
 # TODO: highlight these rows in the Shiny app table
 age_summary |> slice_max(hhsize_2000, n = 1)
 age_summary |> slice_max(hhsize_2019, n = 1)
+
+# ----- Step 4d: RESULTS - Household size in 2000 and 2019 by age bucket ----- #
+# Define ordered levels for AGE_bucket
+age_bucket_levels <- c("0-4", "5-9", "10-14", "15-19", "20-24", 
+                       "25-29", "30-34", "35-39", "40-44", "45-49", 
+                       "50-54", "55-59", "60-64", "65-69", "70-74", 
+                       "75-79", "80-84", "85plus")
+
+# Create named vector for group_encoding
+group_encoding_age_bucket <- setNames(age_bucket_levels, age_bucket_levels)
+
+# Use `tabulate_summary_2year()` with group_encoding to enforce natural order
+age_bucket_summary <- tabulate_summary_2year(
+  data = ipums_db, 
+  years = c(2000, 2019), 
+  group_by = "AGE_bucket", 
+  group_encoding = group_encoding_age_bucket
+)
 
 # Graph
 # Filter data to only include ages up to 90
