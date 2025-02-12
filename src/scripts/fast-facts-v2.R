@@ -12,6 +12,7 @@ library("glue")
 library("readxl")
 library("ggplot2")
 library(base64enc)
+library(patchwork)
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -220,16 +221,16 @@ ggplot(age_bucket_summary |> filter(RACE_ETH_bucket == "All"),
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
 
 # Create the bar plot
-ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_diff_2019_2000)) +
-  geom_bar(stat = "identity", fill = "darkred") +
-  labs(
-    title = "Absolute Change in Household Size (2000-2019) by Age (≤90)",
-    x = "Age",
-    y = "Household Size Change (Persons per Household)"
-  ) +
-  scale_x_discrete(breaks = seq(0, 90, by = 5)) +  # Labels only every 5th subgroup
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+# ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_diff_2019_2000)) +
+#   geom_bar(stat = "identity", fill = "darkred") +
+#   labs(
+#     title = "Absolute Change in Household Size (2000-2019) by Age (≤90)",
+#     x = "Age",
+#     y = "Household Size Change (Persons per Household)"
+#   ) +
+#   scale_x_discrete(breaks = seq(0, 90, by = 5)) +  # Labels only every 5th subgroup
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
 
 ##############################################
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
