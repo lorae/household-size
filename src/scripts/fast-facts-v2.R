@@ -186,7 +186,8 @@ age_bucket_levels <- c("0-4", "5-9", "10-14", "15-19", "20-24",
 # Create named vector for group_encoding
 group_encoding_age_bucket <- setNames(age_bucket_levels, age_bucket_levels)
 
-# Use `tabulate_summary_2year()` with group_encoding to enforce natural order
+# Use `tabulate_summary_2year()` with group_encoding to enforce natural order of age
+# buckets and generate data for figure 2
 age_bucket_summary <- tabulate_summary_2year(
   data = ipums_db, 
   years = c(2000, 2019), 
@@ -194,21 +195,16 @@ age_bucket_summary <- tabulate_summary_2year(
   group_encoding = group_encoding_age_bucket
 )
 
+### # FIGURE 2: Bar plot with percentage differences between 2000 and 2019 by age;
+# faceted by race
 # Graph
-# Filter data to only include ages up to 90
-age_summary_filtered <- age_summary |>
-  mutate(hhsize_diff_2019_2000 = hhsize_2019 - hhsize_2000) |>
-  filter(subgroup <= 90)
-
-# Create the bar plot
-ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_pctchg_2000_2019)) +
+ggplot(age_bucket_summary, aes(x = factor(subgroup), y = hhsize_pctchg_2000_2019)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   labs(
-    title = "Percentage Change in Household Size (2000-2019) by Age (≤90)",
+    title = "Percentage Change in Household Size (2000-2019) by Age",
     x = "Age",
     y = "Percentage Change"
   ) +
-  scale_x_discrete(breaks = seq(0, 90, by = 5)) +  # Labels only every 5th subgroup
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
 
