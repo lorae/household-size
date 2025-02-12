@@ -208,7 +208,8 @@ age_bucket_summary <- map_dfr(race_ethnicities, function(race) {
 ### # FIGURE 2: Bar plot with percentage differences between 2000 and 2019 by age;
 # faceted by race
 # Graph
-ggplot(age_bucket_summary, aes(x = factor(subgroup), y = hhsize_pctchg_2000_2019)) +
+ggplot(age_bucket_summary |> filter(RACE_ETH_bucket == "All"), 
+       aes(x = factor(subgroup), y = hhsize_pctchg_2000_2019)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   labs(
     title = "Percentage Change in Household Size (2000-2019) by Age",
@@ -229,6 +230,54 @@ ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_diff_2019_2000
   scale_x_discrete(breaks = seq(0, 90, by = 5)) +  # Labels only every 5th subgroup
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 0, hjust = 0.5))
+
+##############################################
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
+##############################################
+#### BETA: facet plot with all races together.
+# Define race order and column layout (4x2)
+race_order <- c("All", "AAPI", "AIAN", "Black", "Hispanic", "White", "Multiracial", "Other")
+age_bucket_summary <- age_bucket_summary %>%
+  mutate(RACE_ETH_bucket = factor(RACE_ETH_bucket, levels = race_order))
+
+# Create the plot
+facet_plot <- ggplot(age_bucket_summary, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  
+  # Facet by race/ethnicity with a 4x2 layout
+  facet_wrap(~ RACE_ETH_bucket, ncol = 2, scales = "fixed") +
+  
+  # Labels and theme
+  labs(
+    title = "Percentage Change in Household Size (2000-2019) by Age and Race",
+    x = "Age",
+    y = NULL  # No y-axis label, just grid lines at -5, 0, and 5
+  ) +
+  
+  # Customizing facets for clean layout
+  theme_minimal() +
+  theme(
+    strip.text.x = element_blank(),  # Remove facet labels inside facets
+    panel.spacing = unit(1, "lines"),  # Space between facets
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 8),  # Rotate x-axis labels
+    axis.text.y = element_blank(),  # Remove y-axis text
+    panel.grid.major.y = element_line(color = "gray", size = 0.5),  # Gridlines at y-axis
+    panel.grid.minor.y = element_blank(),  # Remove minor grid lines
+    panel.grid.major.x = element_blank(),  # Remove vertical grid lines
+    strip.placement = "outside"  # Keep race labels outside
+  ) +
+  
+  # Custom y-axis breaks at -5, 0, and 5%
+  scale_y_continuous(breaks = c(-5, 0, 5))
+
+# Save the plot with width 6.5 inches
+ggsave("results/fig02.png", plot = facet_plot, width = 6.5, height = 6.5, dpi = 500)
+
+# Display plot
+print(facet_plot)
+##############################################
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+##############################################
 
 
 # Household size in 2000 and 2019 by age bucket
