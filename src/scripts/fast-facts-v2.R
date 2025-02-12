@@ -23,6 +23,7 @@ con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
 ipums_db <- tbl(con, "ipums_processed")
 
 # ----- Step 3: Define functions for tabulating summaries ----- #
+# TODO: Unit test!!!
 # Function to compute weighted household size (or bedroom size) by designated group_by category
 # in designated year
 tabulate_summary <- function(
@@ -98,23 +99,18 @@ tabulate_summary_2year <- function(
   # Merge results using dynamically constructed suffixes
   combined_table <- merge(year1_table, year2_table, by = "subgroup", suffixes = paste0("_", years))
   
-  # Find all columns ending in _year1 and _year2 dynamically
-  year1_cols <- grep(paste0("_", year1, "$"), names(combined_table), value = TRUE)
-  year2_cols <- grep(paste0("_", year2, "$"), names(combined_table), value = TRUE)
-  
-  # Ensure matched pairs
-  common_vars <- intersect(gsub(paste0("_", year1), "", year1_cols), gsub(paste0("_", year2), "", year2_cols))
-  
   # Compute percent changes dynamically
-  for (var in common_vars) {
-    col1 <- paste0(var, "_", year1)
-    col2 <- paste0(var, "_", year2)
-    pct_col <- paste0(var, "_pctchg_", year1, "_", year2)
-    
-    result <- combined_table |> mutate(!!pct_col := (!!sym(col2) - !!sym(col1)) / !!sym(col1) * 100)
+  for (var in intersect(names(year1_table), names(year2_table))) {
+    if (var != "subgroup") { # Ensure we don't try to mutate 'subgroup'
+      col1 <- paste0(var, "_", year1)
+      col2 <- paste0(var, "_", year2)
+      pct_col <- paste0(var, "_pctchg_", year1, "_", year2)
+      
+      combined_table <- combined_table |> mutate(!!pct_col := (!!sym(col2) - !!sym(col1)) / !!sym(col1) * 100)
+    }
   }
   
-  return(result)
+  return(combined_table)
 }
 
 
