@@ -235,46 +235,68 @@ ggplot(age_summary_filtered, aes(x = factor(subgroup), y = hhsize_diff_2019_2000
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
 ##############################################
 #### BETA: facet plot with all races together.
-# Define race order and column layout (4x2)
+# Define race order (ensuring correct factor levels for consistent ordering)
 race_order <- c("All", "AAPI", "AIAN", "Black", "Hispanic", "White", "Multiracial", "Other")
 age_bucket_summary <- age_bucket_summary %>%
   mutate(RACE_ETH_bucket = factor(RACE_ETH_bucket, levels = race_order))
 
-# Create the plot
-facet_plot <- ggplot(age_bucket_summary, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
+# Split data into two halves
+left_data <- age_bucket_summary %>% filter(RACE_ETH_bucket %in% race_order[1:4])  # First 4 races
+right_data <- age_bucket_summary %>% filter(RACE_ETH_bucket %in% race_order[5:8])  # Last 4 races
+
+# Left plot (Facet titles on the LEFT)
+left_plot <- ggplot(left_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
   geom_bar(stat = "identity", fill = "steelblue") +
-  
-  # Facet by race/ethnicity with a 4x2 layout
-  facet_wrap(~ RACE_ETH_bucket, ncol = 2, scales = "fixed") +
-  
-  # Labels and theme
-  labs(
-    title = "Percentage Change in Household Size (2000-2019) by Age and Race",
-    x = "Age",
-    y = NULL  # No y-axis label, just grid lines at -5, 0, and 5
-  ) +
-  
-  # Customizing facets for clean layout
+  facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
+  geom_vline(aes(xintercept = as.numeric(subgroup)), color = "grey80", linetype = "dashed", size = 0.3) +
   theme_minimal() +
   theme(
-    strip.text.x = element_blank(),  # Remove facet labels inside facets
-    panel.spacing = unit(1, "lines"),  # Space between facets
-    axis.text.x = element_text(angle = 90, hjust = 1, size = 8),  # Rotate x-axis labels
-    axis.text.y = element_blank(),  # Remove y-axis text
-    panel.grid.major.y = element_line(color = "gray", size = 0.5),  # Gridlines at y-axis
-    panel.grid.minor.y = element_blank(),  # Remove minor grid lines
-    panel.grid.major.x = element_blank(),  # Remove vertical grid lines
-    strip.placement = "outside"  # Keep race labels outside
+    strip.text.y.left = element_text(angle = 0, hjust = 0, vjust = 0.5, color = "red", size = 10),  # Labels on the left
+    strip.placement = "outside",
+    panel.spacing = unit(1, "lines"),
+    panel.spacing.y = unit(0.2, "lines"),
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+    axis.text.y = element_blank(),
+    panel.grid.major.y = element_line(color = "gray", size = 0.5),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank()
   ) +
-  
-  # Custom y-axis breaks at -5, 0, and 5%
-  scale_y_continuous(breaks = c(-5, 0, 5))
+  scale_y_continuous(breaks = c(0), limits = c(-15, 15)) +
+  labs(y = NULL)  # Remove y-axis label
+left_plot
 
-# Save the plot with width 6.5 inches
-ggsave("results/fig02.png", plot = facet_plot, width = 6.5, height = 6.5, dpi = 500)
+# Right plot (Facet titles on the RIGHT)
+right_plot <- ggplot(right_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed") +
+  geom_vline(aes(xintercept = as.numeric(subgroup)), color = "grey80", linetype = "dashed", size = 0.3) +
+  theme_minimal() +
+  theme(
+    strip.text.y = element_text(angle = 0, hjust = 0, vjust = 0.5, color = "red", size = 10),  # Labels on the right
+    strip.placement = "outside",
+    strip.position = "right",
+    panel.spacing = unit(1, "lines"),
+    panel.spacing.y = unit(0.2, "lines"),
+    axis.text.x = element_text(angle = 90, hjust = 1, size = 8),
+    axis.text.y = element_blank(),
+    panel.grid.major.y = element_line(color = "gray", size = 0.5),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_y_continuous(breaks = c(0), limits = c(-15, 15)) +
+  labs(y = NULL)  # Remove y-axis label
+right_plot
 
-# Display plot
-print(facet_plot)
+# Combine both plots into one, side-by-side
+combined_plot <- left_plot + right_plot + 
+  plot_layout(widths = c(1, 1)) + 
+  plot_annotation(title = "Percentage Change in Household Size (2000-2019) by Age and Race")
+
+# Save the combined plot with correct width
+ggsave("results/fig02_combined.png", plot = combined_plot, width = 6.5, height = 6.5, dpi = 500)
+
+# Display the combined plot
+print(combined_plot)
 ##############################################
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 ##############################################
