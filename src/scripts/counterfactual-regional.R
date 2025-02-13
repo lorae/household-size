@@ -240,7 +240,9 @@ transform_state <- function(
 state_sf <- st_read("data/s_05mr24/s_05mr24.shp") |>
   rename(STATEFIP = FIPS) |> # For consistency with household size data
   filter(!STATEFIP %in% c('60', '64', '66', '68', '69', '70', '72', '78')) |># Remove excluded states, like Puerto Rico
-  st_transform(crs = "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs")
+  st_transform(crs = "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs") |>
+  mutate(geometry = st_simplify(geometry, dTolerance =  5000))  # Simplify shapes
+
 
 # Rotate and move Alaska and Hawaii to fit on map
 alaska <- transform_state(state_sf, "02", -39, 2.3, c(1000000, -5000000))
