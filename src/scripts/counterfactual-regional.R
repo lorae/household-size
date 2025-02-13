@@ -213,6 +213,7 @@ bedroom_state_summary <- bedroom_contributions_state |>
 ##############################################
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
 ##############################################
+### FIGURE 4: unexplained diff by state
 # Creates a 2x2 matrix representing the rotation transformation relative to angle
 # a
 rot <- function(a) {
@@ -259,15 +260,50 @@ state_sf_hhsize <- state_sf_final |>
   left_join(hhsize_state_summary, by = "STATEFIP")
 
 # Choropleth map (color version)
-fig03 <- ggplot(state_sf_hhsize) + 
+fig04 <- ggplot(state_sf_hhsize) + 
   geom_sf(aes(geometry = geometry, fill = weighted_mean), color = "black", size = 0.5) +
   scale_fill_gradient2(
-    name = "2000 to 2019 \nUnexplained Change in Household Size",
+    name = "Change in \nHousehold \nSize",
     low = "#577590", mid = "white", high = "#F94144", midpoint = 0,
     breaks = seq(from = -0.1, to = 0.2, by = 0.05)
   ) +
   theme_void()
-fig03
+fig04
+
+# Save the black and white plot as fig03a
+ggsave("results/fig04.png", plot = fig04, width = 6.5, height = 5, dpi = 300)
+
+### FIG 4a: Unexplained diff by cpuma, nationally
+# Load shapefiles. Data is unzipped from WHERE? TODO: document
+cpuma_sf <- st_read("data/ipums-cpuma0010-sf/ipums_cpuma0010.shp") |>
+  filter(!STATEFIP %in% c('60', '64', '66', '68', '69', '70', '72', '78')) |># Remove excluded states, like Puerto Rico
+  st_transform(crs = "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs") |>
+  mutate(geometry = st_simplify(geometry, dTolerance =  5000))  # Simplify shapes
+
+# Rotate and move Alaska and Hawaii to fit on map
+alaska_cpuma <- transform_state(cpuma_sf, "02", -39, 2.3, c(1000000, -5000000))
+hawaii_cpuma <- transform_state(cpuma_sf, "15", -35, 1, c(5200000, -1400000))
+
+# Final map after transforming non-contiguous states
+cpuma_sf_final <- cpuma_sf |>
+  filter(!STATEFIP %in% c("02", "15")) |>
+  bind_rows(alaska_cpuma, hawaii_cpuma)
+
+# Join the state data with household size differences
+cpuma_sf_hhsize <- cpuma_sf_final |>
+  left_join(hhsize_contributions_state, by = "CPUMA0010") |>
+  mutate(hhsize_unexplained = contribution_diff / prop_2019) 
+
+# Choropleth map (color version)
+fig04a <- ggplot(cpuma_sf_hhsize) + 
+  geom_sf(aes(geometry = geometry, fill = diff), color = NA, size = 0) +
+  scale_fill_gradient2(
+    name = "Change in \nHousehold \nSize",
+    low = "#577590", mid = "white", high = "#F94144", midpoint = 0,
+    breaks = seq(from = -0.8, to = 0.6, by = 0.2)
+  ) +
+  theme_void()
+fig04a
 ##############################################
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 ##############################################
