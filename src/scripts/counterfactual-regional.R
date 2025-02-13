@@ -35,6 +35,8 @@ library("glue")
 library("readxl")
 library("ggplot2")
 library(base64enc)
+library("sf")
+options(scipen = 999)
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -191,7 +193,7 @@ is.na(bedroom_contributions_state$State) |> sum() # No NA values! Great!
 # and mean diffs. Used as a scaffolding for Shiny app tables 3.3 and 3.4
 # Table 3.3 (Persons per household)
 hhsize_state_summary <- hhsize_contributions_state |>
-  group_by(State) |>
+  group_by(State, STATEFIP) |>
   summarize(
     median = median(diff, na.rm = TRUE),
     weighted_median = rep(diff, times = pop_2019) |> median(),
@@ -200,13 +202,74 @@ hhsize_state_summary <- hhsize_contributions_state |>
   )
 # Table 3.4 (Persons per bedroom)
 bedroom_state_summary <- bedroom_contributions_state |>
-  group_by(State) |>
+  group_by(State, STATEFIP) |>
   summarize(
     median = median(diff, na.rm = TRUE),
     weighted_median = rep(diff, times = pop_2019) |> median(),
     weighted_mean = weighted.mean(diff, w = pop_2019, na.rm = TRUE),
     .groups = "drop"
   )
+
+##############################################
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv#
+##############################################
+# Creates a 2x2 matrix representing the rotation transformation relative to angle
+# a
+rot <- function(a) {
+  matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
+}
+
+# Moves a state according to custom specifications
+transform_state <- function(
+    df, 
+    state_fp, 
+    rotation_angle, 
+    scale_factor, 
+    shift_coords
+) {
+  state <- df %>% filter(STATEFIP == state_fp)
+  state_geom <- st_geometry(state)
+  state_centroid <- st_centroid(st_union(state_geom))
+  rotated_geom <- (state_geom - state_centroid) * rot(rotation_angle * pi / 180) / scale_factor + state_centroid + shift_coords
+  state %>% st_set_geometry(rotated_geom) %>% st_set_crs(st_crs(df))
+}
+
+# Load shapefiles. Data is unzipped from https://www.weather.gov/gis/USStates
+# Unfortunately, the Census shapefiles I tried to download all had strange shapes
+# because they included water bodies.
+state_sf <- st_read("data/s_05mr24/s_05mr24.shp") |>
+  rename(STATEFIP = FIPS) |> # For consistency with household size data
+  filter(!STATEFIP %in% c('60', '64', '66', '68', '69', '70', '72', '78')) |># Remove excluded states, like Puerto Rico
+  st_transform(crs = "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs")
+
+# Rotate and move Alaska and Hawaii to fit on map
+alaska <- transform_state(state_sf, "02", -39, 2.3, c(1000000, -5000000))
+hawaii <- transform_state(state_sf, "15", -35, 1, c(5200000, -1400000))
+
+# Final map after transforming non-contiguous states
+state_sf_final <- state_sf %>%
+  filter(!STATEFIP %in% c("02", "15")) |>
+  
+  bind_rows(alaska, hawaii)
+
+# Join the state data with household size differences
+state_sf_hhsize <- state_sf_final |>
+  left_join(hhsize_state_summary, by = "STATEFIP")
+
+# Choropleth map (color version)
+fig03 <- ggplot(state_sf_hhsize) + 
+  geom_sf(aes(geometry = geometry, fill = weighted_mean), color = "black", size = 0.5) +
+  scale_fill_gradient2(
+    name = "2000 to 2019 \nUnexplained Change in Household Size",
+    low = "#577590", mid = "white", high = "#F94144", midpoint = 0,
+    breaks = seq(from = -0.1, to = 0.2, by = 0.05)
+  ) +
+  theme_void()
+fig03
+##############################################
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
+##############################################
+
 
 # A function that produces a dotplot by state
 dotplot_by_state <- function(
