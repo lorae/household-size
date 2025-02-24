@@ -297,9 +297,10 @@ cpuma_sf_hhsize <- cpuma_sf_final |>
 # Choropleth map (color version)
 fig04a <- ggplot(cpuma_sf_hhsize) + 
   geom_sf(aes(geometry = geometry, fill = diff), color = NA, size = 0) +
+  geom_sf(data = state_sf_hhsize, aes(geometry = geometry), color = "grey50", fill = NA, size = 0.1) +  # Overlay state boundaries
   scale_fill_gradient2(
     name = "Change in \nHousehold \nSize",
-    low = "#577590", mid = "white", high = "#F94144", midpoint = 0,
+    low = "darkblue", mid = "white", high = "darkred", midpoint = 0,
     breaks = seq(from = -0.8, to = 0.6, by = 0.2)
   ) +
   theme_void()
