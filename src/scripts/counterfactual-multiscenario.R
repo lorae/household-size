@@ -276,7 +276,27 @@ fig03 <- ggplot(fig03_data, aes(x = Category, y = Household_Size, fill = Type)) 
 fig03
 
 # Save the plot
-ggsave("results/fig03.png", plot = fig03, width = 6.5, height = 6.5, dpi = 500)
+ggsave("results/fig03.png", plot = fig03, width = 6.5, height = 5.5, dpi = 500)
+
+
+##### Variation Fig 3a without the I-bar differences
+# Create the bar plot (without I-segments or differences)
+fig3a <- ggplot(fig03_data, aes(x = Category, y = Household_Size, fill = Type)) +
+  geom_bar(stat = "identity", aes(linetype = Type), color = "black", linewidth = 0.4, width = 0.6) +
+  geom_text(aes(label = sprintf("%.3f", Household_Size)), vjust = 1.5, color = "white", size = 4) +
+  scale_fill_manual(values = c("Observed" = "steelblue", "Counterfactual" = scales::alpha("steelblue", 0.5))) +
+  scale_linetype_manual(values = c("Observed" = "solid", "Counterfactual" = "dotted")) +
+  labs(y = "Household Size", x = NULL) +
+  coord_cartesian(ylim = c(3, 3.5)) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(size = 11),
+    plot.caption = element_text(hjust = 0, size = 9) # Align caption to the left
+  )
+
+# Save the plot
+ggsave("results/fig3a.png", plot = fig3a, width = 6.5, height = 5.5, dpi = 500)
 
 
 #----- Step 4: Save the results to the Shiny app ----- #

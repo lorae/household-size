@@ -11,8 +11,8 @@ library("purrr")
 library("glue")
 library("readxl")
 library("ggplot2")
-library(base64enc)
-library(patchwork)
+library("base64enc")
+library("patchwork")
 
 # ----- Step 1: Source helper functions ----- #
 
