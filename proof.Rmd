@@ -1,0 +1,90 @@
+---
+title: "Test title"
+output: 
+  html_document:
+    mathjax: "default"
+---
+
+
+
+```{r init, include = FALSE}
+library(ggplot2)
+library(patchwork)
+```
+
+As shown in the documentation for this project, it is possible to have the same summary statistics but different underlying household configurations.
+
+
+Consider the following counterexample. There is a population of 6 individuals. The average person-level household size is 3. How many households are there in the population?
+
+Figure 1.2 shows two hypothetical Americas consistent with the summary statistics. In scenario 1, average person-level household size is
+\\[ 
+\\frac{3+3+3 + 3+3+3}{6} = 3
+\\]
+
+While in scenario 2, average person-level household size is
+\\[ 
+\\frac{1 + 1 + 4+4+4+4}{6} = 3
+\\]
+  
+**Figure 1.2**
+```{r fig01.2, echo=FALSE, out.width="100%"}
+
+# Define plot height factor (adjustable)
+plot_height <- 1  
+
+# Data for Scenario 1
+hh_data1 <- data.frame(
+  hh_id = rep(c("Household A", "Household B"), times = c(3, 3)),
+  x = c(1, 2, 1.5, 1, 2, 1.5),
+  y = c(1, 1, 2, 1, 1, 2)
+)
+
+# Data for Scenario 2
+hh_data2 <- data.frame(
+  hh_id = rep(c("Household A", "Household B", "Household C"), times = c(1, 1, 4)),
+  x = c(1.5, 1.5, 1, 1, 2, 2),
+  y = c(1.5, 1.5, 1, 2, 1, 2)
+)
+
+# Plot for Scenario 1
+plot1 <- ggplot(hh_data1, aes(x = x, y = y)) +
+  geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
+  theme_void(base_size = 10 * plot_height) +
+  theme(plot.margin = margin(0,0,0,0)) +
+  facet_wrap(~hh_id, nrow = 1) +
+  coord_fixed(ratio = 1) +
+  xlim(0, 3) +
+  ylim(0, 3) +
+  ggtitle("Scenario 1")
+
+# Plot for Scenario 2
+plot2 <- ggplot(hh_data2, aes(x = x, y = y)) +
+  geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
+  theme_void(base_size = 10 * plot_height) +
+  theme(plot.margin = margin(0,0,0,0)) +
+  facet_wrap(~hh_id, nrow = 1) +
+  coord_fixed(ratio = 1) +
+  xlim(0, 3) +
+  ylim(0, 3) +
+  ggtitle("Scenario 2")
+
+# Combine both plots vertically using patchwork
+print(plot1 | plot2)
+```
+For every person \( j \) in a population \( P \) living in a household of \( m_j \) members, the **person-level** mean household size is a simple average across person-level observations:
+
+\[
+\text{(Mean HH Size)}_{\text{person}}
+= \frac{\sum_{j = 1}^P m_j}{\sum_{i = 1}^H m_i}
+= \frac{\sum_{j = 1}^P m_j}{P}
+\]
+
+For every household \( i \) with number of members \( m_i \) in households \( 1 \) through \( H \), the **household-level** mean household size is a simple average across households as individual observations:
+
+\[ 
+\text{(Mean HH Size)}_{\text{household}} 
+= \frac{\sum_{i = 1}^H m_i}{H} 
+= \frac{P}{H}
+\\]
+
