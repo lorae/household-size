@@ -18,22 +18,22 @@ As shown in the documentation for this project, it is possible to have the same 
 
 Let:
 
-- \(P\) = total population size  
-- \(H\) = number of households  
-- \(M_p\) = person-level mean household size 
+- \(P\) = **Total population size**
+- \(H\) = **Number of households** 
+- \(M_p\) = **Person-level mean household size**
 
     For every person \( j \) in a population \( P \) living in a household of \( m_j \) members, the **person-level** mean household size is a simple average across person-level observations:
     
     \begin{align}
-    M_p = \frac{\sum_{j = 1}^P m_j}{\sum_{i = 1}^H m_i} = \frac{\sum_{j = 1}^P m_j}{P}
+    M_p = \frac{\sum_{j = 1}^P m_j}{P}
     \end{align}
 
-- \(M_h\) = household-level mean household size
+- \(M_h\) = **Household-level mean household size**
 
-    For every household \( i \) with number of members \( m_i \) in households \( 1 \) through \( H \), the **household-level** mean household size is a simple average across households as individual observations:
+   The **household-level** mean household size is a simple average across households as individual observations:
     
     \begin{align}
-    M_h = \frac{\sum_{i = 1}^H m_i}{H} = \frac{P}{H}
+    M_h = \frac{P}{H}
     \end{align}
 
 ---
