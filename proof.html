@@ -356,80 +356,86 @@ display: none;
 <p>As shown in the documentation for this project, it is possible to
 have the same summary statistics but different underlying household
 configurations.</p>
+<div id="definitions-and-notation" class="section level1">
+<h1>Definitions and Notation</h1>
+<p>Let:</p>
+<ul>
+<li><p><span class="math inline">\(P\)</span> = total population
+size<br />
+</p></li>
+<li><p><span class="math inline">\(H\)</span> = number of
+households<br />
+</p></li>
+<li><p><span class="math inline">\(M_p\)</span> = person-level mean
+household size</p>
 <p>For every person <span class="math inline">\(j\)</span> in a
 population <span class="math inline">\(P\)</span> living in a household
 of <span class="math inline">\(m_j\)</span> members, the
 <strong>person-level</strong> mean household size is a simple average
 across person-level observations:</p>
 <p><span class="math display">\[\begin{align}
-\text{(Mean HH Size)}_{\text{person}}
-= \frac{\sum_{j = 1}^P m_j}{\sum_{i = 1}^H m_i}
-= \frac{\sum_{j = 1}^P m_j}{P}
-\end{align}\]</span></p>
+  M_p = \frac{\sum_{j = 1}^P m_j}{\sum_{i = 1}^H m_i} = \frac{\sum_{j =
+1}^P m_j}{P}
+  \end{align}\]</span></p></li>
+<li><p><span class="math inline">\(M_h\)</span> = household-level mean
+household size</p>
 <p>For every household <span class="math inline">\(i\)</span> with
 number of members <span class="math inline">\(m_i\)</span> in households
 <span class="math inline">\(1\)</span> through <span class="math inline">\(H\)</span>, the <strong>household-level</strong>
 mean household size is a simple average across households as individual
 observations:</p>
 <p><span class="math display">\[\begin{align}
-\text{(Mean HH Size)}_{\text{household}}
-= \frac{\sum_{i = 1}^H m_i}{H}
-= \frac{P}{H}
-\end{align}\]</span></p>
-<p>We have:</p>
-<ul>
-<li>population size</li>
-<li>average household size</li>
+  M_h = \frac{\sum_{i = 1}^H m_i}{H} = \frac{P}{H}
+  \end{align}\]</span></p></li>
 </ul>
-<p>We want to know</p>
-<ul>
-<li>number of households</li>
-</ul>
-<p>Proof: although household-level average household size is perfectly
-determinate in this regard, person-level household size in conjunction
-with population size can also be used to come up with a minimum and
-maximum bound on number of households.</p>
-<p>Since <span class="math display">\[\begin{align}
+<table style="width:6%;">
+<colgroup>
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th># Context Since <span class="math display">\[\begin{align}
 \text{(Mean HH Size)}_{\text{household}}
 = \frac{P}{H}
-\end{align}\]</span></p>
-<p><span class="math display">\[\begin{align}
-H = \frac{P}{\text{(Mean HH Size)}_{\text{household}}}
-\end{align}\]</span></p>
-<p>However, household-level household size doesn’t lend itself to this
-equivalency. In fact, given population size and person-level average
-household size, there are potentially more than one value of number of
-household consistent with the first two facts. Consider the following
-counterexample. There is a population of 6 individuals. The average
-person-level household size is 3.</p>
-<p>Figure 1.2 shows two hypothetical Americas consistent with the
-summary statistics. In scenario 1, average person-level household size
-is \[ \frac{3+3+3 + 3+3+3}{6} = 3 \]</p>
-<p>While in scenario 2, average person-level household size is \[
-\frac{1 + 1 + 4+4+4+4}{6} = 3 \]</p>
-<p>However, in Scenario 1, there are two households, while in scenario
-3, there are 3 households. Thus, person-level household size and
-population are not always adequate to precisely estimate number of
-households.</p>
-<p><strong>Figure 1.2</strong>
-<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAArlBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZrY6AAA6OgA6Ojo6OmY6ZmY6ZpA6ZrY6kNtmAABmOgBmOjpmZjpmZpBmkLZmkNtmtttmtv+QOgCQZjqQZmaQkLaQtraQttuQ2/+2ZgC2Zjq2kDq2kGa225C229u22/+2///bkDrbkGbbtmbbtpDbtrbbttvb25Db27bb29vb2//b/7bb////tmb/25D/27b/29v//7b//9v///9g6Im3AAAACXBIWXMAAB2HAAAdhwGP5fFlAAAbl0lEQVR4nO3di3bb1oGGUSi+yE3jSGkdx+nUkZvGUe2ZejqWHEvv/2JD8ApeZIM/ARAE9l4rXbJMEAR8zkcSANniHoBIcewHAHCqBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCO0K6N37H86Lonj017ftrPPuVfHN73Vu+Pmi3u0YuD6MyLtf/1Q+hO9aegicph0BfVeO1ZknrYyWugGtHVqGrQ8jcvUYnrfxCDhR2wG9KSpaCVjNMN5dtbR+TksfRmT1MTxt4RFworYC+vmiKB6//jj56X9/nTzpPvl4hAc1NRnUAko/RuT0Mfw2+eHDZVGc/XKER0A/bQX0ujJEbyfj9aeOH9DC+/PWXm9wUvowIm+WrzvL53UvQVnYCuhV9Qn2+liD5dPkib747lJA6cWIvFp1e9Lw470to2++HNDJYFk88b57NnnvsjoFefeuPCf57evZUJoeQ7r7df0mf0xPW559+3pxx08+vp/c4tu3qyNOd+9/qNxLxWSenL10Eon7vozIpcm7eQFlYddb+O+3b3Z7OTt+fjZ/Hr5dnJN8PB2d5QD85+JXPy3vaHHmdDreJsP13fQuflkO10+Xa/dSfRRnzz86C0+pHyNySUCp2ApoORCf/2fjl+Ux9Pl4/WVxo+pZ0ekJn/WbXFd+Mx3/V8Wj89k5zMVwXd3rVij/+HjvMiam+jEil24cA2Vl+zKm6Tg7+/Pfq0P2qnxHPXt+LgfP7Lxo+a7pfPaL6XA9ezl50fhmPjrLm0xHfXnacvqMfVUsruJbDNfyXl9Mlvn1fPeYFFBK/RmRs7txFp6lL11IvzwStBw08x9uludF578oh+u8dfOj/Kvn6clrg8XgfFI5PjX9i/lQXP20RkCZ6s2InC3kBShLuz/KuTgSVD4d31fH3vX0gFLlsP7N9Om9HK7z41RbJyknI3oxXOc3mQ/XygnVq52HuQSUmb6MSB/uYMNDXyby4dcfVofbr9cvvqseRp+dFZ0MwMUAXh+uf/z3386L5XCd38l8uK5fGrLjaV1AWenJiPQGnqovfRvTp5/nh4+u1kdN5VD7fETvGq7zL4BYHpBf3clsuFaWeeDaOgFl3ZFH5CcfQ2LDl7/Obn60aGO4Vs54Pjxcqzd6aLgu87j70hABZdMxR2R5B48NSKo2A3q1/t7oavMIU2n72Xl7uM5eEzz69q9//78Lr0DJ9WZElhcDPHcFKGs2A7rxUbnZsabtI04bYdsertfLa5E/PzBcqzNj97V1Akp/RuR1sfu8EqO2GdDFJR4z82G4dgXI9LLjjW902BqulV/cPPCGyVl46ujJiLx2+JMdNgNaDsXVx9iui43r42bjqvz12+Utvv/icP108dBwdR0oNfRjRN6sVgArOz/KWXz328fFxXfzD71NP/dRfqqjHGjl4aTyUx73f7wpFpctb7xhupqN+ulnOmZ/tzVc1z73sevjxQLKfT9GpM8fsdv2Wfh3ayc0Z29pKpeJTIdv9fu5y19sD9e1bxF/YLh+7ZPHAkqpByOy+jl67+VZ2XEZ0+J7bsqR8uP8d8tvqZkfGLpZXhIy/cWOi0beLO7ixfz41PZw/dp33wgoU0cfkWtfTSKgrOy8DvTDz7PvTfyv1buY6bcvFt+uvn1x9v9R+GL2BQ+7LluefrHio8kbovkB/x3Ddfnti7sfm4Ayd+QRuXGhvoCy4P8XHiAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoAAhAQUICShASEABQgIKEBJQgJCAAoQEFCAkoACh4wT0uvhp9sNN8f2+y16d/bLjt3evvvl9/uPt+dO1v1isa7i62p03xcyfXiaPEoZn8AG9PS+efNz7AZ6WrgNaFM+ThwmDM/iAXp8927nAkHQX0Nndvz8f/C6FWoYe0M8XT97tv44T03VAJysc+i6FWvoR0HfPiuLR9MDabD7PJm3527MXs/ff7y8rt/jXefH49f3agrMZ/+mHybvLf1cDOlnB54tlDAaq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gAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQgJKAAIQEFCAkoQEhAAUICChASUICQgAKEBBQg9P8/8K3T05ZghAAAAABJRU5ErkJggg==" width="100%" /></p>
-<p>That said, we can prove that given population size and average
-person-level household size, there is a minimum number of households
-given by</p>
-<p><span class="math display">\[\begin{align}
+\end{align}\]</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td># Goal</td>
+</tr>
+<tr class="even">
+<td>We seek to determine the possible range for the number of households
+<span class="math inline">\(H\)</span> consistent with a known
+population size <span class="math inline">\(P\)</span> and person-level
+average household size <span class="math inline">\(M_p\)</span>.
+Specifically, we will establish both a minimum and maximum bound for
+<span class="math inline">\(H\)</span>. Given population size and
+average person-level household size, there is a minimum number of
+households given by</td>
+</tr>
+<tr class="odd">
+<td><span class="math display">\[\begin{align}
 H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
+\end{align}\]</span></td>
+</tr>
+<tr class="even">
+<td>and a max given by</td>
+</tr>
+<tr class="odd">
+<td>[FILL IN HERE]</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="lemma-1-minimum-number-of-households" class="section level1">
+<h1>Lemma 1: Minimum Number of Households</h1>
+<p><strong>Lemma:</strong><br />
+The minimum number of households consistent with a population size <span class="math inline">\(P\)</span> and person-level average household size
+<span class="math inline">\(M_p\)</span> is: <span class="math display">\[\begin{align}
+H_{\min} = \frac{P}{M_p}
 \end{align}\]</span></p>
-<p>and a max given by</p>
-<p>[FILL IN HERE]</p>
-<div id="proof-minimum-number-of-households-is-given-by" class="section level1">
-<h1>Proof: minimum number of households is given by</h1>
-<p><span class="math display">\[\begin{align}
-H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
-\end{align}\]</span></p>
-<p>Notation: Let the mean person-level household size, <span class="math inline">\(\text{(Mean HH Size)}_{\text{person}}\)</span>, be
-indicated in shorthand as <span class="math inline">\(M_{p}\)</span>.
-Let the population be indicated as <span class="math inline">\(P\)</span> and the number of households be
-indicated as <span class="math inline">\(H\)</span>.</p>
+<p><strong>Proof:</strong></p>
 <p>Case A: Consider a specific case where <span class="math inline">\(P
 = p\)</span> and <span class="math inline">\(M_p = m\)</span>, which
 happens to be a factor of <span class="math inline">\(p\)</span>: in
@@ -453,14 +459,21 @@ households ill push the average person-level household size above <span class="m
 households, <span class="math inline">\(i = p/m\)</span>. And, in fact,
 when <span class="math inline">\(i\)</span> is not an integer, as in
 Case B, then the true minimum is given by rounding <span class="math inline">\(i\)</span> up to the nearest integer.</p>
+<hr />
 </div>
-<div id="proof-maximum-number-of-househodls-is-given-by" class="section level1">
-<h1>Proof: Maximum number of househodls is given by</h1>
-<p>[TBD]</p>
-<p>In this section, I show that the sparsest configuraiton of households
-is given in a case hwere you produce some number of 1-person households
-and then throw the rest of the population into a remaining large
+<div id="lemma-2-maximum-number-of-households" class="section level1">
+<h1>Lemma 2: Maximum Number of Households</h1>
+<p><strong>Lemma:</strong><br />
+The maximum number of households consistent with a population size <span class="math inline">\(P\)</span> and person-level average household size
+<span class="math inline">\(M_p\)</span> is: <span class="math display">\[\begin{align}
+TBD
+\end{align}\]</span></p>
+<p><strong>Proof:</strong><br />
+In this section, I show that the sparsest configuraiton of households is
+given in a case where you produce some number of 1-person households and
+then throw the rest of the population into a remaining large
 households.</p>
+<hr />
 </div>
 <div id="conclusion" class="section level1">
 <h1>conclusion</h1>

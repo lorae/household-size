@@ -14,35 +14,30 @@ library(patchwork)
 
 As shown in the documentation for this project, it is possible to have the same summary statistics but different underlying household configurations.
 
+# Definitions and Notation
 
+Let:
 
-For every person \( j \) in a population \( P \) living in a household of \( m_j \) members, the **person-level** mean household size is a simple average across person-level observations:
+- \(P\) = total population size  
+- \(H\) = number of households  
+- \(M_p\) = person-level mean household size 
 
-\begin{align}
-\text{(Mean HH Size)}_{\text{person}}
-= \frac{\sum_{j = 1}^P m_j}{\sum_{i = 1}^H m_i}
-= \frac{\sum_{j = 1}^P m_j}{P}
-\end{align}
+    For every person \( j \) in a population \( P \) living in a household of \( m_j \) members, the **person-level** mean household size is a simple average across person-level observations:
+    
+    \begin{align}
+    M_p = \frac{\sum_{j = 1}^P m_j}{\sum_{i = 1}^H m_i} = \frac{\sum_{j = 1}^P m_j}{P}
+    \end{align}
 
-For every household \( i \) with number of members \( m_i \) in households \( 1 \) through \( H \), the **household-level** mean household size is a simple average across households as individual observations:
+- \(M_h\) = household-level mean household size
 
-\begin{align}
-\text{(Mean HH Size)}_{\text{household}} 
-= \frac{\sum_{i = 1}^H m_i}{H} 
-= \frac{P}{H}
-\end{align}
+    For every household \( i \) with number of members \( m_i \) in households \( 1 \) through \( H \), the **household-level** mean household size is a simple average across households as individual observations:
+    
+    \begin{align}
+    M_h = \frac{\sum_{i = 1}^H m_i}{H} = \frac{P}{H}
+    \end{align}
 
-We have:
-
-- population size
-- average household size
-
-We want to know 
-
-- number of households
-
-Proof: although household-level average household size is perfectly determinate in this regard, person-level household size in conjunction with population size can also be used to come up with a minimum and maximum bound on number of households.
-
+---
+# Context
 Since 
 \begin{align}
 \text{(Mean HH Size)}_{\text{household}} 
@@ -54,7 +49,6 @@ H = \frac{P}{\text{(Mean HH Size)}_{\text{household}}}
 \end{align}
 
 However, household-level household size doesn't lend itself to this equivalency. In fact, given population size and person-level average household size, there are potentially more than one value of number of household consistent with the first two facts. Consider the following counterexample. There is a population of 6 individuals. The average person-level household size is 3. 
-
 Figure 1.2 shows two hypothetical Americas consistent with the summary statistics. In scenario 1, average person-level household size is
 \\[ 
 \\frac{3+3+3 + 3+3+3}{6} = 3
@@ -114,7 +108,10 @@ plot2 <- ggplot(hh_data2, aes(x = x, y = y)) +
 print(plot1 | plot2)
 ```
 
-That said, we can prove that given population size and average person-level household size, there is a minimum number of households given by
+---
+# Goal
+
+We seek to determine the possible range for the number of households \(H\) consistent with a known population size \(P\) and person-level average household size \(M_p\). Specifically, we will establish both a minimum and maximum bound for \(H\). Given population size and average person-level household size, there is a minimum number of households given by
 
 \begin{align}
 H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
@@ -124,13 +121,16 @@ and a max given by
 
 [FILL IN HERE]
 
+---
 
-# Proof: minimum number of households is given by 
+# Lemma 1: Minimum Number of Households  
+**Lemma:**  
+The minimum number of households consistent with a population size \(P\) and person-level average household size \(M_p\) is:
 \begin{align}
-H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
+H_{\min} = \frac{P}{M_p}
 \end{align}
 
-Notation: Let the mean person-level household size, $\text{(Mean HH Size)}_{\text{person}}$, be indicated in shorthand as $M_{p}$. Let the population be indicated as $P$ and the number of households be indicated as $H$.
+**Proof:**  
 
 Case A:
 Consider a specific case where $P = p$ and $M_p = m$, which happens to be a factor of $p$: in other words, there exists a positive integer $i$ such that $m * i = p$. Let us imagine a town configured in this fashion. One (but potentially not the only) configuration consistent with these statistics: $M_p = m$, $P = p$, is that the town has exactly $i$ households, each containing exactly $\frac{p}{i} = m$ members:
@@ -146,11 +146,19 @@ Then I illustrate the same concept even when $i$ is not an integer by creating t
 
 Thus, the configurations described above give the minimum number of households, $i = p/m$. And, in fact, when $i$ is not an integer, as in Case B, then the true minimum is given by rounding $i$ up to the nearest integer.
 
-# Proof: Maximum number of househodls is given by 
-[TBD]
+---
 
-In this section, I show that the sparsest configuraiton of households is given in a case hwere you produce some number of 1-person households and then throw the rest of the population into a remaining large households.
+# Lemma 2: Maximum Number of Households  
+**Lemma:**  
+The maximum number of households consistent with a population size \(P\) and person-level average household size \(M_p\) is:
+\begin{align}
+TBD
+\end{align}
 
+**Proof:**  
+In this section, I show that the sparsest configuraiton of households is given in a case where you produce some number of 1-person households and then throw the rest of the population into a remaining large households.
+
+---
 # conclusion
 
 Reiterate the minima and maxima, take it back to the example at the begining and show that the two configurations I listed are actually the two special cases of minima and maxima.
