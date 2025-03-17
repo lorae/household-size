@@ -37,7 +37,9 @@ Let:
     \end{align}
 
 ---
+
 # Context
+
 Since 
 \begin{align}
 \text{(Mean HH Size)}_{\text{household}} 
@@ -63,6 +65,7 @@ While in scenario 2, average person-level household size is
 However, in Scenario 1, there are two households, while in scenario 3, there are 3 households. Thus, person-level household size and population are not always adequate to precisely estimate number of households.
 
 **Figure 1.2**
+
 ```{r fig01.2, echo=FALSE, out.width="100%"}
 
 # Define plot height factor (adjustable)
@@ -109,6 +112,7 @@ print(plot1 | plot2)
 ```
 
 ---
+
 # Goal
 
 We seek to determine the possible range for the number of households \(H\) consistent with a known population size \(P\) and person-level average household size \(M_p\). Specifically, we will establish both a minimum and maximum bound for \(H\). Given population size and average person-level household size, there is a minimum number of households given by
