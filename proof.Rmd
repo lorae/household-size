@@ -24,21 +24,27 @@ Let:
 
     For every person \( j \) in a population \( P \) living in a household of \( m_j \) members, the **person-level** mean household size is a simple average across person-level observations:
     
-    \begin{align}
+    \begin{equation}
+    \label{eq:1}
+    \tag{1}
     M_p = \frac{\sum_{j = 1}^P m_j}{P}
-    \end{align}
+    \end{equation}
 
 - \(M_h\) = **Household-level mean household size**
 
    The **household-level** mean household size is a simple average across households as individual observations:
     
     \begin{align}
+    \label{eq:2}
+    \tag{2}
     M_h = \frac{P}{H}
     \end{align}
 
 ---
 
 # Context
+
+Equation \eqref{eq:1} shows that $a=c$. Equation \eqref{eq:2} shows the sky is blue.
 
 Since 
 \begin{align}
