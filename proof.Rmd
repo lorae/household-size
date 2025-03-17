@@ -44,39 +44,13 @@ Let:
 
 # Context
 
-Equation \eqref{eq:1} shows that $a=c$. Equation \eqref{eq:2} shows the sky is blue.
+Equation \eqref{eq:2} shows that household-level mean household size and population is adequate to deduce the number of households. However, person-level household size does not lend itself to this equivalency: the same person-level mean and population can be consistent with multiple values for the number of households. 
 
-Since 
-\begin{align}
-\text{(Mean HH Size)}_{\text{household}} 
-= \frac{P}{H}
-\end{align}
-
-\begin{align}
-H = \frac{P}{\text{(Mean HH Size)}_{\text{household}}}
-\end{align}
-
-However, household-level household size doesn't lend itself to this equivalency. In fact, given population size and person-level average household size, there are potentially more than one value of number of household consistent with the first two facts. Consider the following counterexample. There is a population of 6 individuals. The average person-level household size is 3. 
-Figure 1.2 shows two hypothetical Americas consistent with the summary statistics. In scenario 1, average person-level household size is
-\\[ 
-\\frac{3+3+3 + 3+3+3}{6} = 3
-\\]
-
-While in scenario 2, average person-level household size is
-\\[ 
-\\frac{1 + 1 + 4+4+4+4}{6} = 3
-\\]
-  
-  
-However, in Scenario 1, there are two households, while in scenario 3, there are 3 households. Thus, person-level household size and population are not always adequate to precisely estimate number of households.
+Figure 1.2 illustrates this point in a hypothetical population with \( P = 6 \) and \( M_p = 3 \). In scenario 1, average person-level household size is \( \frac{3+3+3 + 3+3+3}{6} = 3 \) and there are 3 households. In scenario 2, average person-level household size is \( \frac{1 + 1 + 4+4+4+4}{6} = 3 \) and there are 4 households. Thus, population and person-level household size alone do not singularly determine the number of households.
 
 **Figure 1.2**
 
 ```{r fig01.2, echo=FALSE, out.width="100%"}
-
-# Define plot height factor (adjustable)
-plot_height <- 1  
-
 # Data for Scenario 1
 hh_data1 <- data.frame(
   hh_id = rep(c("Household A", "Household B"), times = c(3, 3)),
@@ -93,9 +67,12 @@ hh_data2 <- data.frame(
 
 # Plot for Scenario 1
 plot1 <- ggplot(hh_data1, aes(x = x, y = y)) +
-  geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
-  theme_void(base_size = 10 * plot_height) +
-  theme(plot.margin = margin(0,0,0,0)) +
+  geom_point(shape = 21, size = 4, color = "black", stroke = 1.2) +
+  theme_void() +
+  theme(
+    plot.margin = margin(1, 1, 1, 1),
+    plot.background = element_rect(color = "black", fill = NA, linewidth = 0.5)
+  ) +
   facet_wrap(~hh_id, nrow = 1) +
   coord_fixed(ratio = 1) +
   xlim(0, 3) +
@@ -104,17 +81,27 @@ plot1 <- ggplot(hh_data1, aes(x = x, y = y)) +
 
 # Plot for Scenario 2
 plot2 <- ggplot(hh_data2, aes(x = x, y = y)) +
-  geom_point(shape = 21, size = 4 * plot_height, color = "black", stroke = 1.2 * plot_height) +
-  theme_void(base_size = 10 * plot_height) +
-  theme(plot.margin = margin(0,0,0,0)) +
+  geom_point(shape = 21, size = 4, color = "black", stroke = 1.2) +
+  theme_void() +
+  theme(
+    plot.margin = margin(1, 1, 1, 1),
+    plot.background = element_rect(color = "black", fill = NA, linewidth = 0.5)
+  ) +
   facet_wrap(~hh_id, nrow = 1) +
   coord_fixed(ratio = 1) +
   xlim(0, 3) +
   ylim(0, 3) +
   ggtitle("Scenario 2")
+```
 
-# Combine both plots vertically using patchwork
-print(plot1 | plot2)
+```{r, fig.height=3, out.width="100%"}
+# Combine plots using patchwork
+combined_plot <- plot1 + plot2 +
+  plot_layout(widths = c(1, 1))
+
+# Display the plot
+print(combined_plot)
+
 ```
 
 ---
