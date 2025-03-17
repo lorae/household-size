@@ -427,10 +427,46 @@ H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
 H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
 \end{align}\]</span></p>
 <p>Notation: Let the mean person-level household size, <span class="math inline">\(\text{(Mean HH Size)}_{\text{person}}\)</span>, be
-indicated in shorthand as <span class="math inline">\(M_{p}\)</span>.</p>
-<p>For simplicity, let’s start with a case where <span class="math inline">\(M_{p}\)</span> is a factor of <span class="math inline">\(P\)</span>: in other words, <span class="math inline">\(M_{p} * i = P\)</span>, where <span class="math inline">\(i\)</span> is a positive integer.</p>
-<p>Suppose the number of households is equal to <span class="math inline">\(i\)</span>. We can imagine a configuration of
-these H households</p>
+indicated in shorthand as <span class="math inline">\(M_{p}\)</span>.
+Let the population be indicated as <span class="math inline">\(P\)</span> and the number of households be
+indicated as <span class="math inline">\(H\)</span>.</p>
+<p>Case A: Consider a specific case where <span class="math inline">\(P
+= p\)</span> and <span class="math inline">\(M_p = m\)</span>, which
+happens to be a factor of <span class="math inline">\(p\)</span>: in
+other words, there exists a positive integer <span class="math inline">\(i\)</span> such that <span class="math inline">\(m
+* i = p\)</span>. Let us imagine a town configured in this fashion. One
+(but potentially not the only) configuration consistent with these
+statistics: <span class="math inline">\(M_p = m\)</span>, <span class="math inline">\(P = p\)</span>, is that the town has exactly <span class="math inline">\(i\)</span> households, each containing exactly
+<span class="math inline">\(\frac{p}{i} = m\)</span> members:</p>
+<p>[schematic showing this in an example where P = 30, m = 3].</p>
+<p>…</p>
+<p>this section of the proof ends where I show that there’s no possible
+way to “dissolve” a household and add its contents to other households
+without pushing the average persn-level household size above <span class="math inline">\(m\)</span>.</p>
+<p>Case B: Then I illustrate the same concept even when <span class="math inline">\(i\)</span> is not an integer by creating the
+“closest square household configuration” where I essentially show that,
+for example, if m = 2.75, you can configure the population into groups
+of the nearest integer-size households (2- and 3-person housholds) such
+that dissolving the contents of any one household and adding it to other
+households ill push the average person-level household size above <span class="math inline">\(m\)</span>.</p>
+<p>Thus, the configurations described above give the minimum number of
+households, <span class="math inline">\(i = p/m\)</span>. And, in fact,
+when <span class="math inline">\(i\)</span> is not an integer, as in
+Case B, then the true minimum is given by rounding <span class="math inline">\(i\)</span> up to the nearest integer.</p>
+</div>
+<div id="proof-maximum-number-of-househodls-is-given-by" class="section level1">
+<h1>Proof: Maximum number of househodls is given by</h1>
+<p>[TBD]</p>
+<p>In this section, I show that the sparsest configuraiton of households
+is given in a case hwere you produce some number of 1-person households
+and then throw the rest of the population into a remaining large
+households.</p>
+</div>
+<div id="conclusion" class="section level1">
+<h1>conclusion</h1>
+<p>Reiterate the minima and maxima, take it back to the example at the
+begining and show that the two configurations I listed are actually the
+two special cases of minima and maxima.</p>
 </div>
 
 

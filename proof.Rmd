@@ -130,8 +130,27 @@ and a max given by
 H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
 \end{align}
 
-Notation: Let the mean person-level household size, $\text{(Mean HH Size)}_{\text{person}}$, be indicated in shorthand as $M_{p}$.
+Notation: Let the mean person-level household size, $\text{(Mean HH Size)}_{\text{person}}$, be indicated in shorthand as $M_{p}$. Let the population be indicated as $P$ and the number of households be indicated as $H$.
 
-For simplicity, let's start with a case where $M_{p}$ is a factor of $P$: in other words, $M_{p} * i = P$, where $i$ is a positive integer.
+Case A:
+Consider a specific case where $P = p$ and $M_p = m$, which happens to be a factor of $p$: in other words, there exists a positive integer $i$ such that $m * i = p$. Let us imagine a town configured in this fashion. One (but potentially not the only) configuration consistent with these statistics: $M_p = m$, $P = p$, is that the town has exactly $i$ households, each containing exactly $\frac{p}{i} = m$ members:
 
-Suppose the number of households is equal to $i$. We can imagine a configuration of these H households
+[schematic showing this in an example where P = 30, m = 3].
+
+...
+
+this section of the proof ends where I show that there's no possible way to "dissolve" a household and add its contents to other households without pushing the average persn-level household size above $m$.
+
+Case B:
+Then I illustrate the same concept even when $i$ is not an integer by creating the "closest square household configuration" where I essentially show that, for example, if m = 2.75, you can configure the population into groups of the nearest integer-size households (2- and 3-person housholds) such that dissolving the contents of any one household and adding it to other households ill push the average person-level household size above $m$.
+
+Thus, the configurations described above give the minimum number of households, $i = p/m$. And, in fact, when $i$ is not an integer, as in Case B, then the true minimum is given by rounding $i$ up to the nearest integer.
+
+# Proof: Maximum number of househodls is given by 
+[TBD]
+
+In this section, I show that the sparsest configuraiton of households is given in a case hwere you produce some number of 1-person households and then throw the rest of the population into a remaining large households.
+
+# conclusion
+
+Reiterate the minima and maxima, take it back to the example at the begining and show that the two configurations I listed are actually the two special cases of minima and maxima.
