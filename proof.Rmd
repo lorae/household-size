@@ -46,7 +46,7 @@ Let:
 
 Equation \eqref{eq:2} shows that household-level mean household size and population is adequate to deduce the number of households. However, person-level household size does not lend itself to this equivalency: the same person-level mean and population can be consistent with multiple values for the number of households. 
 
-Figure 1.2 illustrates this point in a hypothetical population with \( P = 6 \) and \( M_p = 3 \). In scenario 1, average person-level household size is \( \frac{3+3+3 + 3+3+3}{6} = 3 \) and there are 3 households. In scenario 2, average person-level household size is \( \frac{1 + 1 + 4+4+4+4}{6} = 3 \) and there are 4 households. Thus, population and person-level household size alone do not singularly determine the number of households.
+Figure 1.2 illustrates this point in a hypothetical population with \( P = 6 \) and \( M_p = 3 \). In Scenario 1, average person-level household size is \( \frac{3+3+3 + 3+3+3}{6} = 3 \) and there are 2 households. In Scenario 2, average person-level household size is \( \frac{1 + 1 + 4+4+4+4}{6} = 3 \) and there are 3 households. Thus, population and person-level household size alone do not singularly determine the number of households.
 
 **Figure 1.2**
 
@@ -94,10 +94,13 @@ plot2 <- ggplot(hh_data2, aes(x = x, y = y)) +
   ggtitle("Scenario 2")
 ```
 
-```{r, fig.height=3, out.width="100%"}
+```{r, fig.height=3, out.width="100%", echo = FALSE}
 # Combine plots using patchwork
 combined_plot <- plot1 + plot2 +
-  plot_layout(widths = c(1, 1))
+  plot_layout(widths = c(1, 1)) +
+  plot_annotation(
+    caption = expression(paste("Circles represent individual people. In both scenarios, P = 6 and ", M[p], " = 3, yet the number of households differs."))
+  )
 
 # Display the plot
 print(combined_plot)
@@ -106,34 +109,67 @@ print(combined_plot)
 
 ---
 
-# Goal
+# Assertion
 
-We seek to determine the possible range for the number of households \(H\) consistent with a known population size \(P\) and person-level average household size \(M_p\). Specifically, we will establish both a minimum and maximum bound for \(H\). Given population size and average person-level household size, there is a minimum number of households given by
+There is a range of possible number of households \(H\) consistent with a known population size \(P\) and person-level average household size \(M_p\). The range on \(H\) is bounded by a minumum of 
 
 \begin{align}
-H_{min} = \frac{P}{\text{(Mean HH Size)}_{\text{person}}}
+H_{min} = \frac{P}{M_p}
 \end{align}
 
-and a max given by
+and a maximum of
 
 [FILL IN HERE]
 
 ---
 
 # Lemma 1: Minimum Number of Households  
-**Lemma:**  
+
 The minimum number of households consistent with a population size \(P\) and person-level average household size \(M_p\) is:
 \begin{align}
 H_{\min} = \frac{P}{M_p}
 \end{align}
 
-**Proof:**  
+## Proof
 
-Case A:
-Consider a specific case where $P = p$ and $M_p = m$, which happens to be a factor of $p$: in other words, there exists a positive integer $i$ such that $m * i = p$. Let us imagine a town configured in this fashion. One (but potentially not the only) configuration consistent with these statistics: $M_p = m$, $P = p$, is that the town has exactly $i$ households, each containing exactly $\frac{p}{i} = m$ members:
+Let the measured population $P$ of an area be $p$ and the measured person-level mean household size $M_p$ be $m$. Let $i$ be defined $i = p/m$
+
+There are two possibilites:
+
+- $i$ is an integer
+- $i$ is not an integer
+
+We diescuss each case in turn.
+
+**$i$ is an integer**
+
+If $m$ divides evenly into $p$, then one potential configuration of the population is to have $i$ households, each with exactly $\frac{p}{i} = m$ members.
 
 [schematic showing this in an example where P = 30, m = 3].
 
+We aim to prove that there is no possible configuration that can be achieved with $P = p$ and $M_p = m$ such that $H < i$.
+
+Suppose we have the households in this configuration. The only way to reduce the number of households is to dissolve one household and distribute its members among the other households. In the current configuration,
+
+\begin{equation}
+M_{p, init} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{im^2}{P} = m
+\end{equation}
+
+If we were to dissolve a household and put each of its members into one of $m$ other households (assuming that there are enough other households to do this), then
+
+\begin{equation}
+M_{p, post} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{(i - 1 - m)m^2 + m(m+1)^2}{P} = \frac{m^2 + im^2 + m}{P}
+\end{equation}
+
+Since $m$ and $i$ are both positive integers, $M_{p, post} > M_{p, init}$
+
+What if we instead dissolved a household and incorporated all $m$ of its members into one other household? Then
+
+\begin{equation}
+M_{p, post2} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{(i - 2)m^2 + 1(2m)^2}{P} = \frac{im^2 + 2m^2}{P}
+\end{equation}
+
+Which is still larger than $M_{p, init}$. In fact, regardless of the way we reallocate the dissolved household to other households
 ...
 
 this section of the proof ends where I show that there's no possible way to "dissolve" a household and add its contents to other households without pushing the average persn-level household size above $m$.
