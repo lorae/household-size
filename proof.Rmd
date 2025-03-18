@@ -142,7 +142,7 @@ Any configuration of $P$ individuals across households can be transformed into a
 2. Move another individual from Household A to Household C.
 3. Move two individuals from Household B to Household C.
 
-Let us move to quantifying the change in person-level mean household size from $M_p$ to $M_p'$ after an arbitrary single-person transfer. Suppose we begin with an arbitrary configuration of $P$ individuals in $H$ households, with each household $m_j$ containing some whole number of members $m_1, m_2, \ldots, m_{H-1}, m_H$. We move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
+Next, we calculate how the person-level mean household size changes after a single-person transfer. Suppose we begin with an arbitrary configuration of $P$ individuals in $H$ households, with each household $m_j$ containing some whole number of members $m_1, m_2, \ldots, m_{H-1}, m_H$. We move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
 
 \begin{equation}
 M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg)
@@ -154,13 +154,20 @@ to
 M_p' =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H+1}m_j'^2 \bigg)
 \end{equation}
 
-Person-level household size increases if $M_p' - M_p > 0$, remains the same if $M_p' - M_p = 0$, and shrinks if $M_p' - M_p < 0$. Since all household sizes $m_j = m_j'$ are unaffected by the shift, aside from the special case of $j = k$ and $j = k+1$, the remaining terms cancel out:
+Person-level household size increases if $M_p' - M_p > 0$, remains the same if $M_p' - M_p = 0$, and shrinks if $M_p' - M_p < 0$. Since all household sizes $m_j = m_j'$ are unaffected by the shift, aside from the special case of $j = k$ and $j = k+1$, the remaining terms cancel out due to equivalence.
 
 \begin{align}
 M_p' - M_p & = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H}m_j^2 \bigg) - \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H}m_j'^2 \bigg) \\
+\label{eq:3}
+\tag{3}
 & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
 \end{align}
 
+We now transition to exploring how the value $M_p' - M_p$ varies under each of the three circumstances:
+
+1. $m_{k+1} = m_k - 1$
+2. $m_{k+1} < m_k - 1$
+2. $m_{k+1} > m_k - 1$
 
 ...
 

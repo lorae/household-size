@@ -453,10 +453,12 @@ C.</li>
 <li>Move another individual from Household A to Household C.</li>
 <li>Move two individuals from Household B to Household C.</li>
 </ol>
-<p>Let us move to quantifying the change in person-level mean household
-size from <span class="math inline">\(M_p\)</span> to <span class="math inline">\(M_p&#39;\)</span> after an arbitrary single-person
-transfer. Suppose we begin with an arbitrary configuration of <span class="math inline">\(P\)</span> individuals in <span class="math inline">\(H\)</span> households, with each household <span class="math inline">\(m_j\)</span> containing some whole number of
-members: <span class="math inline">\(m_1, m_2, \ldots, m_{H-1},
+<p>Next, we calculate how the person-level mean household size changes
+after a single-person transfer. Suppose we begin with an arbitrary
+configuration of <span class="math inline">\(P\)</span> individuals in
+<span class="math inline">\(H\)</span> households, with each household
+<span class="math inline">\(m_j\)</span> containing some whole number of
+members <span class="math inline">\(m_1, m_2, \ldots, m_{H-1},
 m_H\)</span>. We move one individual from household <span class="math inline">\(j = k\)</span> to household <span class="math inline">\(j = k+1\)</span>. Then mean household size changes
 from:</p>
 <p><span class="math display">\[\begin{equation}
@@ -473,18 +475,24 @@ if <span class="math inline">\(M_p&#39; - M_p = 0\)</span>, and shrinks
 if <span class="math inline">\(M_p&#39; - M_p &lt; 0\)</span>. Since all
 household sizes <span class="math inline">\(m_j = m_j&#39;\)</span> are
 unaffected by the shift, aside from the special case of <span class="math inline">\(j = k\)</span> and <span class="math inline">\(j =
-k+1\)</span>, the remaining terms cancel out:</p>
+k+1\)</span>, the remaining terms cancel out due to equivalence.</p>
 <p><span class="math display">\[\begin{align}
 M_p&#39; - M_p &amp; = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 +
-m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg) - \frac{1}{P}
-\bigg( \sum_{j = 1}^{k-1} m_j&#39;^2 + m_k&#39;^2 + m_{k+1}&#39;^2 +
-\sum_{j = k+2}^{H+1}m_j&#39;^2 \bigg) \\
+m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H}m_j^2 \bigg) - \frac{1}{P} \bigg(
+\sum_{j = 1}^{k-1} m_j&#39;^2 + m_k&#39;^2 + m_{k+1}&#39;^2 + \sum_{j =
+k+2}^{H}m_j&#39;^2 \bigg) \\
+\label{eq:3}
+\tag{3}
 &amp; = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k&#39;^2 +
 m_{k+1}&#39;^2) \bigg) \\
-\end{align}\]</span> Since only households <span class="math inline">\(j
-= k\)</span> and <span class="math inline">\(j = k+1\)</span> are
-affected by this change, the remaining sums can be regarded as
-equivalent and cancelled out.</p>
+\end{align}\]</span></p>
+<p>We now transition to exploring how the value <span class="math inline">\(M_p&#39; - M_p\)</span> varies under each of the
+three circumstances:</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(m_{k+1} = m_k - 1\)</span></li>
+<li><span class="math inline">\(m_{k+1} &lt; m_k - 1\)</span></li>
+<li><span class="math inline">\(m_{k+1} &gt; m_k - 1\)</span></li>
+</ol>
 <p>…</p>
 <p>this section of the proof ends where I show that there’s no possible
 way to “dissolve” a household and add its contents to other households
