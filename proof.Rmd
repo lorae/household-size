@@ -27,7 +27,7 @@ Let:
     \begin{equation}
     \label{eq:1}
     \tag{1}
-    M_p = \frac{\sum_{j = 1}^P m_j^2}{P}
+    M_p = \frac{\sum_{j = 1}^H m_j^2}{P}
     \end{equation}
 
 - \(M_h\) = **Household-level mean household size**
@@ -132,44 +132,35 @@ H_{\min} = \frac{P}{M_p}
 
 ## Proof
 
-Let the measured population $P$ of an area be $p$ and the measured person-level mean household size $M_p$ be $m$. Let $i$ be defined $i = p/m$
-
-There are two possibilites:
-
-- $i$ is an integer
-- $i$ is not an integer
-
-We diescuss each case in turn.
-
-**$i$ is an integer**
-
-If $m$ divides evenly into $p$, then one potential configuration of the population is to have $i$ households, each with exactly $\frac{p}{i} = m$ members.
-
-[schematic showing this in an example where P = 30, m = 3].
-
-We aim to prove that there is no possible configuration that can be achieved with $P = p$ and $M_p = m$ such that $H < i$.
-
-Suppose we have the households in this configuration. The only way to reduce the number of households is to dissolve one household and distribute its members among the other households. In the current configuration,
-
+Suppose the population $P$ is distributed into $H$ households with the measured household size in the $j$th household equal to $m_j$. As defined above, **person-level** mean household size is:
+    
 \begin{equation}
-M_{p, init} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{im^2}{P} = m
+M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
 \end{equation}
 
-If we were to dissolve a household and put each of its members into one of $m$ other households (assuming that there are enough other households to do this), then
+Note: In this form of the equation, we've added an extra household, household $j = H + 1$, purely as a useful convention for reasons that will soon be apparent. This $H+1$th household can be regarded as a household of 0 people. In fact, the sum can be interpreted as the squared household size of the first $H$ households plus a potentially infinite number of 0-person households.
+
+Any change in one configuration among the $H$ households can be made by incrementally moving one individual at a time from one household to another. [expand upon what we mean in a picture, perhaps. Or just explain it better]. Suppose we move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
 
 \begin{equation}
-M_{p, post} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{(i - 1 - m)m^2 + m(m+1)^2}{P} = \frac{m^2 + im^2 + m}{P}
+M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg)
 \end{equation}
 
-Since $m$ and $i$ are both positive integers, $M_{p, post} > M_{p, init}$
-
-What if we instead dissolved a household and incorporated all $m$ of its members into one other household? Then
+to 
 
 \begin{equation}
-M_{p, post2} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{(i - 2)m^2 + 1(2m)^2}{P} = \frac{im^2 + 2m^2}{P}
+M_p' =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H+1}m_j'^2 \bigg)
 \end{equation}
 
-Which is still larger than $M_{p, init}$. In fact, regardless of the way we reallocate the dissolved household to other households
+Person-level household size increases if $M_p' - M_p > 0$, remains the same if $M_p' - M_p = 0$, and shrinks if $M_p' - M_p < 0$. Since all household sizes $m_j = m_j'$ are unaffected by the shift, aside from the special case of $j = k$ and $j = k+1$, the remaining terms cancel out:
+
+\begin{align}
+M_p' - M_p & = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg) - \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H+1}m_j'^2 \bigg) \\
+& = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
+\end{align}
+Since only households $j = k$ and $j = k+1$ are affected by this change, the remaining sums can be regarded as equivalent and cancelled out.
+
+
 ...
 
 this section of the proof ends where I show that there's no possible way to "dissolve" a household and add its contents to other households without pushing the average persn-level household size above $m$.

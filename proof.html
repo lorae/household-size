@@ -374,7 +374,7 @@ across person-level observations:</p>
 <p><span class="math display">\[\begin{equation}
   \label{eq:1}
   \tag{1}
-  M_p = \frac{\sum_{j = 1}^P m_j^2}{P}
+  M_p = \frac{\sum_{j = 1}^H m_j^2}{P}
   \end{equation}\]</span></p></li>
 <li><p><span class="math inline">\(M_h\)</span> =
 <strong>Household-level mean household size</strong></p>
@@ -430,48 +430,51 @@ H_{\min} = \frac{P}{M_p}
 \end{align}\]</span></p>
 <div id="proof" class="section level2">
 <h2>Proof</h2>
-<p>Let the measured population <span class="math inline">\(P\)</span> of
-an area be <span class="math inline">\(p\)</span> and the measured
-person-level mean household size <span class="math inline">\(M_p\)</span> be <span class="math inline">\(m\)</span>. Let <span class="math inline">\(i\)</span> be defined <span class="math inline">\(i = p/m\)</span></p>
-<p>There are two possibilites:</p>
-<ul>
-<li><span class="math inline">\(i\)</span> is an integer</li>
-<li><span class="math inline">\(i\)</span> is not an integer</li>
-</ul>
-<p>We diescuss each case in turn.</p>
-<p><strong><span class="math inline">\(i\)</span> is an
-integer</strong></p>
-<p>If <span class="math inline">\(m\)</span> divides evenly into <span class="math inline">\(p\)</span>, then one potential configuration of
-the population is to have <span class="math inline">\(i\)</span>
-households, each with exactly <span class="math inline">\(\frac{p}{i} =
-m\)</span> members.</p>
-<p>[schematic showing this in an example where P = 30, m = 3].</p>
-<p>We aim to prove that there is no possible configuration that can be
-achieved with <span class="math inline">\(P = p\)</span> and <span class="math inline">\(M_p = m\)</span> such that <span class="math inline">\(H &lt; i\)</span>.</p>
-<p>Suppose we have the households in this configuration. The only way to
-reduce the number of households is to dissolve one household and
-distribute its members among the other households. In the current
-configuration,</p>
+<p>Suppose the population <span class="math inline">\(P\)</span> is
+distributed into <span class="math inline">\(H\)</span> households with
+the measured household size in the <span class="math inline">\(j\)</span>th household equal to <span class="math inline">\(m_j\)</span>. As defined above,
+<strong>person-level</strong> mean household size is:</p>
 <p><span class="math display">\[\begin{equation}
-M_{p, init} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{im^2}{P} = m
+M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
 \end{equation}\]</span></p>
-<p>If we were to dissolve a household and put each of its members into
-one of <span class="math inline">\(m\)</span> other households (assuming
-that there are enough other households to do this), then</p>
+<p>Note: In this form of the equation, we’ve added an extra household,
+household <span class="math inline">\(j = H + 1\)</span>, purely as a
+useful convention for reasons that will soon be apparent. This <span class="math inline">\(H+1\)</span>th household can be regarded as a
+household of 0 people. In fact, the sum can be interpreted as the
+squared household size of the first <span class="math inline">\(H\)</span> households plus a potentially infinite
+number of 0-person households.</p>
+<p>Any change in one configuration among the <span class="math inline">\(H\)</span> households can be made by incrementally
+moving one individual at a time from one household to another. [expand
+upon what we mean in a picture, perhaps. Or just explain it better].
+Suppose we move one individual from household <span class="math inline">\(j = k\)</span> to household <span class="math inline">\(j = k+1\)</span>. Then mean household size changes
+from:</p>
 <p><span class="math display">\[\begin{equation}
-M_{p, post} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{(i - 1 - m)m^2 +
-m(m+1)^2}{P} = \frac{m^2 + im^2 + m}{P}
+M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2
++  \sum_{j = k+2}^{H+1}m_j^2 \bigg)
 \end{equation}\]</span></p>
-<p>Since <span class="math inline">\(m\)</span> and <span class="math inline">\(i\)</span> are both positive integers, <span class="math inline">\(M_{p, post} &gt; M_{p, init}\)</span></p>
-<p>What if we instead dissolved a household and incorporated all <span class="math inline">\(m\)</span> of its members into one other
-household? Then</p>
+<p>to</p>
 <p><span class="math display">\[\begin{equation}
-M_{p, post2} = \frac{\sum_{j = 1}^P m_j}{P} = \frac{(i - 2)m^2 +
-1(2m)^2}{P} = \frac{im^2 + 2m^2}{P}
+M_p&#39; =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j&#39;^2 + m_k&#39;^2
++ m_{k+1}&#39;^2 + \sum_{j = k+2}^{H+1}m_j&#39;^2 \bigg)
 \end{equation}\]</span></p>
-<p>Which is still larger than <span class="math inline">\(M_{p,
-init}\)</span>. In fact, regardless of the way we reallocate the
-dissolved household to other households …</p>
+<p>Person-level household size increases if <span class="math inline">\(M_p&#39; - M_p &gt; 0\)</span>, remains the same
+if <span class="math inline">\(M_p&#39; - M_p = 0\)</span>, and shrinks
+if <span class="math inline">\(M_p&#39; - M_p &lt; 0\)</span>. Since all
+household sizes <span class="math inline">\(m_j = m_j&#39;\)</span> are
+unaffected by the shift, aside from the special case of <span class="math inline">\(j = k\)</span> and <span class="math inline">\(j =
+k+1\)</span>, the remaining terms cancel out:</p>
+<p><span class="math display">\[\begin{align}
+M_p&#39; - M_p &amp; = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 +
+m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg) - \frac{1}{P}
+\bigg( \sum_{j = 1}^{k-1} m_j&#39;^2 + m_k&#39;^2 + m_{k+1}&#39;^2 +
+\sum_{j = k+2}^{H+1}m_j&#39;^2 \bigg) \\
+&amp; = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k&#39;^2 +
+m_{k+1}&#39;^2) \bigg) \\
+\end{align}\]</span> Since only households <span class="math inline">\(j
+= k\)</span> and <span class="math inline">\(j = k+1\)</span> are
+affected by this change, the remaining sums can be regarded as
+equivalent and cancelled out.</p>
+<p>…</p>
 <p>this section of the proof ends where I show that there’s no possible
 way to “dissolve” a household and add its contents to other households
 without pushing the average persn-level household size above <span class="math inline">\(m\)</span>.</p>
