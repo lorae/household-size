@@ -27,7 +27,7 @@ Let:
     \begin{equation}
     \label{eq:1}
     \tag{1}
-    M_p = \frac{\sum_{j = 1}^P m_j}{P}
+    M_p = \frac{\sum_{j = 1}^P m_j^2}{P}
     \end{equation}
 
 - \(M_h\) = **Household-level mean household size**
@@ -46,7 +46,7 @@ Let:
 
 Equation \eqref{eq:2} shows that household-level mean household size and population is adequate to deduce the number of households. However, person-level household size does not lend itself to this equivalency: the same person-level mean and population can be consistent with multiple values for the number of households. 
 
-Figure 1.2 illustrates this point in a hypothetical population with \( P = 6 \) and \( M_p = 3 \). In Scenario 1, average person-level household size is \( \frac{3+3+3 + 3+3+3}{6} = 3 \) and there are 2 households. In Scenario 2, average person-level household size is \( \frac{1 + 1 + 4+4+4+4}{6} = 3 \) and there are 3 households. Thus, population and person-level household size alone do not singularly determine the number of households.
+Figure 1.2 illustrates this point in a hypothetical population with \( P = 6 \) and \( M_p = 3 \). In Scenario 1, average person-level household size is \( \frac{3^2 + 3^2}{6} = 3 \) and there are 2 households. In Scenario 2, average person-level household size is \( \frac{1^2 + 1^2 + 4^2}{6} = 3 \) and there are 3 households. Thus, population and person-level household size alone do not singularly determine the number of households.
 
 **Figure 1.2**
 
