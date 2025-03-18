@@ -138,9 +138,17 @@ Suppose the population $P$ is distributed into $H$ households with the measured 
 M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
 \end{equation}
 
-Note: In this form of the equation, we've added an extra household, household $j = H + 1$, purely as a useful convention for reasons that will soon be apparent. This $H+1$th household can be regarded as a household of 0 people. In fact, the sum can be interpreted as the squared household size of the first $H$ households plus a potentially infinite number of 0-person households.
+Any configuration of $P$ people among households can be achieved by incrementally moving one individual at a time from one household to another. Forming a new household can be achieved by moving an individual from an existing household to household $H+1$ (technically out of the original range of number of households, but the total number of households in any configuration can be regarded as H households with a positive number of residents and an infinite number of 0-person households). For example, one can move from Scenario 1 to Scenario 2 in Figure 1.2 through the following steps:
 
-Any change in one configuration among the $H$ households can be made by incrementally moving one individual at a time from one household to another. [expand upon what we mean in a picture, perhaps. Or just explain it better]. Suppose we move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
+1. Move one individual from Household A to a (newly populated) Household C
+2. Move one of the remaining 2 individuals in Household A to Household C
+3. Move one individual from Household B to Household C
+4. Move one of the remaining 2 individuals in Household B to Household C
+5. The configuration now matches Scenario 2.
+
+Note that in our notation, we
+
+Suppose we begin with an arbitrary configuration of $P$ individuals in $H$ households, with each household $m_j$ containing some whole number of members: $m_1, m_2, \ldots, m_{H-1}, m_H$. We move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
 
 \begin{equation}
 M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg)
