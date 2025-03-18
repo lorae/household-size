@@ -1,0 +1,274 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={Test title},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Test title}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{definitions-and-notation}{%
+\section{Definitions and Notation}\label{definitions-and-notation}}
+
+Let:
+
+\begin{itemize}
+\item
+  \(P\) = \textbf{Total population size}
+\item
+  \(H\) = \textbf{Number of households}
+\item
+  \(M_p\) = \textbf{Person-level mean household size}
+
+  For every person \(j\) in a population \(P\) living in a household of
+  \(m_j\) members, the \textbf{person-level} mean household size is a
+  simple average across person-level observations:
+
+  \begin{equation}
+    \label{eq:1}
+    \tag{1}
+    M_p = \frac{\sum_{j = 1}^H m_j^2}{P}
+    \end{equation}
+\item
+  \(M_h\) = \textbf{Household-level mean household size}
+
+  The \textbf{household-level} mean household size is a simple average
+  across households as individual observations:
+
+  \begin{align}
+    \label{eq:2}
+    \tag{2}
+    M_h = \frac{P}{H}
+    \end{align}
+\end{itemize}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{context}{%
+\section{Context}\label{context}}
+
+Equation \eqref{eq:2} shows that household-level mean household size and
+population is adequate to deduce the number of households. However,
+person-level household size does not lend itself to this equivalency:
+the same person-level mean and population can be consistent with
+multiple values for the number of households.
+
+Figure 1.2 illustrates this point in a hypothetical population with
+\(P = 6\) and \(M_p = 3\). In Scenario 1, average person-level household
+size is \(\frac{3^2 + 3^2}{6} = 3\) and there are 2 households. In
+Scenario 2, average person-level household size is
+\(\frac{1^2 + 1^2 + 4^2}{6} = 3\) and there are 3 households. Thus,
+population and person-level household size alone do not singularly
+determine the number of households.
+
+\textbf{Figure 1.2}
+
+\includegraphics[width=1\linewidth]{proof_files/figure-latex/unnamed-chunk-1-1}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{assertion}{%
+\section{Assertion}\label{assertion}}
+
+There is a range of possible number of households \(H\) consistent with
+a known population size \(P\) and person-level average household size
+\(M_p\). The range on \(H\) is bounded by a minumum of
+
+\begin{align}
+H_{min} = \frac{P}{M_p}
+\end{align}
+
+and a maximum of
+
+{[}FILL IN HERE{]}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{lemma-1-minimum-number-of-households}{%
+\section{Lemma 1: Minimum Number of
+Households}\label{lemma-1-minimum-number-of-households}}
+
+The minimum number of households consistent with a population size \(P\)
+and person-level average household size \(M_p\) is: \begin{align}
+H_{\min} = \frac{P}{M_p}
+\end{align}
+
+\hypertarget{proof}{%
+\subsection{Proof}\label{proof}}
+
+Suppose the population \(P\) is distributed into \(H\) households with
+the measured household size in the \(j\)th household equal to \(m_j\).
+As defined above, \textbf{person-level} mean household size is:
+
+\begin{equation}
+M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
+\end{equation}
+
+Any configuration of \(P\) individuals across households can be
+transformed into any other configuration through a finite sequence of
+single-person transfers. The initial count of households, \(H\), need
+not match the final count of households, \(H'\): we conceptualize a
+`reservoir' of zero-person households to account for changes between
+\(H\) and \(H'\). Forming a new household can be conceptualized as
+moving an individual to a zero-person household, which remains uncounted
+unless populated. Conversely, a household can be dissolved by moving all
+of its members to other households, thus turning a household with a
+positive number of members into a zero-person household. For example, in
+Figure 1.2, once can incrementally create Scenario 2 after starting from
+Scenario 1 through the following steps:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Move one individual from Household A to a newly formed Household C.
+\item
+  Move another individual from Household A to Household C.
+\item
+  Move two individuals from Household B to Household C.
+\end{enumerate}
+
+Next, we calculate how the person-level mean household size changes
+after a single-person transfer. Suppose we begin with an arbitrary
+configuration of \(P\) individuals in \(H\) households, with each
+household \(m_j\) containing some whole number of members
+\(m_1, m_2, \ldots, m_{H-1}, m_H\). We move one individual from
+household \(j = k\) to household \(j = k+1\). Then mean household size
+changes from:
+
+\begin{equation}
+M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H}m_j^2 \bigg)
+\end{equation}
+
+to
+
+\begin{equation}
+M_p' =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H}m_j'^2 \bigg)
+\end{equation}
+
+Person-level household size increases if \(M_p' - M_p > 0\), remains the
+same if \(M_p' - M_p = 0\), and shrinks if \(M_p' - M_p < 0\). Since all
+household sizes \(m_j = m_j'\) are unaffected by the shift, aside from
+the special case of \(j = k\) and \(j = k+1\), the remaining terms
+cancel out due to equivalence.
+
+\begin{align}
+M_p' - M_p & = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H}m_j^2 \bigg) - \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H}m_j'^2 \bigg) \\
+\label{eq:3}
+\tag{3}
+& = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
+\end{align}
+
+We now transition to exploring how the value \(M_p' - M_p\) varies under
+each of the three circumstances:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(m_{k+1} = m_k - 1\)
+\item
+  \(m_{k+1} < m_k - 1\)
+\item
+  \(m_{k+1} > m_k - 1\)
+\end{enumerate}
+
+\hypertarget{case-1-m_k1-m_k---1}{%
+\subsubsection{\texorpdfstring{Case 1:
+\(m_{k+1} = m_k - 1\)}{Case 1: m\_\{k+1\} = m\_k - 1}}\label{case-1-m_k1-m_k---1}}
+
+add case 1, 2, 3 here
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{lemma-2-maximum-number-of-households}{%
+\section{Lemma 2: Maximum Number of
+Households}\label{lemma-2-maximum-number-of-households}}
+
+\textbf{Lemma:}\\
+The maximum number of households consistent with a population size \(P\)
+and person-level average household size \(M_p\) is: \begin{align}
+TBD
+\end{align}
+
+\textbf{Proof:}\\
+In this section, we show that the sparsest configuraiton of households
+is given in a case where you produce some number of 1-person households
+and then throw the rest of the population into a remaining large
+households.
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{conclusion}{%
+\section{conclusion}\label{conclusion}}
+
+Reiterate the minima and maxima, take it back to the example at the
+begining and show that the two configurations listed are actually the
+two special cases of minima and maxima.
+
+\end{document}

@@ -1,8 +1,8 @@
 ---
 title: "Test title"
 output: 
-  html_document:
-    mathjax: "default"
+  pdf_document:
+    keep_tex: true
 ---
 
 
@@ -171,15 +171,7 @@ We now transition to exploring how the value $M_p' - M_p$ varies under each of t
 
 ### Case 1: $m_{k+1} = m_k - 1$
 
-
-...
-
-this section of the proof ends where I show that there's no possible way to "dissolve" a household and add its contents to other households without pushing the average persn-level household size above $m$.
-
-Case B:
-Then I illustrate the same concept even when $i$ is not an integer by creating the "closest square household configuration" where I essentially show that, for example, if m = 2.75, you can configure the population into groups of the nearest integer-size households (2- and 3-person housholds) such that dissolving the contents of any one household and adding it to other households ill push the average person-level household size above $m$.
-
-Thus, the configurations described above give the minimum number of households, $i = p/m$. And, in fact, when $i$ is not an integer, as in Case B, then the true minimum is given by rounding $i$ up to the nearest integer.
+add case 1, 2, 3 here
 
 ---
 
@@ -191,9 +183,10 @@ TBD
 \end{align}
 
 **Proof:**  
-In this section, I show that the sparsest configuraiton of households is given in a case where you produce some number of 1-person households and then throw the rest of the population into a remaining large households.
+In this section, we show that the sparsest configuraiton of households is given in a case where you produce some number of 1-person households and then throw the rest of the population into a remaining large households.
 
 ---
+
 # conclusion
 
-Reiterate the minima and maxima, take it back to the example at the begining and show that the two configurations I listed are actually the two special cases of minima and maxima.
+Reiterate the minima and maxima, take it back to the example at the begining and show that the two configurations listed are actually the two special cases of minima and maxima.
