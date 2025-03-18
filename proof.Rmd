@@ -12,8 +12,6 @@ library(ggplot2)
 library(patchwork)
 ```
 
-As shown in the documentation for this project, it is possible to have the same summary statistics but different underlying household configurations.
-
 # Definitions and Notation
 
 Let:
@@ -119,7 +117,7 @@ H_{min} = \frac{P}{M_p}
 
 and a maximum of
 
-[FILL IN HERE]
+[FILL IN HERE] 
 
 ---
 
@@ -138,17 +136,13 @@ Suppose the population $P$ is distributed into $H$ households with the measured 
 M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
 \end{equation}
 
-Any configuration of $P$ people among households can be achieved by incrementally moving one individual at a time from one household to another. Forming a new household can be achieved by moving an individual from an existing household to household $H+1$ (technically out of the original range of number of households, but the total number of households in any configuration can be regarded as H households with a positive number of residents and an infinite number of 0-person households). For example, one can move from Scenario 1 to Scenario 2 in Figure 1.2 through the following steps:
+Any configuration of $P$ individuals across households can be transformed into any other configuration through a finite sequence of single-person transfers. The initial count of households, $H$, need not match the final count of households, $H'$: we conceptualize a 'reservoir' of zero-person households to account for changes between $H$ and $H'$. Forming a new household can be conceptualized as moving an individual to a zero-person household, which remains uncounted unless populated. Conversely, a household can be dissolved by moving all of its members to other households, thus turning a household with a positive number of members into a zero-person household. For example, in Figure 1.2, once can incrementally create Scenario 2 after starting from Scenario 1 through the following steps:
 
-1. Move one individual from Household A to a (newly populated) Household C
-2. Move one of the remaining 2 individuals in Household A to Household C
-3. Move one individual from Household B to Household C
-4. Move one of the remaining 2 individuals in Household B to Household C
-5. The configuration now matches Scenario 2.
+1. Move one individual from Household A to a newly formed Household C.
+2. Move another individual from Household A to Household C.
+3. Move two individuals from Household B to Household C.
 
-Note that in our notation, we
-
-Suppose we begin with an arbitrary configuration of $P$ individuals in $H$ households, with each household $m_j$ containing some whole number of members: $m_1, m_2, \ldots, m_{H-1}, m_H$. We move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
+Let us move to quantifying the change in person-level mean household size from $M_p$ to $M_p'$ after an arbitrary single-person transfer. Suppose we begin with an arbitrary configuration of $P$ individuals in $H$ households, with each household $m_j$ containing some whole number of members $m_1, m_2, \ldots, m_{H-1}, m_H$. We move one individual from household $j = k$ to household $j = k+1$. Then mean household size changes from:
 
 \begin{equation}
 M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg)
@@ -166,7 +160,6 @@ Person-level household size increases if $M_p' - M_p > 0$, remains the same if $
 M_p' - M_p & = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg) - \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H+1}m_j'^2 \bigg) \\
 & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
 \end{align}
-Since only households $j = k$ and $j = k+1$ are affected by this change, the remaining sums can be regarded as equivalent and cancelled out.
 
 
 ...

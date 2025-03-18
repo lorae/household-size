@@ -353,9 +353,6 @@ display: none;
 </div>
 
 
-<p>As shown in the documentation for this project, it is possible to
-have the same summary statistics but different underlying household
-configurations.</p>
 <div id="definitions-and-notation" class="section level1">
 <h1>Definitions and Notation</h1>
 <p>Let:</p>
@@ -437,23 +434,28 @@ the measured household size in the <span class="math inline">\(j\)</span>th hous
 <p><span class="math display">\[\begin{equation}
 M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
 \end{equation}\]</span></p>
-<p>Any configuration of <span class="math inline">\(P\)</span> people
-among households can be achieved by incrementally moving one individual
-at a time from one household to another. Forming a new household can be
-achieved by moving an individual from an existing household to household
-<span class="math inline">\(H+1\)</span> (technically out of the
-original range of number of households, but the total number of
-households in any configuration can be regarded as H households with a
-positive number of residents and an infinite number of 0-person
-households). For example, one can move from Scenario 1 to Scenario 2 in
-Figure 1.2 through the following steps:</p>
+<p>Any configuration of <span class="math inline">\(P\)</span>
+individuals across households can be transformed into any other
+configuration through a finite sequence of single-person transfers. The
+initial count of households, <span class="math inline">\(H\)</span>,
+need not match the final count of households, <span class="math inline">\(H&#39;\)</span>: we conceptualize a ‘reservoir’ of
+zero-person households to account for changes between <span class="math inline">\(H\)</span> and <span class="math inline">\(H&#39;\)</span>. Forming a new household can be
+conceptualized as moving an individual to a zero-person household, which
+remains uncounted unless populated. Conversely, a household can be
+dissolved by moving all of its members to other households, thus turning
+a household with a positive number of members into a zero-person
+household. For example, in Figure 1.2, once can incrementally create
+Scenario 2 after starting from Scenario 1 through the following
+steps:</p>
 <ol style="list-style-type: decimal">
-<li>Move one individual from Household A to Household B</li>
-<li>Move one of the remaining 2 individuals in Household A to a new
-household, Household C</li>
+<li>Move one individual from Household A to a newly formed Household
+C.</li>
+<li>Move another individual from Household A to Household C.</li>
+<li>Move two individuals from Household B to Household C.</li>
 </ol>
-<p>Note that in our notation, we</p>
-<p>Suppose we begin with an arbitrary configuration of <span class="math inline">\(P\)</span> individuals in <span class="math inline">\(H\)</span> households, with each household <span class="math inline">\(m_j\)</span> containing some whole number of
+<p>Let us move to quantifying the change in person-level mean household
+size from <span class="math inline">\(M_p\)</span> to <span class="math inline">\(M_p&#39;\)</span> after an arbitrary single-person
+transfer. Suppose we begin with an arbitrary configuration of <span class="math inline">\(P\)</span> individuals in <span class="math inline">\(H\)</span> households, with each household <span class="math inline">\(m_j\)</span> containing some whole number of
 members: <span class="math inline">\(m_1, m_2, \ldots, m_{H-1},
 m_H\)</span>. We move one individual from household <span class="math inline">\(j = k\)</span> to household <span class="math inline">\(j = k+1\)</span>. Then mean household size changes
 from:</p>
