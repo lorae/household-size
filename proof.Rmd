@@ -157,7 +157,7 @@ M_p' =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_
 Person-level household size increases if $M_p' - M_p > 0$, remains the same if $M_p' - M_p = 0$, and shrinks if $M_p' - M_p < 0$. Since all household sizes $m_j = m_j'$ are unaffected by the shift, aside from the special case of $j = k$ and $j = k+1$, the remaining terms cancel out:
 
 \begin{align}
-M_p' - M_p & = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H+1}m_j^2 \bigg) - \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H+1}m_j'^2 \bigg) \\
+M_p' - M_p & = \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H}m_j^2 \bigg) - \frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j'^2 + m_k'^2 + m_{k+1}'^2 + \sum_{j = k+2}^{H}m_j'^2 \bigg) \\
 & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
 \end{align}
 
