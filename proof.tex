@@ -95,7 +95,7 @@ Let:
   \begin{equation}
     \label{eq:1}
     \tag{1}
-    M_p = \frac{\sum_{j = 1}^H m_j^2}{P}
+    M_p = \frac{1}{P} \sum_{j = 1}^H m_j^2
     \end{equation}
 \item
   \(M_h\) = \textbf{Household-level mean household size}
@@ -241,6 +241,12 @@ each of the three circumstances:
   \(m_{k+1} > m_k - 1\)
 \end{enumerate}
 
+Since a single-person transfer involves a move of one person from
+household \(k\) to household \(k+1\), the post-transfer number of
+household members in household \(k\) is \(m_k' = m_k - 1\) while the
+post-transfer number of household members in household \(k+1\) is
+\(m_{k+1}' = m_{k+1}' + 1\).
+
 \hypertarget{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}{%
 \subsection{Case 1: a plain-English explanation of what this type of
 move
@@ -250,12 +256,6 @@ is}\label{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}}
 
 \includegraphics[width=1\linewidth]{proof_files/figure1-3}
 \captionof{figure}{An individual is moved from household $k$, with $m_k = 4$ members, to household $k+1$, with $m_{k+1} = 3$ members. This results in a configuration where $m_k' = 3$ and $m_{k+1}' = 4$.}
-
-Since a single-person transfer involves a move of one person from
-household \(k\) to household \(k+1\), the post-transfer number of
-household members in household \(k\) is \(m_k' = m_k - 1\) while the
-post-transfer number of household members in household \(k+1\) is
-\(m_{k+1}' = m_{k+1}' + 1\).
 
 In this particular case, the initial number of occupants of household
 \(k\) is exactly one larger than the initial number of occupants in
