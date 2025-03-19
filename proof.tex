@@ -54,6 +54,9 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{labelformat=empty}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -197,9 +200,9 @@ Next, we calculate how the person-level mean household size changes
 after a single-person transfer. Suppose we begin with an arbitrary
 configuration of \(P\) individuals in \(H\) households, with each
 household \(m_j\) containing some whole number of members
-\(m_1, m_2, \ldots, m_{H-1}, m_H\). We move one individual from
-household \(j = k\) to household \(j = k+1\). Then mean household size
-changes from:
+\(m_1, m_2, \ldots, m_{H-1}, m_H\). We define a single-person transfer
+as a move of one individual from household \(j = k\) to household
+\(j = k+1\). Mean household size \(M_p\) changes from:
 
 \begin{equation}
 M_p =\frac{1}{P} \bigg( \sum_{j = 1}^{k-1} m_j^2 + m_k^2 + m_{k+1}^2 +  \sum_{j = k+2}^{H}m_j^2 \bigg)
@@ -238,9 +241,33 @@ each of the three circumstances:
   \(m_{k+1} > m_k - 1\)
 \end{enumerate}
 
-\hypertarget{case-1-m_k1-m_k---1}{%
-\subsubsection{\texorpdfstring{Case 1:
-\(m_{k+1} = m_k - 1\)}{Case 1: m\_\{k+1\} = m\_k - 1}}\label{case-1-m_k1-m_k---1}}
+\hypertarget{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}{%
+\subsection{Case 1: a plain-English explanation of what this type of
+move
+is}\label{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}}
+
+\textbf{Figure 1.3: \(m_{k+1} = m_k - 1\)}
+
+\includegraphics[width=1\linewidth]{proof_files/figure1-3}
+\captionof{figure}{An individual is moved from household $k$, with $m_k = 4$ members, to household $k+1$, with $m_{k+1} = 3$ members. This results in a configuration where $m_k' = 3$ and $m_{k+1}' = 4$.}
+
+Since a single-person transfer involves a move of one person from
+household \(k\) to household \(k+1\), the post-transfer number of
+household members in household \(k\) is \(m_k' = m_k - 1\) while the
+post-transfer number of household members in household \(k+1\) is
+\(m_{k+1}' = m_{k+1}' + 1\).
+
+In this particular case, the initial number of occupants of household
+\(k\) is exactly one larger than the initial number of occupants in
+household \(k+1\). With such a shift, we anticipate no change in the
+average person-level household size, because the composition of the
+households remains the same: in essence, it is just the numbering that
+changes. The algebra bears this out:
+
+\begin{align}
+M_p' - M_p & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
+& = butternut squash \\
+\end{align}
 
 add case 1, 2, 3 here
 
