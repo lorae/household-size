@@ -1,6 +1,6 @@
 # The purpose of this script is to produce fast facts that are used in the draft 
 # version of this paper. 
-# Last modified mid-February 2025.
+# Last modified mid-March 2025.
 
 # ----- Step 0: Load required packages ----- #
 library("dplyr")
@@ -13,6 +13,7 @@ library("readxl")
 library("ggplot2")
 library("base64enc")
 library("patchwork")
+library("sf")
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -348,3 +349,366 @@ print(combined_plot)
 
 # Household size in 2000 and 2019 by age bucket
 tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "AGE_bucket")
+
+##############################################
+# Fast fact: percent of the population living in institutions in 2000 and 2019
+##############################################
+source("src/utils/aggregation-tools.R")
+
+## 2000 GROUP QUARTERS STATUS ##
+# Summarize GQ status for 2000 survey
+gq_2000 <- weighted_mean(
+  data = ipums_db |> filter(YEAR == 2000),
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("GQ")
+) |> collect() |>
+  mutate(pct_of_pop = sum_weights / sum(sum_weights))
+
+# Count % in GQ in 2000
+in_gq_2000 <- gq_2000 |> 
+  filter(GQ %in% c(3, 4, 5)) |>
+  summarize(sum_pct = sum(pct_of_pop)) |>
+  pull(sum_pct)
+
+# Count % out GQ in 2000
+out_gq_2000 <- gq_2000 |> 
+  filter(GQ %in% c(1, 2)) |>
+  summarize(sum_pct = sum(pct_of_pop)) |>
+  pull(sum_pct)
+
+gq_2000
+in_gq_2000
+out_gq_2000
+
+## 2019 GROUP QUARTERS STATUS ##
+# Summarize GQ status for 2019 survey
+gq_2019 <- weighted_mean(
+  data = ipums_db |> filter(YEAR == 2019),
+  value_column = "NUMPREC",
+  weight_column = "PERWT",
+  group_by_columns = c("GQ")
+) |> collect() |>
+  mutate(pct_of_pop = sum_weights / sum(sum_weights))
+
+# Count % in GQ in 2000
+in_gq_2019 <- gq_2019 |> 
+  filter(GQ %in% c(3, 4, 5)) |>
+  summarize(sum_pct = sum(pct_of_pop)) |>
+  pull(sum_pct)
+
+# Count % out GQ in 2000
+out_gq_2019 <- gq_2019 |> 
+  filter(GQ %in% c(1, 2)) |>
+  summarize(sum_pct = sum(pct_of_pop)) |>
+  pull(sum_pct)
+
+gq_2019
+in_gq_2019
+out_gq_2019
+
+##############################################
+# Fast fact: household size by age in 2000 and 2019
+##############################################
+
+## Table of household sizes in 2000 and 2019 by age group
+age_bucket_summary |> filter(RACE_ETH_bucket == "All")
+
+## Age buckets with the largest household sizes
+age_bucket_summary |> filter(RACE_ETH_bucket == "All") |> slice_max(hhsize_2000, n = 1)
+age_bucket_summary |> filter(RACE_ETH_bucket == "All") |> slice_max(hhsize_2019, n = 1)
+
+## Average household size among children age 0-19
+ipums_db_age_v1 <- ipums_db |>
+  # Add columns for whether an individual is under 20 or over 65
+  mutate(
+    under20 = (AGE < 20), # excludes 20 year-olds
+    over65 = (AGE >= 65), # includes 65 year-olds
+    from20to64 = (AGE >= 20 & AGE < 65) # includes 20 yos, excludes 65 yos
+  )
+
+ipums_db_age_v2 <- ipums_db_age_v1 |>
+  # Add a column for whether a household contains an individual under 20
+  group_by(SAMPLE, SERIAL, YEAR) |> # uniquely IDs HHs
+  mutate(
+    contains_under20 = any(under20),
+    count_under20 = sum(as.integer(under20))
+    ) |>
+  ungroup()
+
+ipums_db_age_v3 <- ipums_db_age_v2 |>
+  # Add a column for whether an individual is an adult over 20 living in a hh with an under-20 yo
+  # Also add a column for the number of over 20 adults in a household with children
+  mutate(
+    cohabit_under20 = (contains_under20 & under20 == FALSE),
+    n_cohabit_under20 = NUMPREC - count_under20
+  )
+
+# Visually inspect a few entries to ensure logic works properly
+# Running this line will take 1-2 minutes
+x <- ipums_db_age_v3 |> head(100) |> collect() |>
+  select(SERIAL, NUMPREC, PERNUM, AGE, under20, from20to64, over65, contains_under20, count_under20, cohabit_under20, n_cohabit_under20)
+View(x) # logic appears consistent with intention
+
+# Note: I needed 12 cores to make this step work. 5 cores, and the session crashes.
+tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "under20")
+tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "cohabit_under20")
+tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "over65")
+
+##############################################
+# Fast fact: household size by cPUMA
+##############################################
+## Average hhsize by CPUMA0010 in 2000 and 2019
+cpuma_hhsize <- tabulate_summary_2year(data = ipums_db, years = c(2000,2019), group_by = "CPUMA0010")
+cpuma_hhsize
+
+## Household size in the median CPUMA in 2000
+median(cpuma_hhsize$hhsize_2000)
+
+## Minimum household size in a CPUMA in 2000
+min(cpuma_hhsize$hhsize_2000)
+
+## Maximum household size in a CPUMA in 2000
+max(cpuma_hhsize$hhsize_2000)
+
+## Average household size increased/decreased in X% of CPUMAs from 2000 - 2019
+cpuma_hhsize <- cpuma_hhsize |>
+  mutate(
+    hhsize_decreased = (hhsize_pctchg_2000_2019 < 0)
+  )
+sum(cpuma_hhsize$hhsize_decreased) # number of CPUMAs where HH size decreased
+nrow(cpuma_hhsize) # total number of CPUMAs
+
+sum(cpuma_hhsize$hhsize_decreased) / nrow(cpuma_hhsize) # Proportion of CPUMAs where HH size decreased
+
+## Household size in the median CPUMA in 2019
+median(cpuma_hhsize$hhsize_2019)
+
+## Change in range in CPUMA-level HH size from 2000 to 2019
+# 2000 min, max, range
+min_2000 <- min(cpuma_hhsize$hhsize_2000)
+max_2000 <- max(cpuma_hhsize$hhsize_2000)
+
+min_2000
+max_2000
+max_2000 - min_2000
+
+# 2019 min, max, range
+min_2019 <- min(cpuma_hhsize$hhsize_2019)
+max_2019 <- max(cpuma_hhsize$hhsize_2019)
+
+min_2019
+max_2019
+max_2019 - min_2019
+
+##############################################
+# Fast fact: number of additional housing units needed
+##############################################
+source("src/utils/counterfactual-tools.R") # Includes function for counterfactual calculation
+
+ipums_db <- tbl(con, "ipums_processed")
+
+# ----- Import CPI-U data ----- #
+# TODO: this is a copypaste from counterfactual-multiscenario.R. Do this data processing 
+# upstream to avoid reiteration
+cpiu <- read_excel(
+  path = "data/helpers/CPI-U.xlsx",
+  sheet = "BLS Data Series",
+  range = "A12:N36",
+  col_names = TRUE
+) |>
+  select(Year, Annual) |>
+  rename(
+    YEAR = Year,
+    cpiu = Annual
+  )
+# Get the 2010 value of cpi_u
+cpiu_2010_value <- cpiu |>
+  filter(YEAR == 2010) |>
+  pull(cpiu)
+# Add a new column cpi_u_2010
+cpiu <- cpiu |>
+  mutate(cpiu_2010_deflator = cpiu / cpiu_2010_value)
+
+# Add columns to ipums_db data 
+ipums_db <- ipums_db |>
+  left_join(cpiu, by = "YEAR", copy = TRUE) |>
+  mutate(
+    INCTOT_cpiu_2010 = if_else(
+      INCTOT %in% c(9999999, 9999998), 
+      NA_real_, 
+      INCTOT / cpiu_2010_deflator
+    )
+  ) |>
+  mutate(
+    INCTOT_cpiu_2010 = if_else(
+      AGE < 15,
+      0,
+      INCTOT_cpiu_2010 # Keep the existing value if AGE >= 15
+    )
+  ) |>
+  mutate(
+    INCTOT_cpiu_2010_bucket = case_when(
+      INCTOT_cpiu_2010 < 0 ~ "neg",
+      INCTOT_cpiu_2010 == 0 ~ "0",
+      INCTOT_cpiu_2010 < 10000 ~ "under 10k",
+      INCTOT_cpiu_2010 >= 10000 & INCTOT_cpiu_2010 < 30000 ~ "10 to 30k",
+      INCTOT_cpiu_2010 >= 30000 & INCTOT_cpiu_2010 < 100000 ~ "30k to 100k",
+      INCTOT_cpiu_2010 >= 100000 ~ "over 100k",
+      TRUE ~ NA_character_ # Handles unexpected cases
+    )
+  )
+# We're adding some simplified/binary variables for counterfactual calculations
+ipums_db <- ipums_db |>
+  mutate(
+    us_born = BPL <= 120 # TRUE if person born in US or US territories
+  )
+
+# Calculate CPUMA-level fully-controlled diffs
+hhsize_contributions <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"),
+  p0 = 2000,
+  p1 = 2019,
+  p0_data = ipums_db |> filter(YEAR == 2000, GQ %in% c(0,1,2)), 
+  p1_data = ipums_db |> filter(YEAR == 2019, GQ %in% c(0,1,2)),
+  outcome = "NUMPREC"
+)$contributions  
+
+# Counterfactual overall household size in 2019
+cf_hhsize_2019_overall <- (hhsize_contributions$weighted_mean_2000 * hhsize_contributions$percent_2019) |> sum() / 100
+cf_hhsize_2019_overall
+
+population_aggregates_2019 <- crosstab_mean(
+  data = ipums_db |> filter(YEAR == 2019, GQ %in% c(0,1,2)),
+  value = "NUMPREC",
+  wt_col = "PERWT",
+  group_by = c(),
+  every_combo = TRUE)
+
+# Actual overall household size in 2019 (excluding those in Group Quarters)
+act_hhsize_2019_overall <- population_aggregates_2019 |>
+  pull(weighted_mean)
+act_hhsize_2019_overall
+
+# Population in 2019 (excluding those in Group Quarters)
+population_2019 <- population_aggregates_2019 |>
+  pull(weighted_count)
+population_2019
+
+## Overall housing unit shortage/surfeit in 2019 (netting out positives and negatives within CPUMAs)
+(population_2019/act_hhsize_2019_overall) - (population_2019/cf_hhsize_2019_overall)
+
+##############################################
+# Fast fact: number of additional housing units needed, accounting for CPUMA-level surfeit/surplus
+##############################################
+
+# Sum the counterfactuals by CPUMA
+hhsize_contributions_cpuma <- hhsize_contributions |>
+  mutate(
+    contribution = weighted_mean_2000 * percent_2019 / 100
+  ) |>
+  group_by(CPUMA0010) |>
+  summarize(
+    contribution = sum(contribution, na.rm = TRUE),
+    population = sum(weighted_count_2019, na.rm = TRUE),
+    percent = sum(percent_2019, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(cf_hhsize = contribution/percent * 100)
+
+# Validity check: ensure the sum of contributions equals cf_hhsize_2019_overall
+# Rounded to 5 decimal places due to floating point errors
+round((hhsize_contributions_cpuma$contribution |> sum()), 5) == round(cf_hhsize_2019_overall, 5)
+
+# Validity check: sum of `population` column matches population_2019
+sum(hhsize_contributions_cpuma$population) == population_2019
+
+# Validity check: cf_hhsize*percent/100 |> sum() = cf_hhsize_2019_overall
+round(((hhsize_contributions_cpuma$cf_hhsize*hhsize_contributions_cpuma$percent/100)) |> sum(), 5) == round(cf_hhsize_2019_overall, 5)
+
+cf_by_cpuma <- cpuma_hhsize |>
+  rename(CPUMA0010 = subgroup) |>
+  left_join(hhsize_contributions_cpuma, by = "CPUMA0010") |>
+  mutate(
+    housing_surfeit = (population/hhsize_2019) - (population/cf_hhsize)
+  )
+
+# Housing shortage and surplus, and number of CPUMAs with a shortage or surplus
+cf_by_cpuma_summary <- cf_by_cpuma |> 
+  summarize(
+    total = sum(housing_surfeit, na.rm = TRUE),
+    count_total = sum(!is.na(housing_surfeit)),
+    sum_negative = sum(housing_surfeit[housing_surfeit < 0], na.rm = TRUE),
+    sum_positive = sum(housing_surfeit[housing_surfeit > 0], na.rm = TRUE),
+    count_negative = sum(housing_surfeit < 0, na.rm = TRUE),
+    count_positive = sum(housing_surfeit > 0, na.rm = TRUE)
+  )
+cf_by_cpuma_summary
+
+# Percentage with a shortage
+pull(cf_by_cpuma_summary, count_negative) / pull(cf_by_cpuma_summary, count_total)
+
+# Largest surfeit
+slice_max(cf_by_cpuma, housing_surfeit) |> View()
+# Largest shortage
+slice_min(cf_by_cpuma, housing_surfeit) |> View()
+
+# Figure out where the greatest surfeit/surplus is by mapping.
+# TODO: Don't just copy and paste this code from counterfactual-regional.R. Create
+# a function that can be called to map things.
+rot <- function(a) {
+  matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
+}
+transform_state <- function(
+    df, 
+    state_fp, 
+    rotation_angle, 
+    scale_factor, 
+    shift_coords
+) {
+  state <- df %>% filter(STATEFIP == state_fp)
+  state_geom <- st_geometry(state)
+  state_centroid <- st_centroid(st_union(state_geom))
+  rotated_geom <- (state_geom - state_centroid) * rot(rotation_angle * pi / 180) / scale_factor + state_centroid + shift_coords
+  state %>% st_set_geometry(rotated_geom) %>% st_set_crs(st_crs(df))
+}
+# Load shapefiles. Data is unzipped from WHERE? TODO: document
+cpuma_sf <- st_read("data/ipums-cpuma0010-sf/ipums_cpuma0010.shp") |>
+  filter(!STATEFIP %in% c('60', '64', '66', '68', '69', '70', '72', '78')) |># Remove excluded states, like Puerto Rico
+  st_transform(crs = "+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs") |>
+  mutate(geometry = st_simplify(geometry, dTolerance =  5000))  # Simplify shapes
+
+# Rotate and move Alaska and Hawaii to fit on map
+alaska_cpuma <- transform_state(cpuma_sf, "02", -39, 2.3, c(1000000, -5000000))
+hawaii_cpuma <- transform_state(cpuma_sf, "15", -35, 1, c(5200000, -1400000))
+
+# Final map after transforming non-contiguous states
+cpuma_sf_final <- cpuma_sf |>
+  filter(!STATEFIP %in% c("02", "15")) |>
+  bind_rows(alaska_cpuma, hawaii_cpuma)
+
+# Highlight CPUMA 973 in red
+cpuma_sf_hhsize <- cpuma_sf_final |>
+  mutate(
+    fill_color = ifelse(CPUMA0010 == "973", "red", "white")
+  )
+ggplot(cpuma_sf_hhsize) + 
+  geom_sf(aes(geometry = geometry, fill = fill_color), color = "grey50", size = 0.1) +
+  scale_fill_identity() + 
+  theme_void()
+
+
+# Highlight CPUMA 550 in red
+cpuma_sf_hhsize <- cpuma_sf_final |>
+  mutate(
+    fill_color = ifelse(CPUMA0010 == "550", "red", "white")
+  )
+ggplot(cpuma_sf_hhsize) + 
+  geom_sf(aes(geometry = geometry, fill = fill_color), color = "grey50", size = 0.1) +
+  scale_fill_identity() + 
+  theme_void()
+
+
+##############################################
+# Fast fact: number of additional housing units needed, all CPUMAs have average HH size of white americans
+##############################################
