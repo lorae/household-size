@@ -455,6 +455,22 @@ tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = 
 tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "cohabit_under20")
 tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "over65")
 
+## Average number of adults (age 20+) per household that contains at least one child (age <20)
+# ... in 2019
+crosstab_mean(
+  data = ipums_db_age_v3 |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)) |> filter(contains_under20 == TRUE),
+  value = "n_cohabit_under20",
+  wt_col = "PERWT",
+  group_by = c()
+)
+# ... in 2000
+crosstab_mean(
+  data = ipums_db_age_v3 |> filter(YEAR == 2000) |> filter(GQ %in% c(0,1,2)) |> filter(contains_under20 == TRUE),
+  value = "n_cohabit_under20",
+  wt_col = "PERWT",
+  group_by = c()
+)
+
 ##############################################
 # Fast fact: household size by cPUMA
 ##############################################
