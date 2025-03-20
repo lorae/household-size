@@ -177,11 +177,11 @@ Since a single-person transfer involves a move of one person from household $k$ 
 
 ## Case 1: a symmetric transfer
 
-**Figure 1.3: $m_{k+1} = m_k - 1$**
+**Figure 1.3: An example single-person transfer where $m_{k+1} = m_k - 1$**
 ```{r, fig.pos = "H", out.width="100%", echo = FALSE}
 knitr::include_graphics("proof_files/figure1-3.png")
 ```
-\captionof{figure}{An individual is moved from household $k$, with $m_k = 4$ members, to household $k+1$, with $m_{k+1} = 3$ members. This results in a configuration where $m_k' = 3$ and $m_{k+1}' = 4$.}
+\captionof{figure}{Initially, household $h$ has $m_k = 4$ members and household $k+1$, has $m_{k+1} = 3$ members. One individual is moved from household $k$ to household $k+1$, resulting in $m_k' = 3$ members in household $k$ and $m_{k+1}' = 4$ members in household $k+1$.}
 
 
 In Case 1, the overall person-level mean household size remains unchanged after the shift, because the two affected households have precisely a one-person difference in their sizes. When one person moves from the larger household to the smaller one, the decrease in the squared size of the original larger household is exactly offset by the increase in the squared size of the receiving household.
@@ -192,11 +192,31 @@ M_p' - M_p & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \b
 & = 0 \\
 \end{align}
 
+## Case 2: a transfer from a larger household to a smaller household
+**Figure 1.4: An example single-person transfer where $m_{k+1} < m_k - 1$**
+```{r, fig.pos = "H", out.width="100%", echo = FALSE}
+knitr::include_graphics("proof_files/figure1-4.png")
+```
+\captionof{figure}{Initially, household $h$ has $m_k = 5$ members and household $k+1$, has $m_{k+1} = 2$ members. One individual is moved from household $k$ to household $k+1$, resulting in $m_k' = 4$ members in household $k$ and $m_{k+1}' = 3$ members in household $k+1$.}
 
+[ADD IN EXPLANATION ON HOW THIS TRANSFER REDUCES AVERAGE HOUSEHOLD SIZE]
 
-add case 1, 2, 3 here
+## Case 3: a transfer from a smaller household to a larger (or equal-size) household
+**Figure 1.4: An example single-person transfer where $m_{k+1} > m_k - 1$**
+```{r, fig.pos = "H", out.width="100%", echo = FALSE}
+knitr::include_graphics("proof_files/figure1-5.png")
+```
+\captionof{figure}{Initially, household $h$ has $m_k = 2$ members and household $k+1$, has $m_{k+1} = 2$ members. One individual is moved from household $k$ to household $k+1$, resulting in $m_k' = 1$ member in household $k$ and $m_{k+1}' = 3$ members in household $k+1$.}
+
+[ADD IN EXPLANATION ON HOW THIS TRANSFER INCREASES AVERAGE HOUSEHOLD SIZE]
 
 ---
+
+[NEXT STEPS: Outline below, to-do more thoroughly]
+
+After cases have been discussed, demonstrate that a partition of a population into equally-sized households, each with $m_j = M_H$, will result in the minimal $H$ consistent with $M_H$. Any attempt to further reduce number of households would require "dissolving" an existing household and transferring all $m_j$ members to other household(s). But this would necessitate "Case 3" transfers, which necessarily increase $M_H$, as shown above. Thus, it is impossible to formulate a configuration consistent with $P$ and $M_H$ that has any fewer than $H$ households.
+
+[NOTE: Above explanation is only consistent when $M_H$ divides cleanly into $P$ an integer number of times, $i$. The proof can be extended to cases where $i$ is not an integer by invoking Case 1 transfers and arguing that the lowest housing configuration consistent with $M_H$ and $P$ is a set of households where all $m_j \in \{ \lfloor M_P \rfloor, \lceil M_P \rceil$. And that this exception doesn't matter anyway because the number of $H$ that can be constructed using $m_j \in \{ \lfloor M_P \rfloor, \lceil M_P \rceil$ such that the population sums to $P$ is always going to be greater than the value $P / M_P$]
 
 # Lemma 2: Maximum Number of Households  
 **Lemma:**  
@@ -206,7 +226,7 @@ TBD
 \end{align}
 
 **Proof:**  
-In this section, we show that the sparsest configuraiton of households is given in a case where you produce some number of 1-person households and then put the rest of the population into one remaining large household.
+This is more of an accessory proof, since the maximum bounds on $H$ are so large as to not be useful in practical contexts. However, in this section, we will demonstrate that the sparsest configuration of households is given in a case where you produce some number of 1-person households and then put the rest of the population into one remaining large household. This proof will rely on Case 2 transfers, described above.
 
 ---
 

@@ -247,29 +247,80 @@ household members in household \(k\) is \(m_k' = m_k - 1\) while the
 post-transfer number of household members in household \(k+1\) is
 \(m_{k+1}' = m_{k+1} + 1\).
 
-\hypertarget{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}{%
-\subsection{Case 1: a plain-English explanation of what this type of
-move
-is}\label{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}}
+\hypertarget{case-1-a-symmetric-transfer}{%
+\subsection{Case 1: a symmetric
+transfer}\label{case-1-a-symmetric-transfer}}
 
-\textbf{Figure 1.3: \(m_{k+1} = m_k - 1\)}
+\textbf{Figure 1.3: An example single-person transfer where
+\(m_{k+1} = m_k - 1\)}
 
 \includegraphics[width=1\linewidth]{proof_files/figure1-3}
-\captionof{figure}{An individual is moved from household $k$, with $m_k = 4$ members, to household $k+1$, with $m_{k+1} = 3$ members. This results in a configuration where $m_k' = 3$ and $m_{k+1}' = 4$.}
+\captionof{figure}{Initially, household $h$ has $m_k = 4$ members and household $k+1$, has $m_{k+1} = 3$ members. One individual is moved from household $k$ to household $k+1$, resulting in $m_k' = 3$ members in household $k$ and $m_{k+1}' = 4$ members in household $k+1$.}
 
-In this particular case, the initial number of occupants of household
-\(k\) is exactly one larger than the initial number of occupants in
-household \(k+1\). Thus:
+In Case 1, the overall person-level mean household size remains
+unchanged after the shift, because the two affected households have
+precisely a one-person difference in their sizes. When one person moves
+from the larger household to the smaller one, the decrease in the
+squared size of the original larger household is exactly offset by the
+increase in the squared size of the receiving household.
 
 \begin{align}
 M_p' - M_p & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
 & = \frac{1}{P} \bigg( (m_k^2 + (m_k - 1)^2) - ((m_k-1)^2 + m_k^2) \bigg)\\
-& = 0 \bigg)\\
+& = 0 \\
 \end{align}
 
-add case 1, 2, 3 here
+\hypertarget{case-2-a-transfer-from-a-larger-household-to-a-smaller-household}{%
+\subsection{Case 2: a transfer from a larger household to a smaller
+household}\label{case-2-a-transfer-from-a-larger-household-to-a-smaller-household}}
+
+\textbf{Figure 1.4: An example single-person transfer where
+\(m_{k+1} < m_k - 1\)}
+
+\includegraphics[width=1\linewidth]{proof_files/figure1-4}
+\captionof{figure}{Initially, household $h$ has $m_k = 5$ members and household $k+1$, has $m_{k+1} = 2$ members. One individual is moved from household $k$ to household $k+1$, resulting in $m_k' = 4$ members in household $k$ and $m_{k+1}' = 3$ members in household $k+1$.}
+
+{[}ADD IN EXPLANATION ON HOW THIS TRANSFER REDUCES AVERAGE HOUSEHOLD
+SIZE{]}
+
+\hypertarget{case-3-a-transfer-from-a-smaller-household-to-a-larger-or-equal-size-household}{%
+\subsection{Case 3: a transfer from a smaller household to a larger (or
+equal-size)
+household}\label{case-3-a-transfer-from-a-smaller-household-to-a-larger-or-equal-size-household}}
+
+\textbf{Figure 1.4: An example single-person transfer where
+\(m_{k+1} > m_k - 1\)}
+
+\includegraphics[width=1\linewidth]{proof_files/figure1-5}
+\captionof{figure}{Initially, household $h$ has $m_k = 2$ members and household $k+1$, has $m_{k+1} = 2$ members. One individual is moved from household $k$ to household $k+1$, resulting in $m_k' = 1$ member in household $k$ and $m_{k+1}' = 3$ members in household $k+1$.}
+
+{[}ADD IN EXPLANATION ON HOW THIS TRANSFER INCREASES AVERAGE HOUSEHOLD
+SIZE{]}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+{[}NEXT STEPS: Outline below, to-do more thoroughly{]}
+
+After cases have been discussed, demonstrate that a partition of a
+population into equally-sized households, each with \(m_j = M_H\), will
+result in the minimal \(H\) consistent with \(M_H\). Any attempt to
+further reduce number of households would require ``dissolving'' an
+existing household and transferring all \(m_j\) members to other
+household(s). But this would necessitate ``Case 3'' transfers, which
+necessarily increase \(M_H\), as shown above. Thus, it is impossible to
+formulate a configuration consistent with \(P\) and \(M_H\) that has any
+fewer than \(H\) households.
+
+{[}NOTE: Above explanation is only consistent when \(M_H\) divides
+cleanly into \(P\) an integer number of times, \(i\). The proof can be
+extended to cases where \(i\) is not an integer by invoking Case 1
+transfers and arguing that the lowest housing configuration consistent
+with \(M_H\) and \(P\) is a set of households where all
+\(m_j \in \{ \lfloor M_P \rfloor, \lceil M_P \rceil\). And that this
+exception doesn't matter anyway because the number of \(H\) that can be
+constructed using \(m_j \in \{ \lfloor M_P \rfloor, \lceil M_P \rceil\)
+such that the population sums to \(P\) is always going to be greater
+than the value \(P / M_P\){]}
 
 \hypertarget{lemma-2-maximum-number-of-households}{%
 \section{Lemma 2: Maximum Number of
@@ -282,10 +333,13 @@ TBD
 \end{align}
 
 \textbf{Proof:}\\
-In this section, we show that the sparsest configuraiton of households
-is given in a case where you produce some number of 1-person households
-and then put the rest of the population into one remaining large
-household.
+This is more of an accessory proof, since the maximum bounds on \(H\)
+are so large as to not be useful in practical contexts. However, in this
+section, we will demonstrate that the sparsest configuration of
+households is given in a case where you produce some number of 1-person
+households and then put the rest of the population into one remaining
+large household. This proof will rely on Case 2 transfers, described
+above.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
