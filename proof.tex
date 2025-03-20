@@ -245,7 +245,7 @@ Since a single-person transfer involves a move of one person from
 household \(k\) to household \(k+1\), the post-transfer number of
 household members in household \(k\) is \(m_k' = m_k - 1\) while the
 post-transfer number of household members in household \(k+1\) is
-\(m_{k+1}' = m_{k+1}' + 1\).
+\(m_{k+1}' = m_{k+1} + 1\).
 
 \hypertarget{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}{%
 \subsection{Case 1: a plain-English explanation of what this type of
@@ -259,14 +259,12 @@ is}\label{case-1-a-plain-english-explanation-of-what-this-type-of-move-is}}
 
 In this particular case, the initial number of occupants of household
 \(k\) is exactly one larger than the initial number of occupants in
-household \(k+1\). With such a shift, we anticipate no change in the
-average person-level household size, because the composition of the
-households remains the same: in essence, it is just the numbering that
-changes. The algebra bears this out:
+household \(k+1\). Thus:
 
 \begin{align}
 M_p' - M_p & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
-& =  \\
+& = \frac{1}{P} \bigg( (m_k^2 + (m_k - 1)^2) - ((m_k-1)^2 + m_k^2) \bigg)\\
+& = 0 \bigg)\\
 \end{align}
 
 add case 1, 2, 3 here
