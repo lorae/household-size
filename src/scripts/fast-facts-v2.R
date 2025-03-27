@@ -444,15 +444,15 @@ ipums_db_age_v3 <- ipums_db_age_v2 |>
     n_cohabit_under20 = NUMPREC - count_under20
   )
 
-# Visually inspect a few entries to ensure logic works properly
-# Running this line will take 1-2 minutes
-x <- ipums_db_age_v3 |> head(100) |> collect() |>
-  select(SERIAL, NUMPREC, PERNUM, AGE, under20, from20to64, over65, contains_under20, count_under20, cohabit_under20, n_cohabit_under20)
-View(x) # logic appears consistent with intention
+# # Visually inspect a few entries to ensure logic works properly
+# # Running this line will take 1-2 minutes
+# x <- ipums_db_age_v3 |> head(100) |> collect() |>
+#   select(SERIAL, NUMPREC, PERNUM, AGE, under20, from20to64, over65, contains_under20, count_under20, cohabit_under20, n_cohabit_under20)
+# View(x) # logic appears consistent with intention
 
 # Note: I needed 12 cores to make this step work. 5 cores, and the session crashes.
 tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "under20")
-tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "cohabit_under20")
+tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "from20to64")
 tabulate_summary_2year(data = ipums_db_age_v3, years = c(2000,2019), group_by = "over65")
 
 ## Average number of adults (age 20+) per household that contains at least one child (age <20)
@@ -728,3 +728,43 @@ ggplot(cpuma_sf_hhsize) +
 ##############################################
 # Fast fact: number of additional housing units needed, all CPUMAs have average HH size of white americans
 ##############################################
+
+# Average size of a white household
+white_hhsize_2019_overall <- crosstab_mean(
+  data = ipums_db |> filter(YEAR == 2019) |> filter(GQ %in% c(0,1,2)),
+  value = "NUMPREC",
+  wt_col = "PERWT",
+  group_by = c("RACE_ETH_bucket")
+) |> 
+  filter(RACE_ETH_bucket == "White") |>
+  pull(weighted_mean)
+
+## Overall housing unit shortage/surfeit in 2019 relative to white household norms (netting out positives and negatives within CPUMAs)
+(population_2019/act_hhsize_2019_overall) - (population_2019/white_hhsize_2019_overall) # huge number!
+
+## cPUMA-level household counterfactual, except we replace every cPUMA's cf_hhsize with 3.09 (the value of `white_hhsize_2019_overall`)
+hhsize_contributions_cpuma_white <- hhsize_contributions_cpuma |>
+  select(-cf_hhsize) |>
+  mutate(cf_hhsize_white = white_hhsize_2019_overall)
+
+cf_by_cpuma_white <- cpuma_hhsize |>
+  rename(CPUMA0010 = subgroup) |>
+  left_join(hhsize_contributions_cpuma_white, by = "CPUMA0010") |>
+  mutate(
+    housing_surfeit = (population/hhsize_2019) - (population/cf_hhsize_white)
+  )
+
+# Housing shortage and surplus, and number of CPUMAs with a shortage or surplus
+cf_by_cpuma_summary_white <- cf_by_cpuma_white |> 
+  summarize(
+    total = sum(housing_surfeit, na.rm = TRUE),
+    count_total = sum(!is.na(housing_surfeit)),
+    sum_negative = sum(housing_surfeit[housing_surfeit < 0], na.rm = TRUE),
+    sum_positive = sum(housing_surfeit[housing_surfeit > 0], na.rm = TRUE),
+    count_negative = sum(housing_surfeit < 0, na.rm = TRUE),
+    count_positive = sum(housing_surfeit > 0, na.rm = TRUE)
+  )
+cf_by_cpuma_summary_white
+
+# Percentage with a shortage
+pull(cf_by_cpuma_summary_white, count_negative) / pull(cf_by_cpuma_summary_white, count_total)
