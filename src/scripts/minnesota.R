@@ -118,6 +118,7 @@ sf <- read_sf("data/ipums-cpuma0010-sf/ipums_cpuma0010.shp")
 fig01_minnesota_map <- map_geographies(sf |> filter(State == "Minnesota"))
 
 fig01_minnesota_map
+ggsave("results/fig01_minnesota.png", plot = fig01_minnesota_map, width = 6.5, height = 5, dpi = 300)
 
 # Minnesota CPUMA map (coloring by change in household size)
 # Values represent the difference between average household size in 2019 and counterfactual
@@ -136,6 +137,7 @@ fig02_minnesota_map_cf <- ggplot(cpuma_sf_hhsize) +
   theme_void()
 
 fig02_minnesota_map_cf
+ggsave("results/fig02_minnesota.png", plot = fig02_minnesota_map_cf, width = 6.5, height = 5, dpi = 300)
 
 
 
