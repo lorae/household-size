@@ -9,6 +9,8 @@ library("dbplyr")
 library("glue")
 library("purrr")
 library("ggplot2")
+library("sf")
+library("svglite")
 
 devtools::load_all("../dataduck")
 
@@ -99,10 +101,47 @@ hhsize_contributions <- calculate_counterfactual(
   p0_data = minnesota_db |> filter(YEAR == 2000, GQ %in% c(0,1,2)), 
   p1_data = minnesota_db |> filter(YEAR == 2019, GQ %in% c(0,1,2)),
   outcome = "NUMPREC"
-)$contributions  
+)$contributions |>
+  group_by(CPUMA0010) |>
+  summarize(contribution_diff = sum(contribution_diff, na.rm = TRUE),
+            prop_2019 = sum(percent_2019) / 100, .groups = "drop",
+            pop_2019 = sum(weighted_count_2019)) |>
+  mutate(diff = contribution_diff / prop_2019)
 
 
 # ----- Step 4: Generate counterfactual by CPUMA map ----- #
+
+# Read in shapefiles of every CPUMA0010 region in the United States
+sf <- read_sf("data/ipums-cpuma0010-sf/ipums_cpuma0010.shp")
+
+# Minnesota CPUMA map (without coloring)
+fig01_minnesota_map <- map_geographies(sf |> filter(State == "Minnesota"))
+
+fig01_minnesota_map
+
+# Minnesota CPUMA map (coloring by change in household size)
+# Values represent the difference between average household size in 2019 and counterfactual
+# household size in 2019, using 2000 preferences. Blue values represent smaller households
+# than expected; red represents larger households than expected.
+cpuma_sf_hhsize <- hhsize_contributions |>
+  left_join(sf, by = "CPUMA0010")
+
+fig02_minnesota_map_cf <- ggplot(cpuma_sf_hhsize) + 
+  geom_sf(aes(geometry = geometry, fill = diff), color = "black", size = 0) +
+  scale_fill_gradient2(
+    name = "Change in \nHousehold \nSize",
+    low = "darkblue", mid = "white", high = "darkred", midpoint = 0,
+    breaks = seq(from = -0.05, to = 0.2, by = 0.05)
+  ) +
+  theme_void()
+
+fig02_minnesota_map_cf
+
+
+
+
+# map_geographies is in data_duck
+ggsave("docs/images/minnesota_cpumas.svg", plot = minnesota_map, width = 1200, height = 1200, units = "px")
 
 # ----- Step 5: Generate bar graph showing actual, counterfactual, diff (fig 3) ----- #
 
