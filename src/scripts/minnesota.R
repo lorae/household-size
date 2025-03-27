@@ -139,12 +139,63 @@ fig02_minnesota_map_cf <- ggplot(cpuma_sf_hhsize) +
 fig02_minnesota_map_cf
 ggsave("results/fig02_minnesota.png", plot = fig02_minnesota_map_cf, width = 6.5, height = 5, dpi = 300)
 
-
-
-
-# map_geographies is in data_duck
-ggsave("docs/images/minnesota_cpumas.svg", plot = minnesota_map, width = 1200, height = 1200, units = "px")
-
 # ----- Step 5: Generate bar graph showing actual, counterfactual, diff (fig 3) ----- #
+
+# Average household size in 2000
+hhsize_2000_observed <- crosstab_mean(
+  data = minnesota_db |> filter(YEAR == 2000, GQ %in% c(0,1,2)),
+  value = "NUMPREC",
+  wt_col = "PERWT",
+  group_by = c(),
+  every_combo = TRUE) |>
+  pull(weighted_mean)
+
+# Average household size in 2019
+hhsize_2019_observed <- crosstab_mean(
+  data = minnesota_db |> filter(YEAR == 2019, GQ %in% c(0,1,2)),
+  value = "NUMPREC",
+  wt_col = "PERWT",
+  group_by = c(),
+  every_combo = TRUE) |>
+  pull(weighted_mean)
+
+# Counterfactual household size in 2019
+hhsize_2019_expected <- calculate_counterfactual(
+  cf_categories = c("RACE_ETH_bucket", "AGE_bucket", "SEX", "us_born", "EDUC", "INCTOT_cpiu_2010_bucket", "CPUMA0010"),
+  p0 = 2000,
+  p1 = 2019,
+  p0_data = minnesota_db |> filter(YEAR == 2000, GQ %in% c(0,1,2)), 
+  p1_data = minnesota_db |> filter(YEAR == 2019, GQ %in% c(0,1,2)),
+  outcome = "NUMPREC"
+)$summary |> pull(counterfactual)
+
+# Data frame for plotting
+fig03_minnesota_data <- tibble(
+  Category = factor(c("2000\nObserved", "2019\nObserved", "2019\nCounterfactual"), 
+                    levels = c("2000\nObserved", "2019\nObserved", "2019\nCounterfactual")),
+  Household_Size = c(hhsize_2000_observed, hhsize_2019_observed, hhsize_2019_expected),
+  Type = c("Observed", "Observed", "Counterfactual") # Differentiate for styling
+)
+
+# Adjustable settings
+difference_text_offset <- 0.1   # Horizontal offset for difference text labels
+
+# Create the bar plot
+fig03_minnesota <- ggplot(fig03_minnesota_data, aes(x = Category, y = Household_Size, fill = Type)) +
+  geom_bar(stat = "identity", aes(linetype = Type), color = "black", linewidth = 0.4, width = 0.6) +
+  geom_text(aes(label = sprintf("%.3f", Household_Size)), vjust = 1.5, color = "white", size = 4) +
+  scale_fill_manual(values = c("Observed" = "steelblue", "Counterfactual" = scales::alpha("steelblue", 0.5))) +
+  scale_linetype_manual(values = c("Observed" = "solid", "Counterfactual" = "dotted")) +
+  labs(y = "Household Size", x = NULL) +
+  coord_cartesian(ylim = c(3, 3.5)) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text.x = element_text(size = 11),
+    plot.caption = element_text(hjust = 0, size = 9) # Align caption to the left
+  )
+
+fig03_minnesota
+ggsave("results/fig03_minnesota.png", plot = fig03_minnesota, width = 6.5, height = 5, dpi = 300)
 
 # ----- Step 6: Calculate housing supply shortage / surfeit ----- #
