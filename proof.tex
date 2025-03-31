@@ -93,14 +93,13 @@ Let:
   across households as individual observations:
 
   \begin{align}
-    \label{eq:2}
-    \tag{2}
+    \label{eq:1}
+    \tag{1}
     M_h = \frac{P}{H}
     \end{align}
 
   For example, in Figure 1.1, the the population of \(P = 4\) is divided
-  into \(H = 2\) households. Thus, the average household size is 2
-  individuals.
+  into \(H = 2\) households. Thus, the average household has 2 members.
 
   \textbf{Figure 1.1: An example population divided into two households}
 \end{itemize}
@@ -116,15 +115,15 @@ Let:
   defined as the average size of a household that a person lives in:
 
   \begin{equation}
-    \label{eq:1}
-    \tag{1}
+    \label{eq:2}
+    \tag{2}
     M_p = \frac{1}{P} \sum_{j = 1}^H m_j^2
     \end{equation}
 
   For example, in Figure 1.1, three individuals live in a household of
   three members, and one individual lives in a household of one member.
   Thus, the average size of a household that a person lives in is
-  \(\frac{3 + 3 + 3 + 1}{4} = \frac{3^2 + 1^1}{4} = 2.5\) individuals.
+  \(\frac{3 + 3 + 3 + 1}{4} = \frac{3^2 + 1^1}{4} = 2.5\) members.
 \end{itemize}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -132,7 +131,7 @@ Let:
 \hypertarget{context}{%
 \section{Context}\label{context}}
 
-Equation \eqref{eq:2} shows that household-level mean household size
+Equation \eqref{eq:1} shows that household-level mean household size
 \(M_h\) and population \(P\) is adequate to deduce the number of
 households \(H\). However, person-level household size \(M_p\) does not
 lend itself to this equivalency: the same person-level mean and
@@ -184,7 +183,8 @@ H_{\min} = \frac{P}{M_p}
 
 Suppose the population \(P\) is distributed into \(H\) households with
 the measured household size in the \(j\)th household equal to \(m_j\).
-As defined above, \textbf{person-level} mean household size is:
+As defined in Equation \eqref{eq:2}, \textbf{person-level} mean
+household size is:
 
 \begin{equation}
 M_p = \frac{1}{P}\sum_{j = 1}^H m_j^2
