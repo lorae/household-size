@@ -87,18 +87,6 @@ Let:
 \item
   \(H\) = \textbf{Number of households}
 \item
-  \(M_p\) = \textbf{Person-level mean household size}
-
-  For every person \(j\) in a population \(P\) living in a household of
-  \(m_j\) members, the \textbf{person-level} mean household size is a
-  simple average across person-level observations:
-
-  \begin{equation}
-    \label{eq:1}
-    \tag{1}
-    M_p = \frac{1}{P} \sum_{j = 1}^H m_j^2
-    \end{equation}
-\item
   \(M_h\) = \textbf{Household-level mean household size}
 
   The \textbf{household-level} mean household size is a simple average
@@ -109,6 +97,34 @@ Let:
     \tag{2}
     M_h = \frac{P}{H}
     \end{align}
+
+  For example, in Figure 1.1, the the population of \(P = 4\) is divided
+  into \(H = 2\) households. Thus, the average household size is 2
+  individuals.
+
+  \textbf{Figure 1.1: An example population divided into two households}
+\end{itemize}
+
+\includegraphics[width=1\linewidth]{proof_files/figure1-1}
+
+\begin{itemize}
+\item
+  \(M_p\) = \textbf{Person-level mean household size}
+
+  For every person \(j\) in a population \(P\) living in a household of
+  \(m_j\) members, the \textbf{person-level} mean household size is
+  defined as the average size of a household that a person lives in:
+
+  \begin{equation}
+    \label{eq:1}
+    \tag{1}
+    M_p = \frac{1}{P} \sum_{j = 1}^H m_j^2
+    \end{equation}
+
+  For example, in Figure 1.1, three individuals live in a household of
+  three members, and one individual lives in a household of one member.
+  Thus, the average size of a household that a person lives in is
+  \(\frac{3 + 3 + 3 + 1}{4} = \frac{3^2 + 1^1}{4} = 2.5\) individuals.
 \end{itemize}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -133,7 +149,7 @@ determine the number of households.
 
 \textbf{Figure 1.2}
 
-\includegraphics[width=1\linewidth]{proof_files/figure-latex/unnamed-chunk-1-1}
+\includegraphics[width=1\linewidth]{proof_files/figure-latex/unnamed-chunk-2-1}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -284,6 +300,13 @@ household}\label{case-2-a-transfer-from-a-larger-household-to-a-smaller-househol
 
 {[}ADD IN EXPLANATION ON HOW THIS TRANSFER REDUCES AVERAGE HOUSEHOLD
 SIZE{]}
+
+\begin{align}
+M_p' - M_p & = \frac{1}{P} \bigg( (m_k^2 + m_{k+1}^2) - (m_k'^2 + m_{k+1}'^2) \bigg) \\
+& = \frac{1}{P} \bigg( 2m_k^2 - 2m_k + 1) - (m)
+& = \frac{1}{P} \bigg( (m_k^2 + (m_k - 1)^2) - ((m_k-1)^2 + m_k^2) \bigg)\\
+& = 0 \\
+\end{align}
 
 \hypertarget{case-3-a-transfer-from-a-smaller-household-to-a-larger-or-equal-size-household}{%
 \subsection{Case 3: a transfer from a smaller household to a larger (or
