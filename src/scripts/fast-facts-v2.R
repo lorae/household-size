@@ -389,6 +389,188 @@ fig02a <- ggplot(age_bucket_summary |> filter(RACE_ETH_bucket == "All"), aes(x =
 fig02a
 ggsave("results/fig02a.png", plot = fig02a, width = 6.5, height = 3, dpi = 500)
 
+
+# -----
+# ---- Split data into four parts ----
+first_data  <- age_bucket_summary |> subset(RACE_ETH_bucket %in% race_order[1:2])
+second_data <- age_bucket_summary |> subset(RACE_ETH_bucket %in% race_order[3:4])
+third_data  <- age_bucket_summary |> subset(RACE_ETH_bucket %in% race_order[5:6])
+fourth_data <- age_bucket_summary |> subset(RACE_ETH_bucket %in% race_order[7:8])
+
+# ---- Labels for each panel ----
+label_data <- data.frame(
+  RACE_ETH_bucket = unique(first_data$RACE_ETH_bucket),
+  label = unique(first_data$RACE_ETH_bucket),
+  x = 1,
+  y = 14
+)
+label_data_2 <- data.frame(
+  RACE_ETH_bucket = unique(second_data$RACE_ETH_bucket),
+  label = unique(second_data$RACE_ETH_bucket),
+  x = 1.5,
+  y = 14
+)
+label_data_3 <- data.frame(
+  RACE_ETH_bucket = unique(third_data$RACE_ETH_bucket),
+  label = unique(third_data$RACE_ETH_bucket),
+  x = 1.5,
+  y = 14
+)
+label_data_4 <- data.frame(
+  RACE_ETH_bucket = unique(fourth_data$RACE_ETH_bucket),
+  label = unique(fourth_data$RACE_ETH_bucket),
+  x = 1.5,
+  y = 14
+)
+
+# ---- Optional asterisk data ----
+asterisk_data <- fourth_data |> subset(RACE_ETH_bucket == "Other" & subgroup == "80-84")
+
+# ---- Plot 1 ----
+first_plot <- ggplot(first_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019,
+                                     fill = RACE_ETH_bucket == "All")) +
+  geom_bar(stat = "identity") +
+  facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
+  geom_hline(yintercept = 0, color = "black", size = 0.6) +
+  scale_fill_manual(values = c("TRUE" = "grey60", "FALSE" = "steelblue"), guide = "none") +
+  theme_minimal() +
+  theme(
+    strip.text.y.left = element_blank(),
+    strip.placement = "outside",
+    panel.spacing = unit(1, "lines"),
+    panel.spacing.y = unit(0.2, "lines"),
+    axis.text.x = element_blank(),
+    axis.text.y.left = element_blank(),
+    axis.ticks.y.left = element_blank(),
+    axis.text.y.right = element_text(size = 8, color = "black", hjust = 1),
+    axis.ticks.y.right = element_line(color = "black", size = 0.3),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank()
+  ) +
+  scale_y_continuous(
+    breaks = seq(-10, 10, by = 5),
+    limits = c(-15, 15),
+    labels = function(x) paste0(x, "%"),
+    sec.axis = dup_axis(name = NULL, labels = function(x) paste0(x, "%"))
+  ) +
+  labs(y = NULL, x = NULL) +
+  geom_text(data = label_data, aes(x = x, y = y, label = label),
+            inherit.aes = FALSE, hjust = 0, size = 2, fontface = "bold")
+
+# ---- Plot 2 ----
+second_plot <- ggplot(second_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
+  geom_hline(yintercept = 0, color = "black", size = 0.6) +
+  theme_minimal() +
+  theme(
+    strip.text.y.left = element_blank(),
+    strip.placement = "outside",
+    panel.spacing = unit(0.8, "lines"),
+    panel.spacing.y = unit(0.1, "lines"),
+    axis.text.x = element_blank(),
+    axis.text.y.left = element_blank(),
+    axis.ticks.y.left = element_line(color = "black", size = 0.3),
+    axis.text.y.right = element_text(size = 8, color = "black", hjust = 1),
+    axis.ticks.y.right = element_line(color = "black", size = 0.3),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(5, 5, 5, -10)
+  ) +
+  scale_y_continuous(
+    breaks = seq(-10, 10, by = 5),
+    limits = c(-15, 15),
+    labels = function(x) paste0(x, "%"),
+    sec.axis = dup_axis(name = NULL, labels = function(x) paste0(x, "%"))
+  ) +
+  labs(y = NULL, x = NULL) +
+  geom_text(data = label_data_2, aes(x = x, y = y, label = label),
+            inherit.aes = FALSE, hjust = 0, size = 2, fontface = "bold")
+
+# ---- Plot 3 ----
+third_plot <- ggplot(third_data, aes(x = subgroup, y = hhsize_pctchg_2000_2019)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
+  geom_hline(yintercept = 0, color = "black", size = 0.6) +
+  theme_minimal() +
+  theme(
+    strip.text.y.left = element_blank(),
+    strip.placement = "outside",
+    panel.spacing = unit(0.8, "lines"),
+    panel.spacing.y = unit(0.1, "lines"),
+    axis.text.x = element_blank(),
+    axis.text.y.left = element_blank(),
+    axis.ticks.y.left = element_line(color = "black", size = 0.3),
+    axis.text.y.right = element_text(size = 8, color = "black", hjust = 1),
+    axis.ticks.y.right = element_line(color = "black", size = 0.3),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(5, 5, 5, -10)
+  ) +
+  scale_y_continuous(
+    breaks = seq(-10, 10, by = 5),
+    limits = c(-15, 15),
+    labels = function(x) paste0(x, "%"),
+    sec.axis = dup_axis(name = NULL, labels = function(x) paste0(x, "%"))
+  ) +
+  labs(y = NULL, x = NULL) +
+  geom_text(data = label_data_3, aes(x = x, y = y, label = label),
+            inherit.aes = FALSE, hjust = 0, size = 2, fontface = "bold")
+
+# ---- Plot 4 ----
+fourth_plot <- ggplot(fourth_data, aes(x = subgroup,
+                                       y = pmin(hhsize_pctchg_2000_2019, 14))) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  facet_grid(rows = vars(RACE_ETH_bucket), scales = "fixed", switch = "y") +
+  geom_hline(yintercept = 0, color = "black", size = 0.6) +
+  geom_text(data = asterisk_data,
+            aes(x = subgroup, y = 14.5, label = "*"),
+            size = 5, color = "black") +
+  theme_minimal() +
+  theme(
+    strip.text.y.left = element_blank(),
+    strip.placement = "outside",
+    panel.spacing = unit(0.8, "lines"),
+    panel.spacing.y = unit(0.1, "lines"),
+    axis.text.x = element_blank(),
+    axis.text.y.left = element_blank(),
+    axis.ticks.y.left = element_blank(),
+    axis.text.y.right = element_blank(),
+    axis.ticks.y.right = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(5, 5, 5, -10)
+  ) +
+  scale_y_continuous(
+    breaks = NULL,
+    limits = c(-15, 15),
+    labels = NULL,
+    sec.axis = dup_axis(name = NULL, labels = NULL)
+  ) +
+  labs(y = NULL, x = NULL) +
+  geom_text(data = label_data_4, aes(x = x, y = y, label = label),
+            inherit.aes = FALSE, hjust = 0, size = 2, fontface = "bold")
+
+# ---- Combine plots ----
+fig02b <- (
+  first_plot + second_plot + third_plot + fourth_plot +
+    plot_layout(widths = c(1, 1, 1, 1)) +
+    plot_annotation(
+      caption = "*The 80-84 age group's increase in the 'Other' category exceeds the y-axis limits of ±15%.",
+      theme = theme(plot.caption = element_text(size = 5))
+    )
+)
+
+
+fig02b
+
+# ---- Save ----
+ggsave("results/fig02b.png", plot = fig02b, width = 6.5, height = 4, dpi = 500)
+
 ##############################################
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^#
 ##############################################
