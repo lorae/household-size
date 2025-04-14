@@ -12,18 +12,21 @@ ipums_db <- tbl(con, "ipums_processed") # Connect to the database
 hist_ages <- function(
   data,
   title = "",
+  bar_fill = list(color = "skyblue", alpha = 0.5),
+  xmax = 6,
+  ymax = 0.6,
   params
 ) {
   # Map across params in parallel
   plots <- purrr::pmap(params, function(index, age, ytitle) {
     hist(
-      data = ipums_db |>
-        filter(YEAR == 2019, GQ %in% c(0, 1, 2), AGE_bucket == age),
+      data = data |> filter(AGE_bucket == age),
       title = paste("Age", age),
       xtitle = "",
       ytitle = ytitle,
-      xmax = 8,
-      ymax = 0.6
+      xmax = xmax,
+      ymax = ymax,
+      bar_fill = bar_fill
     )
   })
   
@@ -42,9 +45,32 @@ params <- tibble(
   ytitle = c("Proportion", "", "", "", "")
 )
 
-hist_ages(
+hist_ages_2019 <- hist_ages(
   data =  ipums_db |> filter(YEAR == 2019, GQ %in% c(0, 1, 2)),
   title = "Household Size Distribution by Age Group (2019)",
   params = params
-)
+) 
 
+hist_ages_2019
+ggsave("results/histograms/2019-all-byage.png", hist_ages_2019, width = 10, height = 6, scale = 1)
+
+# ----- Make a plot of hhsize by age group among Hispanics in 2000, 2019 ----- #
+hist_hispan_ages_2000 <- hist_ages(
+  data =  ipums_db |> filter(YEAR == 2000, GQ %in% c(0, 1, 2), RACE_ETH_bucket == "Hispanic"),
+  title = "Household Size Distribution by Age Group (Hispanic, 2000)",
+  bar_fill = list(color = "darkgreen", alpha = 0.5),
+  xmax = 9,
+  ymax = 0.4,
+  params = params
+) 
+hist_hispan_ages_2019 <- hist_ages(
+  data =  ipums_db |> filter(YEAR == 2019, GQ %in% c(0, 1, 2), RACE_ETH_bucket == "Hispanic"),
+  title = "Household Size Distribution by Age Group (Hispanic, 2019)",
+  bar_fill = list(color = "forestgreen", alpha = 0.5),
+  xmax = 9,
+  ymax = 0.4,
+  params = params
+) 
+
+hist_hispan_ages_2000
+hist_hispan_ages_2019

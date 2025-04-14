@@ -60,7 +60,13 @@ hist <- function(
       y = ytitle
     ) +
     theme_minimal() +
-    theme(panel.grid = element_blank())
+    theme(
+      text = element_text(size = 6),
+      plot.title = element_text(size = 8),
+      axis.title = element_text(size = 7),
+      axis.text = element_text(size = 6),
+      panel.grid = element_blank()
+      )
   
   return(p)
 }
