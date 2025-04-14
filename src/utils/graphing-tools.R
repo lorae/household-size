@@ -40,8 +40,7 @@ hist <- function(
         ) +
     scale_x_continuous(
       breaks = x_breaks,
-      labels = x_labels,
-      limits = c(1, xmax)
+      labels = x_labels
       ) +
     scale_y_continuous(limits = if (!is.na(ymax)) c(0, ymax) else NULL) +
     labs(
