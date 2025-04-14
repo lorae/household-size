@@ -7,16 +7,21 @@ source("src/utils/graphing-tools.R") # source the hist function
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
 ipums_db <- tbl(con, "ipums_processed") # Connect to the database
 
+# Inputs to pmap
+params <- tibble(
+  index = c(1,2,3,4,5), # indices for pmap to loop through
+  age = c("0-4", "20-24", "40-44", "60-64", "80-84"),
+  ytitle = c("Proportion", "", "", "", "")
+)
 
-age_groups <- c("0-4", "20-24", "40-44", "60-64", "80-84")
-
-plots <- purrr::imap(age_groups, ~ {
+# Now map across params in parallel
+plots <- purrr::pmap(params, function(index, age, ytitle) {
   hist(
     data = ipums_db |>
-      filter(YEAR == 2019, GQ %in% c(0, 1, 2), AGE_bucket == .x),
-    title = paste("Age", .x),
+      filter(YEAR == 2019, GQ %in% c(0, 1, 2), AGE_bucket == age),
+    title = paste("Age", age),
     xtitle = "",
-    ytitle = if (.y == 1) "Proportion" else "",
+    ytitle = ytitle,
     xmax = 8,
     ymax = 0.6
   )
