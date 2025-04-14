@@ -37,16 +37,23 @@ hist <- function(
         !is.na(xmax) & .data[[data_col]] >= xmax ~ paste0(xmax, "+"),
         TRUE ~ as.character(.data[[data_col]])
       )
-    ) |>
-    # Now sum all values with the same `label` (i.e. all those `xmax`+ entries)
+    )
+  
+  x_axis_factors <- freq_filled_label |> pull(label) |> unique()
+  
+  # Now sum all values with the same `label` (i.e. all those `xmax`+ entries)
+  # Assign a factor label so that the bars remain in numerical order
+  freq_plot <- freq_filled_label |>
+    mutate(label = factor(label, levels = x_axis_factors)) |>
     group_by(label) |>
     summarize(freq = sum(freq), .groups = "drop") |>
-    mutate(proportion = freq / sum(freq))
+    mutate(proportion = freq / sum(freq)) 
   
   #print(freq_filled_label)
+  # TODO: assign factor to the freq_filled_laels so that they print in order
 
   # Plot it!
-  p <- ggplot(freq_filled_label, aes(x = label, y = proportion)) +
+  p <- ggplot(freq_plot, aes(x = label, y = proportion)) +
     geom_col(
       width = 1,
       fill = bar_fill$color,
