@@ -59,7 +59,7 @@ hist_hispan_ages_2000 <- hist_ages(
   data =  ipums_db |> filter(YEAR == 2000, GQ %in% c(0, 1, 2), RACE_ETH_bucket == "Hispanic"),
   title = "Household Size Distribution by Age Group (Hispanic, 2000)",
   bar_fill = list(color = "darkgreen", alpha = 0.5),
-  xmax = 9,
+  xmax = 10,
   ymax = 0.4,
   params = params
 ) 
@@ -67,7 +67,7 @@ hist_hispan_ages_2019 <- hist_ages(
   data =  ipums_db |> filter(YEAR == 2019, GQ %in% c(0, 1, 2), RACE_ETH_bucket == "Hispanic"),
   title = "Household Size Distribution by Age Group (Hispanic, 2019)",
   bar_fill = list(color = "forestgreen", alpha = 0.5),
-  xmax = 9,
+  xmax = 10,
   ymax = 0.4,
   params = params
 ) 
