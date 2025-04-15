@@ -135,7 +135,6 @@ hist <- function(
   return(p)
 }
 
-
 # This function prepares a histogram with overlaid period bars based on the output
 # of prepare_double_hist_data
 double_hist <- function(
@@ -147,24 +146,26 @@ double_hist <- function(
     ytitle = "Proportion",
     ymax = NA,
     bar_fills = list(
-      list(color = "skyblue", alpha = 0.5),
-      list(color = "forestgreen", alpha = 0.5)
+      per1 = list(color = "skyblue", alpha = 0.4, line_color = "skyblue", line_type = "dashed"),
+      per2 = list(color = "forestgreen", alpha = 0.2, line_color = "forestgreen", line_type = "solid")
     )
 ) {
-  ggplot(freq_data, aes(x = as.numeric(as.character(label)))) +
+  ggplot(freq_data, aes(x = label)) +
     geom_col(
       aes(y = .data[[paste0("proportion_", per1)]]),
-      fill = bar_fills[[1]]$color,
-      alpha = bar_fills[[1]]$alpha,
+      fill = bar_fills$per1$color,
+      alpha = bar_fills$per1$alpha,
       width = 1,
-      color = "black"
+      color = bar_fills$per1$line_color,
+      linetype = bar_fills$per1$line_type
     ) +
     geom_col(
       aes(y = .data[[paste0("proportion_", per2)]]),
-      fill = bar_fills[[2]]$color,
-      alpha = bar_fills[[2]]$alpha,
+      fill = bar_fills$per2$color,
+      alpha = bar_fills$per2$alpha,
       width = 1,
-      color = "black"
+      color = bar_fills$per2$line_color,
+      linetype = bar_fills$per2$line_type
     ) +
     scale_y_continuous(limits = if (!is.na(ymax)) c(0, ymax) else NULL) +
     labs(
