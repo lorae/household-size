@@ -1,9 +1,18 @@
+# Set defaults for the four functions below
+default_data_col <- "NUMPREC" # a string
+default_weight_col <- "PERWT" # a string
+default_period_col <- "YEAR" # a string
+default_per1 <- 2000
+default_per2 <- 2019
+
+
+
 # This function prepares frequency tables that can be used as inputs by the 
 # `hist` function.
 prepare_hist_data <- function(
     data, 
-    data_col = "NUMPREC", 
-    weight_col = "PERWT", 
+    data_col = default_data_col, # a string
+    weight_col = default_weight_col, # a string
     xmax = NA
     ) {
   # Produce a frequency table with the first column as the `data_col` and the
@@ -55,31 +64,31 @@ prepare_hist_data <- function(
 # can be overlaid.
 prepare_double_hist_data <- function(
     data, 
-    data_col = "NUMPREC", 
-    weight_col = "PERWT", 
-    period_col = YEAR,
+    data_col = default_data_col, # a string
+    weight_col = default_weight_col, # a string
+    period_col = default_period_col, # no string: just the name
     xmax = NA,
-    per1 = 2000,
-    per2 = 2019
+    per1 = default_per1,
+    per2 = default_per2
 ) {
   # If no xmax is manually assigned, then the max value of `data_col` in the 
   # two periods is selected
   if(is.na(xmax)) {
     xmax <- data |>
-      filter({{ period_col }} %in% c(per1, per2)) |>
+      filter(.data[[period_col]] %in% c(per1, per2)) |>
       summarise(xmax = max(.data[[data_col]], na.rm = TRUE)) |>
       pull(xmax)
   }
   
   freq_per1 <- prepare_hist_data(
-    data = data |> filter({{ period_col }} == per1),
+    data = data |> filter(.data[[period_col]] == per1),
     data_col,
     weight_col,
     xmax
   ) |> rename_with(~ paste0(.x, "_", per1), -label)
   
   freq_per2 <- prepare_hist_data(
-    data = data |> filter({{ period_col }} == per2),
+    data = data |> filter(.data[[period_col]] == per2),
     data_col,
     weight_col,
     xmax
@@ -131,8 +140,8 @@ hist <- function(
 # of prepare_double_hist_data
 double_hist <- function(
     freq_data,
-    per1 = 2000,
-    per2 = 2019,
+    per1 = default_per1,
+    per2 = default_per2,
     title = "",
     xtitle = "Number of people in HH",
     ytitle = "Proportion",
