@@ -50,12 +50,10 @@ prepare_hist_data <- function(
 }
 
 
-# This function prepares frequency tables that can be used as inputs by the XXX
+# This function prepares frequency tables that can be used as inputs by the `double_hist`
 # function. It prepares two frequency tables for two specified years so that the plots
 # can be overlaid.
-# This function prepares frequency tables that can be used as inputs by the 
-# `hist` function.
-prepare_hist_data_multiper <- function(
+prepare_double_hist_data <- function(
     data, 
     data_col = "NUMPREC", 
     weight_col = "PERWT", 
@@ -92,7 +90,8 @@ prepare_hist_data_multiper <- function(
   return(out)
 }
 
-
+# This function creates a simple histogram using the output of the `prepare_hist_data`
+# function
 hist <- function(
     freq_data, # `output from prepare_hist_data`
     title = "",
@@ -125,4 +124,51 @@ hist <- function(
       )
   
   return(p)
+}
+
+
+# This function prepares a histogram with overlaid period bars based on the output
+# of prepare_double_hist_data
+double_hist <- function(
+    freq_data,
+    per1 = 2000,
+    per2 = 2019,
+    title = "",
+    xtitle = "Number of people in HH",
+    ytitle = "Proportion",
+    ymax = NA,
+    bar_fills = list(
+      list(color = "skyblue", alpha = 0.5),
+      list(color = "forestgreen", alpha = 0.5)
+    )
+) {
+  ggplot(freq_data, aes(x = as.numeric(as.character(label)))) +
+    geom_col(
+      aes(y = .data[[paste0("proportion_", per1)]]),
+      fill = bar_fills[[1]]$color,
+      alpha = bar_fills[[1]]$alpha,
+      width = 1,
+      color = "black"
+    ) +
+    geom_col(
+      aes(y = .data[[paste0("proportion_", per2)]]),
+      fill = bar_fills[[2]]$color,
+      alpha = bar_fills[[2]]$alpha,
+      width = 1,
+      color = "black"
+    ) +
+    scale_y_continuous(limits = if (!is.na(ymax)) c(0, ymax) else NULL) +
+    labs(
+      title = title,
+      x = xtitle,
+      y = ytitle
+    ) +
+    theme_minimal() +
+    theme(
+      text = element_text(size = 6),
+      plot.title = element_text(size = 8),
+      axis.title = element_text(size = 7),
+      axis.text = element_text(size = 6),
+      panel.grid = element_blank()
+    )
 }
