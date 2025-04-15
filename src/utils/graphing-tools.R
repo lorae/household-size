@@ -1,14 +1,11 @@
-hist <- function(
-    data,
-    data_col = "NUMPREC",
-    weight_col = "PERWT",
-    title = "",
-    xtitle = "Number of people in HH", # X-axis title
-    ytitle = "Proportion", # Y-axis title
-    xmax = NA,
-    ymax = NA, # If specified, max y-value on chart
-    bar_fill = list(color = "skyblue", alpha = 0.5)
-) {
+# This function prepares frequency tables that can be used as inputs by the 
+# `hist` function.
+prepare_hist_data <- function(
+    data, 
+    data_col = "NUMPREC", 
+    weight_col = "PERWT", 
+    xmax = NA
+    ) {
   # Produce a frequency table with the first column as the `data_col` and the
   # second column as the sum of the weights in `weight_col`
   freq_raw <- data |> 
@@ -28,7 +25,7 @@ hist <- function(
   freq_filled <- filler_values |>
     left_join(freq_raw, by = data_col) |>
     mutate(freq = replace_na(freq, 0)) # fill remaining NAs with 0
-
+  
   freq_filled_label <- freq_filled |>
     mutate(
       # If xmax is specified, assign `label` to read as "`xmax`+"
@@ -43,17 +40,69 @@ hist <- function(
   
   # Now sum all values with the same `label` (i.e. all those `xmax`+ entries)
   # Assign a factor label so that the bars remain in numerical order
-  freq_plot <- freq_filled_label |>
+  freq <- freq_filled_label |>
     mutate(label = factor(label, levels = x_axis_factors)) |>
     group_by(label) |>
     summarize(freq = sum(freq), .groups = "drop") |>
     mutate(proportion = freq / sum(freq)) 
   
-  #print(freq_filled_label)
-  # TODO: assign factor to the freq_filled_laels so that they print in order
+  return(freq)
+}
 
+
+# This function prepares frequency tables that can be used as inputs by the XXX
+# function. It prepares two frequency tables for two specified years so that the plots
+# can be overlaid.
+# This function prepares frequency tables that can be used as inputs by the 
+# `hist` function.
+prepare_hist_data_multiper <- function(
+    data, 
+    data_col = "NUMPREC", 
+    weight_col = "PERWT", 
+    period_col = YEAR,
+    xmax = NA,
+    per1 = 2000,
+    per2 = 2019
+) {
+  # If no xmax is manually assigned, then the max value of `data_col` in the 
+  # two periods is selected
+  if(is.na(xmax)) {
+    xmax <- data |>
+      filter({{ period_col }} %in% c(per1, per2)) |>
+      summarise(xmax = max(.data[[data_col]], na.rm = TRUE)) |>
+      pull(xmax)
+  }
+  
+  freq_per1 <- prepare_hist_data(
+    data = data |> filter({{ period_col }} == per1),
+    data_col,
+    weight_col,
+    xmax
+  ) |> rename_with(~ paste0(.x, "_", per1), -label)
+  
+  freq_per2 <- prepare_hist_data(
+    data = data |> filter({{ period_col }} == per2),
+    data_col,
+    weight_col,
+    xmax
+  ) |> rename_with(~ paste0(.x, "_", per2), -label)
+  
+  out <- full_join(freq_per1, freq_per2, by = "label")
+  
+  return(out)
+}
+
+
+hist <- function(
+    freq_data, # `output from prepare_hist_data`
+    title = "",
+    xtitle = "Number of people in HH", # X-axis title
+    ytitle = "Proportion", # Y-axis title
+    ymax = NA, # If specified, max y-value on chart
+    bar_fill = list(color = "skyblue", alpha = 0.5)
+) {
   # Plot it!
-  p <- ggplot(freq_plot, aes(x = label, y = proportion)) +
+  p <- ggplot(freq_data, aes(x = label, y = proportion)) +
     geom_col(
       width = 1,
       fill = bar_fill$color,
