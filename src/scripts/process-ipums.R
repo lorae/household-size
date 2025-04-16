@@ -14,6 +14,7 @@ library("dplyr")
 library("duckdb")
 library("ipumsr")
 library("readr")
+library("readxl")
 
 # temp: set working directory
 setwd("/scratch/gpfs/ls4540/household-size")
@@ -143,6 +144,79 @@ validate_row_counts(
   db = ipums_db,
   expected_count = obs_count,
   step_description = "data were bucketed into a combined race-ethnicity column"
+)
+
+# ----- Step 6: Add CPI-U data ----- #
+cpiu <- read_excel(
+  path = "data/helpers/CPI-U.xlsx",
+  sheet = "BLS Data Series",
+  range = "A12:N36",
+  col_names = TRUE
+) |>
+  select(Year, Annual) |>
+  rename(
+    YEAR = Year,
+    cpiu = Annual
+  )
+
+# Get the 2010 value of cpi_u
+cpiu_2010_value <- cpiu |>  filter(YEAR == 2010) |> pull(cpiu)
+
+# Add a new column cpi_u_2010
+cpiu <- cpiu |>
+  mutate(cpiu_2010_deflator = cpiu / cpiu_2010_value)
+
+# Recalculate ipums_db using the latest table
+ipums_db <- tbl(con, "ipums_processed")
+
+# Enrich with new derived columns
+ipums_processed_final <- ipums_db |>
+  left_join(cpiu, by = "YEAR", copy = TRUE) |>
+  mutate(
+    INCTOT_cpiu_2010 = if_else(
+      INCTOT %in% c(9999999, 9999998), 
+      NA_real_, 
+      INCTOT / cpiu_2010_deflator
+    ),
+    INCTOT_cpiu_2010 = if_else(
+      AGE < 15,
+      0,
+      INCTOT_cpiu_2010
+    ),
+    INCTOT_cpiu_2010_bucket = case_when(
+      INCTOT_cpiu_2010 < 0 ~ "neg",
+      INCTOT_cpiu_2010 == 0 ~ "0",
+      INCTOT_cpiu_2010 < 10000 ~ "under 10k",
+      INCTOT_cpiu_2010 >= 10000 & INCTOT_cpiu_2010 < 30000 ~ "10 to 30k",
+      INCTOT_cpiu_2010 >= 30000 & INCTOT_cpiu_2010 < 100000 ~ "30k to 100k",
+      INCTOT_cpiu_2010 >= 100000 ~ "over 100k",
+      TRUE ~ NA_character_
+    ),
+    us_born = BPL <= 120,
+    persons_per_bedroom = NUMPREC / BEDROOMS
+  )
+
+# Write to a temporary new table name
+compute(
+  ipums_processed_final,
+  name = "ipums_processed_temp",
+  temporary = FALSE,
+  overwrite = TRUE
+)
+
+# Drop the original table
+dbExecute(con, "DROP TABLE ipums_processed")
+
+# Rename the temporary table
+dbExecute(con, "ALTER TABLE ipums_processed_temp RENAME TO ipums_processed")
+
+# (Optional) Reload ipums_db
+ipums_db <- tbl(con, "ipums_processed")
+
+validate_row_counts(
+  db = ipums_db,
+  expected_count = obs_count,
+  step_description = "final columns (income, US-born, persons/bedroom) were added"
 )
 
 # ----- Step 6: Clean up ----- #

@@ -37,7 +37,6 @@ library("stringr")
 library("tidyr")
 library("purrr")
 library("glue")
-library("readxl")
 library("ggplot2")
 
 # ----- Step 1: Source helper functions ----- #
@@ -48,71 +47,7 @@ source("src/utils/counterfactual-tools.R") # Includes function for counterfactua
 # ----- Step 2: Import and wrangle data ----- #
 
 con <- dbConnect(duckdb::duckdb(), "data/db/ipums.duckdb")
-
-# ----- Step 2a: Import CPI-U data ----- #
-# TODO: Transfer this code to process-ipums.R: import CPI-U series (and bucketing,
-# too - see below)
-cpiu <- read_excel(
-  path = "data/helpers/CPI-U.xlsx",
-  sheet = "BLS Data Series",
-  range = "A12:N36",
-  col_names = TRUE
-  ) |>
-  select(Year, Annual) |>
-  rename(
-    YEAR = Year,
-    cpiu = Annual
-  )
-
-# Get the 2010 value of cpi_u
-cpiu_2010_value <- cpiu |>
-  filter(YEAR == 2010) |>
-  pull(cpiu)
-
-# Add a new column cpi_u_2010
-cpiu <- cpiu |>
-  mutate(cpiu_2010_deflator = cpiu / cpiu_2010_value)
-
-# ----- Step 2b: Add columns to ipums_db data ----- #
-
 ipums_db <- tbl(con, "ipums_processed")
-
-# TODO: introduce this process into process-ipums.R rather than being here
-# Adjust incomes for CPI-U
-ipums_db <- ipums_db |>
-  left_join(cpiu, by = "YEAR", copy = TRUE) |>
-  mutate(
-    INCTOT_cpiu_2010 = if_else(
-      INCTOT %in% c(9999999, 9999998), 
-      NA_real_, 
-      INCTOT / cpiu_2010_deflator
-    )
-  ) |>
-  mutate(
-    INCTOT_cpiu_2010 = if_else(
-      AGE < 15,
-      0,
-      INCTOT_cpiu_2010 # Keep the existing value if AGE >= 15
-    )
-  ) |>
-  mutate(
-    INCTOT_cpiu_2010_bucket = case_when(
-      INCTOT_cpiu_2010 < 0 ~ "neg",
-      INCTOT_cpiu_2010 == 0 ~ "0",
-      INCTOT_cpiu_2010 < 10000 ~ "under 10k",
-      INCTOT_cpiu_2010 >= 10000 & INCTOT_cpiu_2010 < 30000 ~ "10 to 30k",
-      INCTOT_cpiu_2010 >= 30000 & INCTOT_cpiu_2010 < 100000 ~ "30k to 100k",
-      INCTOT_cpiu_2010 >= 100000 ~ "over 100k",
-      TRUE ~ NA_character_ # Handles unexpected cases
-    )
-  )
-
-  
-# We're adding some simplified/binary variables for counterfactual calculations
- ipums_db <- ipums_db |>
-  mutate(
-    us_born = BPL <= 120 # TRUE if person born in US or US territories
-  )
 
 # TODO: eventually write a function in dataduck that when buckets are created,
 # the code automatically writes a list of vectors containing factor
@@ -123,12 +58,6 @@ age_factor_levels <- extract_factor_label(
   lookup_table = read.csv("lookup_tables/age/age_buckets01.csv"),
   colname = "bucket_name"
 )
-
-# Introduce a variable for number of people per bedroom
-ipums_db <- ipums_db |>
-  mutate(
-    persons_per_bedroom = NUMPREC / BEDROOMS
-  )
 
 # ----- Step 3: Run counterfactuals ----- #
 # These results are used to produce tables 3.1 and 3.2 (in tab 3 of the shiny app)
