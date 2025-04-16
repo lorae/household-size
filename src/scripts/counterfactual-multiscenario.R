@@ -140,7 +140,8 @@ hhsize_2019_observed <- crosstab_mean(
   pull(weighted_mean)
 
 # Counterfactual household size in 2019
-hhsize_2019_expected <- hhsize_cf[13,] |> pull(counterfactual)
+# TODO: Don't rely on index numbers!!!!! 15, is buggy and error prone
+hhsize_2019_expected <- hhsize_cf[15,] |> pull(counterfactual) 
 
 library(ggplot2)
 library(dplyr)

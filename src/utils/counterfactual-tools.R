@@ -108,6 +108,7 @@ calculate_counterfactual <- function(
     summarize(total = sum(.data[[paste0("weighted_mean_", p0)]] * .data[[paste0("percent_", p1)]] / 100)) |>
     pull(total)
   
+  # TODO: Make this less brittle! Why are the varnames hard-coded in?
   return(list(
     summary = tibble(
       RACE_ETH_bucket = ("RACE_ETH_bucket" %in% cf_categories),
