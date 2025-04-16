@@ -182,3 +182,73 @@ double_hist <- function(
       panel.grid = element_blank()
     )
 }
+
+# ----- Wrapper functions ----- #
+make_histogram <- function(
+    data,
+    data_col = default_data_col,
+    weight_col = default_weight_col,
+    xmax = NA,
+    title = "",
+    xtitle = "Number of people in HH",
+    ytitle = "Proportion",
+    ymax = NA,
+    bar_fill = list(color = "skyblue", alpha = 0.5)
+) {
+  freq_data <- prepare_hist_data(
+    data = data,
+    data_col = data_col,
+    weight_col = weight_col,
+    xmax = xmax
+  )
+  
+  hist(
+    freq_data = freq_data,
+    title = title,
+    xtitle = xtitle,
+    ytitle = ytitle,
+    ymax = ymax,
+    bar_fill = bar_fill
+  )
+}
+
+
+make_double_histogram <- function(
+    data,
+    data_col = default_data_col,
+    weight_col = default_weight_col,
+    period_col = default_period_col,
+    per1 = default_per1,
+    per2 = default_per2,
+    xmax = NA,
+    title = "",
+    xtitle = "Number of people in HH",
+    ytitle = "Proportion",
+    ymax = NA,
+    bar_fills = list(
+      per1 = list(color = "skyblue", alpha = 0.4, line_color = "skyblue", line_type = "dashed"),
+      per2 = list(color = "forestgreen", alpha = 0.2, line_color = "forestgreen", line_type = "solid")
+    )
+) {
+  freq_data <- prepare_double_hist_data(
+    data = data,
+    data_col = data_col,
+    weight_col = weight_col,
+    period_col = period_col,
+    xmax = xmax,
+    per1 = per1,
+    per2 = per2
+  )
+  
+  double_hist(
+    freq_data = freq_data,
+    per1 = per1,
+    per2 = per2,
+    title = title,
+    xtitle = xtitle,
+    ytitle = ytitle,
+    ymax = ymax,
+    bar_fills = bar_fills
+  )
+}
+
