@@ -89,6 +89,10 @@ bucket_columns <- list(
   list(
     lookup_filepath = "lookup_tables/race/race_buckets00.csv",
     input_column = "RACE"
+  ),
+  list(
+    lookup_filepath = "lookup_tables/educ/educ_buckets00.csv",
+    input_column = "EDUC"
   )
 )
 
