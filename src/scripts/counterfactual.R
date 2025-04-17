@@ -127,10 +127,97 @@ in_group_cf(cf |> filter(OWNERSHP == 2)) # Renter
 # Or more fine-grained ... eg by income
 in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "over 100k" & RACE_ETH_bucket == "White")) 
 in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "30k to 100k" & RACE_ETH_bucket == "White"))
-in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "10k to 30k" & RACE_ETH_bucket == "White"))
+in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "10 to 30k" & RACE_ETH_bucket == "White"))
 in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "under 10k" & RACE_ETH_bucket == "White"))
 in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "0" & RACE_ETH_bucket == "White"))
-in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "negative" & RACE_ETH_bucket == "White"))
+in_group_cf(cf |> filter(INCTOT_cpiu_2010_bucket == "neg" & RACE_ETH_bucket == "White"))
 # TODO: some really interesting tables could come from this, once I quality check
 # the results.
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(readr)
+
+# Define races
+races <- c("All", "Black", "White", "Hispanic")
+
+# Define row groupings
+tenure_categories <- c("Renter" = 2, "Homeowner" = 1)
+education_categories <- c(
+  "Less than HS" = "less_than_hs",
+  "High school" = "hs",
+  "Some college" = "some_college",
+  "College 4yr+" = "college_4yr+"
+)
+income_categories <- c(
+  "<0" = "neg",
+  "0" = "0",
+  "Under 10k" = "under 10k",
+  "10 to 30k" = "10 to 30k",
+  "30 to 100k" = "30k to 100k",
+  "Over 100k" = "over 100k"
+)
+
+# Helper to compute values for all races given a filter condition
+get_values_by_race <- function(data, filter_expr) {
+  map_dbl(races, function(race) {
+    filtered <- data |> filter(!!rlang::enquo(filter_expr))
+    if (race != "All") {
+      filtered <- filtered |> filter(RACE_ETH_bucket == race)
+    }
+    in_group_cf(filtered)
+  }) |> set_names(races)
+}
+
+# Tenure Table
+tenure_table <- map_dfr(
+  names(tenure_categories),
+  function(label) {
+    values <- get_values_by_race(cf, OWNERSHP == tenure_categories[[label]])
+    tibble(Group = label, !!!values)
+  }
+)
+
+# Education Table
+education_table <- map_dfr(
+  names(education_categories),
+  function(label) {
+    values <- get_values_by_race(cf, EDUC_bucket == education_categories[[label]])
+    tibble(Group = label, !!!values)
+  }
+)
+
+# Income Table
+income_table <- map_dfr(
+  names(income_categories),
+  function(label) {
+    values <- get_values_by_race(cf, INCTOT_cpiu_2010_bucket == income_categories[[label]])
+    tibble(Group = label, !!!values)
+  }
+)
+
+# Overall Table
+overall_values <- c(
+  All      = in_group_cf(cf),
+  Black    = in_group_cf(cf |> filter(RACE_ETH_bucket == "Black")),
+  White    = in_group_cf(cf |> filter(RACE_ETH_bucket == "White")),
+  Hispanic = in_group_cf(cf |> filter(RACE_ETH_bucket == "Hispanic"))
+)
+
+overall_table <- tibble(
+  Group    = "Overall",
+  All      = overall_values["All"],
+  Black    = overall_values["Black"],
+  White    = overall_values["White"],
+  Hispanic = overall_values["Hispanic"]
+)
+
+income_table
+education_table
+tenure_table
+overall_table
+# Save to CSVs
+# write_csv(tenure_table, "tenure_by_race.csv")
+# write_csv(education_table, "education_by_race.csv")
+# write_csv(income_table, "income_by_race.csv")
 
