@@ -56,3 +56,6 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# Large data throughput files
+data/counterfactual-results
