@@ -56,6 +56,7 @@ weighted_oaxaca <- function() {
 ############################ NEW STUFF
 
 set.seed(123)  # for reproducibility
+source("src/utils/counterfactual-tools.R") # Includes function for counterfactual calculation
 
 # Function to draw positive integers from a normal distribution
 draw_positive_ints <- function(n, mean, sd) {
@@ -64,7 +65,7 @@ draw_positive_ints <- function(n, mean, sd) {
 
 
 # ----- "all_coefficient" data frame ----- #
-# Manufacture snthetic data
+# Manufacture synthetic data
 n <- 50000
 
 education_levels <- c("less_than_hs", "hs", "some_college", "college_4yr_plus")
@@ -126,12 +127,17 @@ glimpse(input_all)
 
 source("src/utils/counterfactual-tools.R")
 
-lm(data = input_2000,
-   formula = NUMPREC ~ -1 + EDUC_bucket:HHINCOME_bucket)
-# This matches my results exactly in the below calculate_counterfactual
 
-lm(data = input_2019,
-   formula = NUMPREC ~ EDUC_bucket + HHINCOME_bucket)
+x <- lm(data = input_2000,
+   formula = NUMPREC ~ 1) # Think floating point rounding is to blame
+# This matches my results exactly in the below calculate_counterfactual
+y <- lm(data = input_2019,
+   formula = NUMPREC ~ 1) 
+
+w_df <- enframe(w$coefficients, name = "name", value = "w_coef")
+z_df <- enframe(z$coefficients, name = "name", value = "z_coef")
+
+coef_df <- full_join(w_df, z_df, by = "name")
 
 ## TODO: add percent_2000 to this function, and also make the percent_2019 and 
 ## percent_2000 columns instead be prop_2019 and prop_2000
@@ -153,14 +159,18 @@ kob_result <- result$contributions |>
     coef_2019 = if_else(row_number() != 1, weighted_mean_2019 - int_2019[1], NA),
   ) |>
   mutate(
-    prop_2000 = weighted_count_2000 / sum(weighted_count_2000),
-    prop_2019 = weighted_count_2019 / sum(weighted_count_2019)
+    prop_2000 = weighted_mean_2000 / sum(weighted_mean_2000),
+    prop_2019 = percent_2019 / 100
   )
   
 
-result$summary |> pull(counterfactual)
-result$summary |> pull(actual)
-result$summary |> pull(diff)
+cf <- result$summary |> pull(cf_final)
+init <- result$summary |> pull(actual_init)
+final <- result$summary |> pull(actual_final)
+diff = final - init
+init
+final
+diff
 
 u <- (kob_result[1,] |> pull(int_2019)) - (kob_result[1,] |> pull(int_2000))
 c <- sum(kob_result$prop_2000*(kob_result$coef_2019 - kob_result$coef_2000), na.rm = TRUE)
@@ -174,14 +184,14 @@ interaction_dummies <- model.matrix(
   ~ EDUC_bucket:HHINCOME_bucket - 1,  # '-1' removes intercept, so all combinations get their own column
   data = input_all
 )
-input_all_with_dummies <- cbind(input_all, interaction_dummies) |>
+input_all_dummies <- cbind(input_all, interaction_dummies) |>
   mutate(
     is_2000 = if_else(year == 2000, 1, 0)
   )
 
 
 oaxaca_result <- oaxaca(
-  data = input_all_with_dummies,
+  data = input_all_dummies,
   formula = NUMPREC ~ 
     #`EDUC_bucketless_than_hs:HHINCOME_bucketless_than_10k` +
     `EDUC_buckeths:HHINCOME_bucketless_than_10k` +
@@ -195,6 +205,7 @@ oaxaca_result <- oaxaca(
     `EDUC_buckeths:HHINCOME_bucketgreater_than_100k` +
     `EDUC_bucketsome_college:HHINCOME_bucketgreater_than_100k` +
     `EDUC_bucketcollege_4yr_plus:HHINCOME_bucketgreater_than_100k`
-  | is_2000
+  | is_2000,
+  R = NULL
 )
-
+oaxaca_result$y
