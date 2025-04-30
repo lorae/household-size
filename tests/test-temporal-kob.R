@@ -29,6 +29,7 @@ library("purrr")
 library("glue")
 library("ggplot2")
 library("oaxaca")
+library("tibble")
 
 # ----- Step 1: Source helper functions ----- #
 
@@ -128,56 +129,105 @@ glimpse(input_all)
 source("src/utils/counterfactual-tools.R")
 
 
-x <- lm(data = input_2000,
-   formula = NUMPREC ~ 1) # Think floating point rounding is to blame
-# This matches my results exactly in the below calculate_counterfactual
-y <- lm(data = input_2019,
-   formula = NUMPREC ~ 1) 
-
-w_df <- enframe(w$coefficients, name = "name", value = "w_coef")
-z_df <- enframe(z$coefficients, name = "name", value = "z_coef")
-
-coef_df <- full_join(w_df, z_df, by = "name")
-
-## TODO: add percent_2000 to this function, and also make the percent_2019 and 
-## percent_2000 columns instead be prop_2019 and prop_2000
-result <- calculate_counterfactual(
-    cf_categories = c("EDUC_bucket", "HHINCOME_bucket"), # A vector of string names for the group_by variable 
-    p0 = 2000, # An integer for the year of the first (base) period
-    p1 = 2019, # An integer for the year of the second (recent) period
-    p0_data = input_2000, # Data for period 0
-    p1_data = input_2019, # Data for period 1
-    outcome = "NUMPREC" # Name of the outcome variable.
-    # TODO: add back standard errors later. Not needed for now.
-)
-
-kob_result <- result$contributions |>
-  mutate(
-    int_2000 = if_else(row_number() == 1, weighted_mean_2000, NA),
-    coef_2000 = if_else(row_number() != 1, weighted_mean_2000 - int_2000[1], NA),
-    int_2019 = if_else(row_number() == 1, weighted_mean_2019, NA),
-    coef_2019 = if_else(row_number() != 1, weighted_mean_2019 - int_2019[1], NA),
-  ) |>
-  mutate(
-    prop_2000 = weighted_mean_2000 / sum(weighted_mean_2000),
-    prop_2019 = percent_2019 / 100
+adjust_coefs_relative_to <- function(coef_df, ref_name) {
+  # Extract reference values
+  ref_2000 <- coef_df$mean_2000[coef_df$name == ref_name]
+  ref_2019 <- coef_df$mean_2019[coef_df$name == ref_name]
+  
+  if (length(ref_2000) == 0 || length(ref_2019) == 0) {
+    stop("Reference name not found in coef_df.")
+  }
+  
+  # Create adjusted columns
+  coef_df <- coef_df %>%
+    mutate(
+      coef_adj_2000 = mean_2000 - ref_2000,
+      coef_adj_2019 = mean_2019 - ref_2019
+    )
+  
+  # Add new "intercept" row using the actual reference values
+  intercept_row <- tibble(
+    name = "intercept",
+    mean_2000 = 0,
+    mean_2019 = 0,
+    coef_adj_2000 = ref_2000,
+    coef_adj_2019 = ref_2019
   )
   
+  # Combine intercept with rest of the data
+  bind_rows(intercept_row, coef_df)
+}
 
-cf <- result$summary |> pull(cf_final)
-init <- result$summary |> pull(actual_init)
-final <- result$summary |> pull(actual_final)
-diff = final - init
-init
-final
-diff
 
-u <- (kob_result[1,] |> pull(int_2019)) - (kob_result[1,] |> pull(int_2000))
-c <- sum(kob_result$prop_2000*(kob_result$coef_2019 - kob_result$coef_2000), na.rm = TRUE)
-e <- sum(kob_result$coef_2019*(kob_result$prop_2019 - kob_result$prop_2000), na.rm = TRUE)
+# Step 1: Fit models and extract coefficients
+x <- lm(data = input_2000, formula = NUMPREC ~ 1)
+y <- lm(data = input_2019, formula = NUMPREC ~ 1)
+
+model_2000 <- lm(data = input_2000, formula = NUMPREC ~ -1 + EDUC_bucket:HHINCOME_bucket)
+model_2019 <- lm(data = input_2019, formula = NUMPREC ~ -1 + EDUC_bucket:HHINCOME_bucket)
+
+coef_df <- full_join(
+  enframe(model_2000$coefficients, name = "name", value = "mean_2000"),
+  enframe(model_2019$coefficients, name = "name", value = "mean_2019"),
+  by = "name"
+)
+
+# Step 2: Extract bucket levels from the name field
+coef_df <- coef_df %>%
+  mutate(
+    EDUC_bucket = str_extract(name, "EDUC_bucket[^:]+") %>% str_remove("EDUC_bucket"),
+    HHINCOME_bucket = str_extract(name, "HHINCOME_bucket.+") %>% str_remove("HHINCOME_bucket")
+  )
+
+# Step 3: Compute weighted counts for 2000 and 2019
+weighted_2000 <- input_2000 %>%
+  group_by(EDUC_bucket, HHINCOME_bucket) %>%
+  summarise(weighted_count_2000 = sum(PERWT), .groups = "drop")
+
+weighted_2019 <- input_2019 %>%
+  group_by(EDUC_bucket, HHINCOME_bucket) %>%
+  summarise(weighted_count_2019 = sum(PERWT), .groups = "drop")
+
+# Step 4: Join both weighted counts into coef_df
+coef_df <- coef_df %>%
+  left_join(weighted_2000, by = c("EDUC_bucket", "HHINCOME_bucket")) %>%
+  left_join(weighted_2019, by = c("EDUC_bucket", "HHINCOME_bucket"))
+
+# Step 5: add the prop cols
+coef_df <- coef_df |>
+  mutate(
+    prop_2000 = weighted_count_2000 / sum(weighted_count_2000),
+    prop_2019 = weighted_count_2019 / sum(weighted_count_2019)
+  )
+
+coef <- adjust_coefs_relative_to(
+  coef_df,
+  ref_name = "EDUC_bucketless_than_hs:HHINCOME_bucketless_than_10k"
+)
+
+
+
+
+intercept_2000 <- coef |> filter(name == "intercept") |> pull(coef_adj_2000)
+intercept_2019 <- coef |> filter(name == "intercept") |> pull(coef_adj_2019)
+
+coef <- coef |>
+  mutate(
+    e_component = coef_adj_2019*(prop_2019 - prop_2000),
+    c_component = (coef_adj_2019 - coef_adj_2000)*prop_2000
+  )
+
+u <- intercept_2019 - intercept_2000
+e <- sum(coef$e_component, na.rm = TRUE)
+c <- sum(coef$c_component, na.rm = TRUE)
 u
-c
 e
+c
+
+sum(u,e,c)
+
+# Halleleujah!
+
 
 
 interaction_dummies <- model.matrix(
