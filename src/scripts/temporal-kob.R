@@ -131,3 +131,59 @@ coef <- coef |>
     prop_2000 = weighted_count_2000 / pop_2000,
     prop_2019 = weighted_count_2019 / pop_2019
   )
+
+
+intercept_2000 <- coef |> filter(name == "(Intercept)") |> pull(mean_2000)
+intercept_2019 <- coef |> filter(name == "(Intercept)") |> pull(mean_2019)
+
+coef <- coef |>
+  mutate(
+    e_component = mean_2019*(prop_2019 - prop_2000),
+    c_component = (mean_2019 - mean_2000)*prop_2000
+  )
+
+u <- intercept_2019 - intercept_2000
+e <- sum(coef$e_component, na.rm = TRUE)
+c <- sum(coef$c_component, na.rm = TRUE)
+u
+e
+c
+
+sum(u,e,c)
+
+lm(data = ipums_db |> filter(YEAR == 2000, GQ %in% c(0, 1, 2)), 
+   formula = NUMPREC ~ 1,
+   weights = PERWT)$coefficients -> mean_hhsize_2000
+lm(data = ipums_db |> filter(YEAR == 2019, GQ %in% c(0, 1, 2)), 
+   formula = NUMPREC ~ 1,
+   weights = PERWT)$coefficients -> mean_hhsize_2019
+
+mean_hhsize_2019 - mean_hhsize_2000
+
+write.csv(coef, "results/coef.csv")
+
+# Filter out rows with NA c_component and create label
+coef_clean <- coef |>
+  filter(!is.na(c_component)) |>
+  mutate(label = paste(varname, value, sep = ": "))
+
+# Plot
+ggplot(coef_clean, aes(x = reorder(label, c_component), y = c_component)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Contribution to Coefficients (c_component)",
+    x = NULL,
+    y = "c_component"
+  ) +
+  theme_minimal()
+
+ggplot(coef_clean, aes(x = reorder(label, e_component), y = e_component)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Contribution to Endowments (e_component)",
+    x = NULL,
+    y = "c_component"
+  ) +
+  theme_minimal()

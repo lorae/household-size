@@ -172,7 +172,7 @@ input_all_endowment <- bind_rows(group_not_black, group_black)
 glimpse(input_all_endowment)
 
 # ---- Dummy coding EDUC_bucket and HHINCOME_bucket ----
-input_all_coefficient_binary <- input_all_endowment |>
+input_all_endowment_binary <- input_all_endowment |>
   mutate(
     hs = as.integer(EDUC_bucket == "hs"),
     some_college = as.integer(EDUC_bucket == "some_college"),
@@ -189,11 +189,74 @@ results_02 <- oaxaca(
     is_black |
     from_10k_to_100k + greater_than_100k,
     # hs + some_college + college_4yr_plus,
-  data = input_all_coefficient_binary,
+  data = input_all_endowment_binary,
   R = NULL # no bootstrapped SEs
 )
 
 results_02$y
 results_02$threefold$overall
 plot(results_02, components = c("endowments","coefficients"))
+
+# Let's try something new. Oaxaca on fully interacted variables.
+
+# ---- Create fully interacted dummies ----
+
+# Step 1: Make the combo column
+input_all_endowment_combo <- input_all_endowment |>
+  mutate(
+    combo = paste(EDUC_bucket, HHINCOME_bucket, sep = "."),
+    row_id = row_number()  # for joining back later
+  )
+
+# Step 2: Create dummy matrix from combo
+interaction_dummies <- input_all_endowment_combo |>
+  select(row_id, combo) |>
+  mutate(dummy = 1L) |>
+  pivot_wider(
+    names_from = combo,
+    values_from = dummy,
+    values_fill = 0L  # this is safe in this narrow context
+  )
+
+# Step 3: Join dummies back to original data
+input_all_endowment_interaction <- input_all_endowment_combo |>
+  left_join(interaction_dummies, by = "row_id") |>
+  select(-combo, -row_id)  # optional: remove helper cols
+
+results_03 <- oaxaca(
+  formula = NUMPREC ~ 
+    college_4yr_plus.less_than_10k + 
+    college_4yr_plus.from_10k_to_100k + 
+    college_4yr_plus.greater_than_100k + 
+    some_college.less_than_10k + 
+    some_college.from_10k_to_100k + 
+    some_college.greater_than_100k + 
+    hs.less_than_10k + 
+    hs.from_10k_to_100k + 
+    hs.greater_than_100k + 
+    #less_than_hs.less_than_10k # omitted category
+    less_than_hs.from_10k_to_100k +
+    less_than_hs.greater_than_100k |
+    
+    is_black |
+    
+    college_4yr_plus.less_than_10k + 
+    college_4yr_plus.from_10k_to_100k + 
+    college_4yr_plus.greater_than_100k + 
+    some_college.less_than_10k + 
+    some_college.from_10k_to_100k + 
+    some_college.greater_than_100k + 
+    hs.less_than_10k + 
+    hs.from_10k_to_100k + 
+    hs.greater_than_100k + 
+    #less_than_hs.less_than_10k # omitted category
+    less_than_hs.from_10k_to_100k +
+    less_than_hs.greater_than_100k,
+  data = input_all_endowment_interaction,
+  R = NULL # no bootstrapped SEs
+)
+
+results_03$y
+results_03$threefold$overall
+plot(results_03, components = c("endowments","coefficients"))
 

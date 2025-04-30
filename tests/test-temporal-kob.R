@@ -50,9 +50,6 @@ model_2019 <- lm(data = ipums_db |> filter(YEAR == 2019 & GQ %in% c(0,1,2)),
   formula = NUMPREC ~ RACE_ETH_bucket + AGE_bucket + SEX + us_born + EDUC_bucket + INCTOT_cpiu_2010_bucket + OWNERSHP + CPUMA0010)
 
 
-weighted_oaxaca <- function() {
-  
-}
 
 ############################ NEW STUFF
 
