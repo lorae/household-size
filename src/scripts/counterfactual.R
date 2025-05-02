@@ -221,3 +221,68 @@ overall_table
 # write_csv(education_table, "education_by_race.csv")
 # write_csv(income_table, "income_by_race.csv")
 
+
+# ----- new stuff using KOB ----- #
+
+sample <- ipums_db |>
+  filter(YEAR %in% c(2000), GQ %in% c(0, 1, 2), RACE_ETH_bucket %in% c("Black", "White")) |>
+  slice_sample(n = 2000) |>
+  collect()
+
+sample$black <- sample$RACE_ETH_bucket == "Black"
+sample$homeowner <- sample$OWNERSHP == 1
+
+sample_dummy <- sample |>
+  mutate(across(c(AGE_bucket, RACE_ETH_bucket), as.factor)) |>
+  # Make dummy columns manually
+  pivot_wider(
+    names_from = AGE_bucket,
+    values_from = AGE_bucket,
+    values_fn = ~ 1,
+    values_fill = 0,
+    names_prefix = "AGE_"
+  ) |>
+  pivot_wider(
+    names_from = EDUC_bucket,
+    values_from = EDUC_bucket,
+    values_fn = ~ 1,
+    values_fill = 0,
+    names_prefix = "EDUC_"
+  ) |>
+  rename_with(
+    ~ gsub("-", "_", .x), # replace all - with _
+    starts_with("AGE_")
+  ) |>
+  rename_with(
+    ~ gsub("-", "_", .x), 
+    starts_with("EDUC_")
+  ) |>
+  rename_with(
+    ~ gsub("\\+", "", .x), 
+    starts_with("EDUC_")
+  )
+
+
+oaxaca(
+  formula = NUMPREC ~ 
+    homeowner + 
+    HHINCOME_CPIU_2010 + EDUC_hs + EDUC_college_4yr + EDUC_some_college +
+    AGE_0_4 + AGE_5_9 + AGE_10_14 + AGE_15_19 +
+    AGE_20_24 + AGE_25_29 + AGE_30_34 + AGE_35_39 +
+    AGE_40_44 + AGE_45_49 + AGE_50_54 + AGE_55_59 +
+    AGE_60_64 + AGE_65_69 + AGE_70_74 + AGE_75_79 + AGE_80_84
+  | black | 
+    AGE_0_4 + AGE_5_9 + AGE_10_14 + AGE_15_19 +
+    AGE_20_24 + AGE_25_29 + AGE_30_34 + AGE_35_39 +
+    AGE_40_44 + AGE_45_49 + AGE_50_54 + AGE_55_59 +
+    AGE_60_64 + AGE_65_69 + AGE_70_74 + AGE_75_79 + AGE_80_84 +
+    EDUC_hs + EDUC_college_4yr + EDUC_some_college,
+  data = sample_dummy
+) -> test
+
+
+
+age_vars <- grep("^AGE_", names(sample_dummy), value = TRUE)
+age_vars <- setdiff(age_vars, "AGE_85plus")  # Drop the reference category
+race_vars <- grep("^RACE_ETH_", names(sample_dummy), value = TRUE)
+race_vars <- setdiff(race_vars, "RACE_ETH_White")  # Drop the reference category
