@@ -144,3 +144,70 @@ e_only <- bind_rows(e_only_2000, e_only_2019)
 save(e_only, file = "kob/synthetic-data/e-only.rds")
 
 # ----- STEP 3: Create c-component KOB decomp data frame ----- #
+# Via this data generation process, 2000 an 2019 data differ do not at all differ
+# in their correlates (education, income) but do differ in the marginal effect
+# that those correlates have on the measured result (NUMPREC).
+
+# 2000 synthetic data: c (coefficient) only
+c_only_2000 <- tibble(
+  year = 2000,
+  EDUC_bucket = sample(
+    c("less_than_hs", "hs", "some_college", "college_4yr_plus"),
+    size = n,
+    replace = TRUE,
+    prob = c(0.1, 0.3, 0.3, 0.3)
+  ),
+  HHINCOME_bucket = sample(
+    c("less_than_10k", "from_10k_to_100k", "greater_than_100k"),
+    size = n,
+    replace = TRUE,
+    prob = c(0.2, 0.6, 0.2)
+  ),
+  AGE = sample(1:80, size = n, replace = TRUE),
+  PERWT = 1
+) |>
+  mutate(
+    EDUC_bucket = factor(EDUC_bucket, levels = educ_levels, ordered = TRUE),
+    HHINCOME_bucket = factor(HHINCOME_bucket, levels = inc_levels, ordered = TRUE)
+  ) |>
+  mutate(
+    expected_NUMPREC = 
+      (length(educ_levels)*1.5 - as.numeric(EDUC_bucket)*1.5) + 
+      (length(inc_levels)*1.5 - as.numeric(HHINCOME_bucket)*1.5) +
+      1, # Highest income and education has NUMPREC 1, anything else is linearly increasing
+    NUMPREC = draw_positive_ints(n, mean = expected_NUMPREC, sd = 1.5)
+  )
+
+# 2019 synthetic data: c (coefficient) only
+c_only_2019 <- tibble(
+  year = 2019,
+  EDUC_bucket = sample(
+    c("less_than_hs", "hs", "some_college", "college_4yr_plus"),
+    size = n,
+    replace = TRUE,
+    prob = c(0.1, 0.3, 0.3, 0.3)
+  ),
+  HHINCOME_bucket = sample(
+    c("less_than_10k", "from_10k_to_100k", "greater_than_100k"),
+    size = n,
+    replace = TRUE,
+    prob = c(0.2, 0.6, 0.2)
+  ),
+  AGE = sample(1:80, size = n, replace = TRUE),
+  PERWT = 1
+) |>
+  mutate(
+    EDUC_bucket = factor(EDUC_bucket, levels = educ_levels, ordered = TRUE),
+    HHINCOME_bucket = factor(HHINCOME_bucket, levels = inc_levels, ordered = TRUE)
+  ) |>
+  mutate(
+    expected_NUMPREC = 
+      (length(educ_levels)*1 - as.numeric(EDUC_bucket)*1) + 
+      (length(inc_levels)*1 - as.numeric(HHINCOME_bucket)*1) +
+      1, # Highest income and education has NUMPREC 1, anything else is linearly increasing
+    NUMPREC = draw_positive_ints(n, mean = expected_NUMPREC, sd = 1.5)
+  )
+
+# Combine into one data frame
+c_only <- bind_rows(c_only_2000, c_only_2019)
+save(c_only, file = "kob/synthetic-data/c-only.rds")
